@@ -1,0 +1,83 @@
+/* ==========================================================================
+   Keyframes (transform / opacity based wherever possible)
+   ========================================================================== */
+@keyframes drift   { from { transform: translate3d(0,0,0); } to { transform: translate3d(6vmax, 4vmax, 0); } }
+@keyframes breathe { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+@keyframes twinkle { from { opacity: .15; transform: scale(.85); } to { opacity: .8; transform: scale(1.1); } }
+@keyframes spinSlow { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+/* The conic rays use margin-centering in the garden, so give them their own spin */
+.g-rays { animation-name: spinRays; }
+@keyframes spinRays { to { transform: rotate(360deg); } }
+
+/* Countdown */
+@keyframes countIn {
+  0%   { opacity: 0; transform: scale(.55); filter: blur(12px); }
+  28%  { opacity: 1; transform: scale(1);   filter: blur(0); }
+  70%  { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 0; transform: scale(1.5); filter: blur(5px); }
+}
+@keyframes ring {
+  0%   { opacity: 0; transform: scale(.4); }
+  25%  { opacity: .9; }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Title letters */
+@keyframes chIn {
+  from { opacity: 0; transform: translateY(.45em) scale(1.3); filter: blur(12px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+/* Balloons */
+@keyframes rise  { from { transform: translate3d(0,0,0); } to { transform: translate3d(var(--drift, 0), -135dvh, 0); } }
+@keyframes bsway { from { transform: rotate(calc(var(--sa) * -1)); } to { transform: rotate(var(--sa)); } }
+
+/* Flowers */
+@keyframes sway { from { transform: rotate(calc(var(--sa, 2deg) * -1)); } to { transform: rotate(var(--sa, 2deg)); } }
+@keyframes grassSway { from { transform: skewX(-2.5deg); } to { transform: skewX(2.5deg); } }
+@keyframes stemGrow   { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes leafOpen   { from { transform: scale(0) rotate(-35deg); } 70% { transform: scale(1.08) rotate(4deg); } to { transform: scale(1) rotate(0); } }
+@keyframes headIn     { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes petalsOpen { from { transform: scale(.15) rotate(-50deg); opacity: 0; } 30% { opacity: 1; } to { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes coreIn     { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes petalFly {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(0) scale(.5); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); }
+}
+
+/* Cake */
+@keyframes cakeDrop {
+  0%   { opacity: 1; transform: translateY(-140dvh) rotate(-2deg); animation-timing-function: cubic-bezier(.45, 0, .85, .65); }
+  56%  { opacity: 1; transform: translateY(0) rotate(0); animation-timing-function: ease-out; }
+  70%  { transform: translateY(-1.6%); animation-timing-function: ease-in-out; }
+  84%  { transform: translateY(0); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes flicker {
+  0%   { transform: scale(1, 1) skewX(0deg); }
+  25%  { transform: scale(.93, 1.08) skewX(2.5deg); }
+  50%  { transform: scale(1.05, .95) skewX(-2.5deg); }
+  75%  { transform: scale(.96, 1.05) skewX(1.5deg); }
+  100% { transform: scale(1, 1) skewX(-1deg); }
+}
+@keyframes glowPulse { from { opacity: .75; } to { opacity: 1; } }
+@keyframes snuff {
+  0%   { transform: scale(1); opacity: 1; }
+  22%  { transform: scale(1.1, 1.22) skewX(16deg); opacity: 1; }
+  50%  { transform: scale(.75, .7) skewX(-12deg); opacity: .9; }
+  100% { transform: scale(.05); opacity: 0; }
+}
+@keyframes puff {
+  0%   { opacity: 0; transform: translate(0, 0) scale(.6); }
+  18%  { opacity: .7; }
+  100% { opacity: 0; transform: translate(var(--dx), -54px) scale(2.8); }
+}
+
+/* Dinner */
+@keyframes heartUp {
+  0%   { opacity: 0; transform: translate(0, 0) scale(.6); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), -85dvh) scale(1.2); }
+}
