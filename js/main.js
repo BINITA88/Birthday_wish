@@ -23,7 +23,7 @@
       if (document.hidden) App.audio.suspend(); else App.audio.resume();
     });
 
-    App.SceneManager.go('intro', { mode: 'none' });
+    App.SceneManager.go('name', { mode: 'none' });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);

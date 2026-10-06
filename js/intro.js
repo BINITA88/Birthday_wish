@@ -8,7 +8,7 @@
       sec.innerHTML =
         '<div class="intro-glow g1"></div><div class="intro-glow g2"></div>' +
         '<div class="intro-box">' +
-          '<p class="intro-line fade-up">' + u.esc(T.introLine) + '</p>' +
+          '<p class="intro-line"></p>' +
           '<button class="btn fade-up" type="button">' + u.esc(T.introButton) + '</button>' +
         '</div>' +
         '<div class="countdown" aria-live="assertive"></div>';
@@ -21,8 +21,10 @@
       const btn = sec.querySelector('.btn');
       const cd = sec.querySelector('.countdown');
 
-      ctx.show(line, 700);
-      ctx.show(btn, 2300);
+      // The line types in letter by letter; the button appears once it has finished.
+      const lineMs = u.letters(line, T.introLine, 75);
+      ctx.later(function () { line.classList.add('reveal'); }, 700);
+      ctx.show(btn, 700 + lineMs);
 
       let started = false;
       ctx.on(btn, 'click', async function () {

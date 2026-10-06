@@ -45,6 +45,8 @@
 
     /* ---- All on-screen wording ---- */
     text: {
+      waitLine: 'Something is waiting for you...',
+      waitButton: 'Click to Begin',
       introLine: 'Something special is waiting for you...',
       introButton: 'Click to begin ✨',
 

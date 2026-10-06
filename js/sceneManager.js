@@ -124,7 +124,7 @@
       if (locked) return false;
       App.audio.stopAll();
       App.resetState();
-      return SceneManager.go('intro', { mode: 'black', duration: 1300, hold: 500 });
+      return SceneManager.go('name', { mode: 'black', duration: 1300, hold: 500 });
     }
   };
 

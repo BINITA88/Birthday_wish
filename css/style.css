@@ -103,6 +103,8 @@ body.started #sound-btn { opacity: 1; }
   font-family: var(--serif); font-style: italic; font-weight: 300; line-height: 1.2; padding: 0 .5rem;
   font-size: clamp(1.8rem, 6.4vw, 3.4rem); color: var(--cream); text-shadow: 0 0 34px rgba(244,199,107,.38);
 }
+.name-wrap { width: min(94vw, 760px); display: flex; justify-content: center; position: relative; z-index: 3; }
+.flower-name { display: block; max-width: 100%; filter: drop-shadow(0 4px 14px rgba(0,0,0,.45)); }
 .countdown { position: absolute; inset: 0; display: grid; place-items: center; z-index: 3; pointer-events: none; }
 .num { position: relative; display: grid; place-items: center; animation: countIn 1.15s cubic-bezier(.2,.7,.2,1) both; }
 .num b {
@@ -112,7 +114,7 @@ body.started #sound-btn { opacity: 1; }
 .num i { position: absolute; width: 56vmin; height: 56vmin; border-radius: 50%; border: 1px solid rgba(244,199,107,.5); animation: ring 1.15s ease-out both; }
 
 /* ---------- SCENE 2: celebration ---------- */
-.scene-celebration { background: radial-gradient(ellipse at 50% 40%, #1f1722 0, #0b0a10 58%, #08090D 100%); }
+.scene-celebration { background: radial-gradient(ellipse at 50% 40%, #2a2030 0, #120f18 58%, #08090D 100%); }
 .cel-glow {
   position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(circle at 50% 45%, rgba(244,199,107,.22), transparent 55%), radial-gradient(circle at 18% 82%, rgba(244,182,194,.13), transparent 42%);
@@ -360,3 +362,42 @@ body.started #sound-btn { opacity: 1; }
 .d-final .f2 { font-family: var(--serif); font-style: italic; font-size: clamp(1.1rem, 4.2vw, 1.5rem); color: rgba(255,243,224,.92); text-shadow: 0 2px 14px rgba(0,0,0,.9); max-width: 30ch; margin-bottom: .6rem; }
 .hearts { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; }
 .hearts i { position: absolute; bottom: -40px; font-style: normal; opacity: 0; animation: heartUp 3.4s ease-out forwards; }
+
+/* Opening scene: land, seeds, garden */
+.scene-name { background: #070709; padding: 0; }
+.sw-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.sw-light {
+  position: absolute; left: 50%; top: 34%; width: min(120vw, 900px); height: min(70vh, 520px); transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center, rgba(255,226,176,.2) 0%, rgba(255,214,160,.07) 40%, transparent 70%);
+  opacity: 0; pointer-events: none;
+}
+.sw-text { position: absolute; left: 0; right: 0; top: 34%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: clamp(1.4rem, 4vh, 2.4rem); padding: 0 6vw; pointer-events: none; }
+.sw-line {
+  font-family: var(--serif); font-style: italic; font-weight: 300; line-height: 1.2; letter-spacing: .02em;
+  font-size: clamp(1.9rem, 6.2vw, 3.6rem); color: var(--cream); text-shadow: 0 0 36px rgba(255,214,160,.45), 0 2px 18px rgba(0,0,0,.6);
+  opacity: 0; transform: translateY(10px); filter: blur(6px);
+  transition: opacity 3.2s var(--ease), transform 3.2s var(--ease), filter 3.2s var(--ease);
+}
+.sw-text.line-on .sw-line { opacity: 1; transform: none; filter: blur(0); }
+.sw-btn {
+  font: 400 clamp(.82rem, 2.8vw, 1rem)/1 var(--sans); letter-spacing: .34em; text-transform: uppercase; color: rgba(255,243,224,.92);
+  background: none; border: none; border-bottom: 1px solid rgba(255,226,176,.4); padding: .9em .6em; cursor: pointer; touch-action: manipulation;
+  opacity: 0; transition: opacity 2.6s ease; animation: swPulse 3.6s ease-in-out infinite; animation-play-state: paused;
+}
+.sw-text.btn-on .sw-btn { opacity: 1; pointer-events: auto; animation-play-state: running; }
+.sw-btn:hover, .sw-btn:focus-visible { outline: none; border-bottom-color: rgba(255,226,176,.85); text-shadow: 0 0 20px rgba(255,226,176,.8); }
+.sw-skip {
+  position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); z-index: 5;
+  font: 400 .72rem/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: rgba(255,243,224,.5);
+  background: none; border: none; padding: .8em; cursor: pointer; transition: opacity 1.2s, color .3s;
+}
+.sw-skip:hover, .sw-skip:focus-visible { color: rgba(255,243,224,.95); outline: none; }
+.sw-skip.gone { opacity: 0; pointer-events: none; }
+@keyframes swPulse {
+  0%, 100% { text-shadow: 0 0 10px rgba(255,226,176,.15); border-bottom-color: rgba(255,226,176,.28); }
+  50%      { text-shadow: 0 0 26px rgba(255,226,176,.75); border-bottom-color: rgba(255,226,176,.7); }
+}
+
+/* Balloon bundles */
+.bundles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.bundle { position: absolute; left: 0; top: 0; overflow: visible; opacity: 0; will-change: transform; filter: drop-shadow(0 14px 18px rgba(0,0,0,.4)); }
