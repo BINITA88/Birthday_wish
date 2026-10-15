@@ -29,17 +29,22 @@
     ],
     photoObjectPosition: 'center 22%',             // keeps faces in frame when the photo is cropped
 
+    /* ---- Floating balloons (celebration + cake scenes) ---- */
+    balloonImage: 'assets/images/heart-balloon-bouquet.png',
+
     /* ---- The two flowers (scene 3) ---- */
     flowers: {
       sunflower: {
+        image: 'assets/images/sunflower.png',
         title: 'Sunflower', emoji: '🌻',
         description: 'Like sunshine, warmth, and the little things that make life beautiful.',
-        button: 'Choose Sunflower'
+        button: 'Click me'
       },
       rose: {
+        image: 'assets/images/rose.png',
         title: 'Rose', emoji: '🌹',
         description: 'Elegant, timeless, and beautiful in its own way.',
-        button: 'Choose Rose'
+        button: 'Click me'
       }
     },
 

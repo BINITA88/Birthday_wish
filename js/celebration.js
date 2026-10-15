@@ -12,7 +12,7 @@
         '<div class="cel-glow"></div>' +
         '<h1 class="cel-title"><span class="l1"></span><span class="l2"></span></h1>';
 
-      FX.balloons(sec, { count: App.isSmall() ? 9 : 14 });
+      FX.balloons(sec, { count: App.isSmall() ? 4 : 7 });
       const fx = FX.field(sec, { motes: 44, confetti: false, rate: 10 });
       ctx.add(fx.destroy);
 

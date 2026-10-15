@@ -1,15 +1,31 @@
-/* A name written in seeds on a soil bed. A gardener walks along, waters them, and flowers bloom. */
+/* A name written in seeds, one separate soil plot per letter. A gardener walks along and waters the plots one
+   after another: the seeds sprout, grow into little plants and bloom until every letter is filled with flowers.
+   Then the plots glide to the centre, join up, and the name is shown. */
 (function (App) {
   const u = App.u;
   const FX = App.FX;
 
   const PETALS = ['#f06aa8', '#f7a8d0', '#f6a77a', '#e0303a', '#f7c948', '#8f74d6', '#fff6ec', '#d63384', '#ff7f6b', '#b79ae6'];
   const CENTERS = ['#f7c948', '#ffb02e', '#fff2a8'];
-  const LEAF = ['#3f7a45', '#2f6a3a', '#56934f'];
+  const LEAF = ['#3f7a45', '#2f6a3a', '#56934f', '#4d9a52'];
+  const STEM = ['#3f8f4a', '#4d9a52', '#397d43'];
+  const LEAF_AT = [0.3, 0.55, 0.8];          // how far up the stem each leaf sits (as the stem grows)
+
+  /* ---------- timeline (ms, before the reduced-motion scale) ---------- */
+  const ENTER = 800;       // the gardener walks in
+  const FALL = 350;        // water takes this long to fall from the can onto the soil
+  const GERM = 200;        // pause before a watered seed cracks open
+  const STEM_MS = 850;     // a shoot grows to its full height
+  const CONVERGE = 1800;   // the finished letters glide to the centre
+  const LEAD = 11;         // water drifts forward a little while it falls
+  const GM = 18;           // room above a plot for its grass
 
   const easeOutBack = function (t) { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
   const easeOutCubic = function (t) { return 1 - Math.pow(1 - t, 3); };
+  const easeInOutCubic = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
   const clamp01 = function (t) { return t < 0 ? 0 : t > 1 ? 1 : t; };
+  const range = function (a, b) { const r = []; for (let i = a; i < b; i++) r.push(i); return r; };
+  const font = function (px) { return '800 ' + px + 'px Jost, "Segoe UI", Arial, sans-serif'; };
 
   /* ---------- colour helpers ---------- */
   function rgb(hex) { const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
@@ -18,7 +34,7 @@
     return 'rgb(' + Math.round(c[0] + (t[0] - c[0]) * a) + ',' + Math.round(c[1] + (t[1] - c[1]) * a) + ',' + Math.round(c[2] + (t[2] - c[2]) * a) + ')';
   }
 
-  /* ---------- pre-rendered flower sprites (shaded petals, two layers, stamens) ---------- */
+  /* ---------- pre-rendered sprites (shaded petals, buds, leaves, seeds) ---------- */
   const S = 160, R = S * 0.46;
   const sprites = {};
 
@@ -88,16 +104,109 @@
     return (sprites[key] = c);
   }
 
+  /** A single leaf pointing along +x, base at the left edge. */
+  function leafSprite(col) {
+    const key = 'l' + col;
+    if (sprites[key]) return sprites[key];
+    const c = document.createElement('canvas'); c.width = 64; c.height = 32;
+    const g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, 64, 0);
+    gr.addColorStop(0, mix(col, 'k', 0.25)); gr.addColorStop(1, mix(col, 'w', 0.35));
+    g.fillStyle = gr;
+    g.beginPath();
+    g.moveTo(1, 16); g.bezierCurveTo(14, 1, 44, 2, 63, 16); g.bezierCurveTo(44, 30, 14, 31, 1, 16);
+    g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(255,255,255,.28)'; g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(3, 16); g.lineTo(58, 16); g.stroke();
+    return (sprites[key] = c);
+  }
+
+  /** A seed with its little shadow, about 27px long at 1x. */
+  function seedSprite() {
+    if (sprites.seed) return sprites.seed;
+    const c = document.createElement('canvas'); c.width = 48; c.height = 34;
+    const g = c.getContext('2d');
+    g.translate(24, 16);
+    const s = 9;
+    g.fillStyle = 'rgba(0,0,0,.35)';
+    g.beginPath(); g.ellipse(s * 0.2, s * 0.8, s * 2, s * 0.7, 0, 0, 6.283); g.fill();
+    g.rotate(-0.25);
+    const gr = g.createLinearGradient(-s * 1.4, -s, s * 1.4, s);
+    gr.addColorStop(0, '#f1d9a0'); gr.addColorStop(0.55, '#b98a4a'); gr.addColorStop(1, '#6b4624');
+    g.fillStyle = gr;
+    g.beginPath();
+    g.moveTo(-s * 1.5, 0); g.bezierCurveTo(-s * 0.6, -s * 1.2, s * 0.8, -s * 1.1, s * 1.5, 0);
+    g.bezierCurveTo(s * 0.8, s * 1.1, -s * 0.6, s * 1.2, -s * 1.5, 0); g.fill();
+    g.strokeStyle = 'rgba(70,40,15,.45)'; g.lineWidth = Math.max(.6, s * 0.12);
+    g.beginPath(); g.moveTo(-s * 1.1, 0); g.lineTo(s * 1.2, 0); g.stroke();
+    return (sprites.seed = c);
+  }
+
+  /** Dark, damp soil where water has landed. */
+  function wetSprite() {
+    if (sprites.wet) return sprites.wet;
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d');
+    const rg = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    rg.addColorStop(0, 'rgba(0,0,0,.5)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, 64, 64);
+    return (sprites.wet = c);
+  }
+
+  /* ---------- a soil plot with variable corner radii, so neighbouring plots can fuse into one bed ---------- */
+  function patchPath(g, x0, y0, x1, y1, rl, rr) {
+    g.beginPath();
+    g.moveTo(x0 + rl, y0); g.lineTo(x1 - rr, y0);
+    g.quadraticCurveTo(x1, y0, x1, y0 + rr);
+    g.lineTo(x1, y1 - rr); g.quadraticCurveTo(x1, y1, x1 - rr, y1);
+    g.lineTo(x0 + rl, y1); g.quadraticCurveTo(x0, y1, x0, y1 - rl);
+    g.lineTo(x0, y0 + rl); g.quadraticCurveTo(x0, y0, x0 + rl, y0);
+    g.closePath();
+  }
+
+  /** Soft rim light. The side edges fade out once a plot has another plot touching it. */
+  function patchRim(g, x0, y0, x1, y1, rl, rr, aL, aR) {
+    g.lineWidth = 1.2;
+    g.strokeStyle = 'rgba(255,214,160,.16)';
+    g.beginPath(); g.moveTo(x0 + rl, y0); g.lineTo(x1 - rr, y0); g.moveTo(x0 + rl, y1); g.lineTo(x1 - rr, y1); g.stroke();
+    if (aL > 0.02) {
+      g.strokeStyle = 'rgba(255,214,160,' + (0.16 * aL) + ')';
+      g.beginPath(); g.moveTo(x0 + rl, y0); g.quadraticCurveTo(x0, y0, x0, y0 + rl); g.lineTo(x0, y1 - rl); g.quadraticCurveTo(x0, y1, x0 + rl, y1); g.stroke();
+    }
+    if (aR > 0.02) {
+      g.strokeStyle = 'rgba(255,214,160,' + (0.16 * aR) + ')';
+      g.beginPath(); g.moveTo(x1 - rr, y0); g.quadraticCurveTo(x1, y0, x1, y0 + rr); g.lineTo(x1, y1 - rr); g.quadraticCurveTo(x1, y1, x1 - rr, y1); g.stroke();
+    }
+  }
+
+  /** Where the spout of the watering can ends up, relative to the gardener's feet, for a given tilt (0..1). */
+  function canTip(h, tilt) {
+    const th = 0.2 + tilt * 0.45, c = Math.cos(th), s = Math.sin(th);
+    return { x: h * (0.32 + 0.285 * c - 0.125 * s), y: h * (-0.64 + 0.285 * s + 0.125 * c) };
+  }
+
+  function star(g, x, y, s) {
+    g.beginPath();
+    g.moveTo(x, y - s);
+    g.quadraticCurveTo(x + s * 0.12, y - s * 0.12, x + s, y);
+    g.quadraticCurveTo(x + s * 0.12, y + s * 0.12, x, y + s);
+    g.quadraticCurveTo(x - s * 0.12, y + s * 0.12, x - s, y);
+    g.quadraticCurveTo(x - s * 0.12, y - s * 0.12, x, y - s);
+    g.fill();
+  }
+
   /**
    * FX.flowerName(parent, text, opts) -> { done: Promise, destroy() }
-   * 1) seeds appear in the shape of the letters, 2) a gardener waters them left to right,
-   * 3) each seed sprouts and blooms where the water lands. `done` resolves when everything has bloomed.
+   * 1) every letter gets its own plot, scattered with seeds in the shape of that letter,
+   * 2) a gardener waters the plots one by one; the seeds sprout, grow into plants and bloom,
+   * 3) once every letter is in flower the plots glide together at the centre and the name is shown.
+   * `done` resolves shortly after the letters have settled. opts.onConverge fires as they start to move.
    */
   FX.flowerName = function (parent, text, opts) {
-    const o = Object.assign({ maxWidth: 780, bloomMs: 1100, seedMs: 1600, walkMs: 6400 }, opts || {});
+    const o = Object.assign({ maxWidth: 1400, bloomMs: 1100, onConverge: null }, opts || {});
     text = String(text).toUpperCase();
-    const walkMs = App.reduced ? 2600 : o.walkMs;
-    const seedMs = App.reduced ? 700 : o.seedMs;
+    const ts = App.reduced ? 0.4 : 1;                 // timeline scale
+    const T = function (ms) { return ms * ts; };
 
     const canvas = document.createElement('canvas');
     canvas.className = 'flower-name';
@@ -107,204 +216,285 @@
 
     let alive = true, raf = 0, finish;
     const done = new Promise(function (r) { finish = r; });
-    const flowers = [];
-    const drops = [];
-    const ripples = [];
-    let bedImg = null;
-    let W = 0, H = 0, head = 0, gh = 0, walkStart = 0, speed = 0, tipOff = 0, tipUp = 0, endAt = 0;
+    const letters = [];
+    const plan = [];                                  // the gardener's route: walking and pouring segments
+    const drops = [], ripples = [], twinkles = [];
+    let W = 0, H = 0, PH = 0, gh = 0, rr0 = 0, tc = 0, tA = 0, doneAt = 0;
 
     function build() {
       if (!alive) return;
       W = Math.max(220, Math.min(o.maxWidth, (parent.clientWidth || window.innerWidth) - 8));
-      const family = '800 100px Jost, "Segoe UI", Arial, sans-serif';
+      const chars = Array.from(text), n = chars.length;
       const m = document.createElement('canvas').getContext('2d');
-      m.font = family;
+      m.font = font(100);
+      const capRatio = (m.measureText('H').actualBoundingBoxAscent || 72) / 100;
       const gapRatio = 0.1;
-      const widths = Array.from(text).map(function (ch) { return m.measureText(ch).width; });
-      const sum = widths.reduce(function (a, b) { return a + b; }, 0) + gapRatio * 100 * (text.length - 1);
-      const k = (W * 0.92) / sum;
-      const fs = 100 * k, capH = fs * 0.72;
-      head = Math.round(capH * 1.05);                   // room for the gardener above the letters
-      gh = head * 0.84;                                 // gardener height
-      const textH = Math.round(capH * 1.32);
-      H = head + textH;
+      const widths = chars.map(function (ch) { return m.measureText(ch).width; });
+
+      // Wide screens: one row of plots. Narrow screens: two rows, so each letter can still stand well apart.
+      const narrow = W < 700 && n > 3;
+      const split = Math.ceil(n / 2);
+      const rows = (narrow ? [range(0, split), range(split, n)] : [range(0, n)]).filter(function (r) { return r.length; });
+      const Wn = narrow ? W * 0.88 : Math.min(780, W * 0.56);          // width of the finished name
+      const fs = 100 * Wn / (widths.reduce(function (a, b) { return a + b; }, 0) + gapRatio * 100 * (n - 1));
+      const capH = fs * capRatio, gapF = gapRatio * fs;
+      const lw = widths.map(function (w) { return w * fs / 100; });
+
+      const head = Math.round(capH * 1.15);                              // room for the gardener above a plot
+      gh = head * 0.9;
+      const d = Math.max(7, capH / 8.5);                                 // flower spacing
+      const textH = Math.round(capH * 1.55);
+      PH = textH + 12;
+      const rowH = head + PH;
+      H = rowH * rows.length;
+      rr0 = Math.min(22, capH * 0.25);
+      const padS = Math.max(7, capH * 0.17);                             // soil around a lone letter
+      const outerPad = Wn * 0.043;                                       // soil around the finished name
+      padStart = padS;
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.style.width = W + 'px';
       canvas.style.height = H + 'px';
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
-      bedImg = makeBed(dpr);
 
-      const d = Math.max(7, capH / 8.5);
-      const base = head + (textH + capH) / 2;
-      let x = (W - sum * k) / 2;
-      Array.from(text).forEach(function (ch, li) {
-        const w = widths[li] * k;
+      /* ----- plots: where each letter starts out, and where it ends up ----- */
+      chars.forEach(function (ch, j) {
+        const Lt = { idx: j, ch: ch, lw: lw[j], first: j === 0, last: j === n - 1, flowers: [], g: null, pa: 0 };
+        Lt.padEL = Lt.first ? outerPad : gapF / 2;
+        Lt.padER = Lt.last ? outerPad : gapF / 2;
+        Lt.tileW = Math.ceil(lw[j] + 2 * Math.max(padS, outerPad) + 16);
+        Lt.tile = makeTile(Lt.tileW, dpr);
+        letters.push(Lt);
+      });
+
+      let gap = Infinity;
+      rows.forEach(function (row) {
+        if (row.length < 2) return;
+        const tot = row.reduce(function (a, j) { return a + lw[j] + 2 * padS; }, 0);
+        gap = Math.min(gap, (W - 12 - tot) / (row.length - 1));
+      });
+      gap = Math.max(capH * 0.3, Math.min(gap, capH * 1.4));
+      rows.forEach(function (row, ri) {
+        const tot = row.reduce(function (a, j) { return a + lw[j] + 2 * padS; }, 0) + gap * (row.length - 1);
+        let x = (W - tot) / 2;
+        row.forEach(function (j) {
+          letters[j].homeCx = x + padS + lw[j] / 2;
+          letters[j].homeTop = ri * rowH + head;
+          letters[j].row = ri;
+          x += lw[j] + 2 * padS + gap;
+        });
+      });
+      const finTop = rows.length === 1 ? head : (H - PH) / 2;
+      let fx = (W - Wn) / 2;
+      letters.forEach(function (Lt, j) { Lt.finCx = fx + lw[j] / 2; Lt.finTop = finTop; fx += lw[j] + gapF; });
+
+      /* ----- the seeds: sample each letter's shape on a staggered grid ----- */
+      const rMax = d * 0.82, shMax = d * 1.4;
+      const topExt = rMax * 1.15, botExt = shMax + rMax * 0.3;
+      const gt = (textH - capH - topExt - botExt) / 2 + topExt;           // top of the letter inside its plot
+      letters.forEach(function (Lt, j) {
         const cl = document.createElement('canvas');
-        cl.width = Math.ceil(w) + 2; cl.height = H;
+        cl.width = Math.ceil(lw[j]) + 4; cl.height = textH;
         const cg = cl.getContext('2d', { willReadFrequently: true });
-        cg.font = '800 ' + fs + 'px Jost, "Segoe UI", Arial, sans-serif';
-        cg.textBaseline = 'alphabetic'; cg.fillStyle = '#000';
-        cg.fillText(ch, 0, base);
+        cg.font = font(fs); cg.textBaseline = 'alphabetic'; cg.fillStyle = '#000';
+        cg.fillText(Lt.ch, 0, gt + capH);
         const px = cg.getImageData(0, 0, cl.width, cl.height).data;
         let row = 0;
-        for (let y = head + d * 0.5; y < H; y += d * 0.86, row++) {
+        for (let y = d * 0.5; y < textH; y += d * 0.86, row++) {
           for (let gx = d * 0.5 + (row % 2 ? d * 0.5 : 0); gx < cl.width; gx += d) {
-            const ix = Math.round(gx), iy = Math.round(y);
+            const ix = Math.round(gx), iy = Math.min(cl.height - 1, Math.round(y));
             if (px[(iy * cl.width + ix) * 4 + 3] > 140) {
-              flowers.push({
-                x: x + gx + u.rand(-d * 0.1, d * 0.1), y: y + u.rand(-d * 0.1, d * 0.1),
+              Lt.flowers.push({
+                lx: gx - lw[j] / 2 + u.rand(-d * 0.1, d * 0.1), ly: 6 + y + u.rand(-d * 0.1, d * 0.1),
                 r: d * u.rand(0.64, 0.82), n: u.pick([5, 5, 6, 8]), rot: u.rand(0, 6.28),
-                col: u.pick(PETALS), mid: u.pick(CENTERS), leaf: Math.random() < 0.4 ? u.pick(LEAF) : null,
-                la: u.rand(0, 6.28), seedAt: u.rand(0, seedMs), seedRot: u.rand(0, 3.14), lean: u.rand(-0.25, 0.25)
+                col: u.pick(PETALS), mid: u.pick(CENTERS),
+                sh: d * u.rand(1.0, 1.4), bend: d * u.rand(-0.4, 0.4), stemCol: u.pick(STEM),
+                leafCol: [u.pick(LEAF), u.pick(LEAF), u.pick(LEAF)], side: Math.random() < 0.5 ? 1 : -1,
+                la: u.rand(0, 6.28), seedRot: u.rand(0, 3.14),
+                seedAt: T(j * 130 + u.rand(0, 600))
               });
             }
           }
         }
-        x += w + gapRatio * 100 * k;
+        Lt.flowers.sort(function (a, b) { return a.ly - b.ly; });         // back rows first
       });
 
-      // Timeline: seeds appear, then the gardener walks across and waters.
-      walkStart = seedMs + 800;
+      /* ----- the gardener's route: walk to a plot, pour across it slowly, move on ----- */
+      const tip = canTip(gh, 1);
+      const walkSpeed = gh * 2.7 / 1000, pourSpeed = gh * 1.25 / 1000;    // px per ms
       const pw = gh * 0.5;
-      tipOff = gh * 0.66; tipUp = gh * 0.5;
-      speed = (W + pw * 2) / walkMs;                    // px per ms
-      let last = 0;
-      flowers.forEach(function (f) {
-        f.tw = walkStart + (f.x - tipOff + pw) / speed; // moment the water reaches this seed
-        f.t0 = f.tw + 1100;                             // sprout, then bloom
-        last = Math.max(last, f.t0 + o.bloomMs);
+      let px0 = -pw * 1.4, py0 = head - 2, pt = T(ENTER), pd = 0;
+      function addSeg(x1, dur, pour, top) {
+        plan.push({ t0: pt, t1: pt + dur, x0: px0, x1: x1, y: py0, pour: pour, top: top, d0: pd });
+        pd += Math.abs(x1 - px0); px0 = x1; pt += dur;
+      }
+      rows.forEach(function (row, ri) {
+        const top = ri * rowH + head;
+        if (ri > 0) {                                                      // leave stage right, re-enter on the next row
+          addSeg(W + pw * 1.4, Math.max(T(280), Math.abs(W + pw * 1.4 - px0) / walkSpeed * ts), false, top - rowH);
+          pt += T(150); px0 = -pw * 1.4;
+        }
+        py0 = top - 2;
+        row.forEach(function (j) {
+          const Lt = letters[j];
+          const gx0 = Lt.homeCx - lw[j] / 2 - tip.x - LEAD, gx1 = Lt.homeCx + lw[j] / 2 - tip.x - LEAD;
+          addSeg(gx0, Math.max(T(280), Math.abs(gx0 - px0) / walkSpeed * ts), false, top);
+          const t0 = pt;
+          addSeg(gx1, Math.max(T(800), (gx1 - gx0) / pourSpeed * ts), true, top);
+          Lt.pour = { t0: t0, t1: pt, gx0: gx0, gx1: gx1 };
+        });
       });
-      endAt = Math.max(last, walkStart + walkMs) + 200;
+      addSeg(W + pw * 1.4, Math.max(T(280), (W + pw * 1.4 - px0) / walkSpeed * ts), false, rows.length * rowH - PH);
+
+      /* ----- when the water reaches each seed, and what follows ----- */
+      let last = 0;
+      letters.forEach(function (Lt) {
+        const P = Lt.pour;
+        Lt.flowers.forEach(function (f) {
+          const gx = Lt.homeCx + f.lx - tip.x - LEAD;
+          const s = clamp01((gx - P.gx0) / (P.gx1 - P.gx0));
+          f.tw = P.t0 + s * (P.t1 - P.t0) + T(FALL) + u.rand(-T(70), T(70));   // the water lands
+          f.tg = f.tw + T(GERM) + u.rand(0, T(150));                            // the seed cracks, a shoot rises
+          f.stemMs = T(STEM_MS) * u.rand(0.9, 1.15);
+          f.tb = f.tg + f.stemMs * 0.8;                                         // a bud forms, then opens
+          f.bm = T(o.bloomMs);
+          last = Math.max(last, f.tb + f.bm);
+        });
+      });
+      tc = last + T(350);                                                       // every letter is in flower: gather
+      tA = tc + T(CONVERGE);
+      doneAt = tA + T(800);
       run(dpr);
     }
 
-    /* ---------- the soil bed: rendered once ---------- */
-    function makeBed(dpr) {
+    /* ---------- soil tile: rendered once per plot, then moved around ---------- */
+    function makeTile(w, dpr) {
       const c = document.createElement('canvas');
-      c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+      c.width = Math.round(w * dpr); c.height = Math.round((PH + GM) * dpr);
       const g = c.getContext('2d');
       g.scale(dpr, dpr);
-      const top = head - 6, rr = 22;
-      const rect = function () {
-        g.beginPath();
-        g.moveTo(rr, top); g.lineTo(W - rr, top); g.quadraticCurveTo(W, top, W, top + rr);
-        g.lineTo(W, H - rr); g.quadraticCurveTo(W, H, W - rr, H);
-        g.lineTo(rr, H); g.quadraticCurveTo(0, H, 0, H - rr);
-        g.lineTo(0, top + rr); g.quadraticCurveTo(0, top, rr, top);
-        g.closePath();
-      };
-      rect();
-      const gr = g.createLinearGradient(0, top, 0, H);
+      const top = GM;
+      const gr = g.createLinearGradient(0, top, 0, top + PH);
       gr.addColorStop(0, '#1d140e'); gr.addColorStop(0.18, '#34241a'); gr.addColorStop(1, '#2a1c13');
-      g.fillStyle = gr; g.fill();
-      g.save(); rect(); g.clip();
+      g.fillStyle = gr; g.fillRect(0, top, w, PH);
       // grain: clumps of lighter and darker soil
-      const N = W * (H - top) / 40;
+      const N = w * PH / 40;
       for (let i = 0; i < N; i++) {
-        const px = Math.random() * W, py = top + Math.random() * (H - top), sz = u.rand(0.6, 2.6);
-        const t = Math.random();
-        g.fillStyle = t > 0.62 ? 'rgba(120,88,62,' + u.rand(0.2, 0.55).toFixed(2) + ')' : 'rgba(8,4,2,' + u.rand(0.25, 0.6).toFixed(2) + ')';
+        const px = Math.random() * w, py = top + Math.random() * PH, sz = u.rand(0.6, 2.6);
+        g.fillStyle = Math.random() > 0.62 ? 'rgba(120,88,62,' + u.rand(0.2, 0.55).toFixed(2) + ')' : 'rgba(8,4,2,' + u.rand(0.25, 0.6).toFixed(2) + ')';
         g.beginPath(); g.ellipse(px, py, sz, sz * 0.7, u.rand(0, 3), 0, 6.283); g.fill();
       }
       // depth: shadowed back edge, soft light pooling toward the middle
-      const sh = g.createLinearGradient(0, top, 0, top + (H - top) * 0.3);
+      const sh = g.createLinearGradient(0, top, 0, top + PH * 0.3);
       sh.addColorStop(0, 'rgba(0,0,0,.55)'); sh.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = sh; g.fillRect(0, top, W, H);
-      const gl = g.createRadialGradient(W / 2, H * 0.7, 0, W / 2, H * 0.7, W * 0.6);
+      g.fillStyle = sh; g.fillRect(0, top, w, PH);
+      const gl = g.createRadialGradient(w / 2, top + PH * 0.7, 0, w / 2, top + PH * 0.7, w * 0.9);
       gl.addColorStop(0, 'rgba(255,190,120,.10)'); gl.addColorStop(1, 'rgba(255,190,120,0)');
-      g.fillStyle = gl; g.fillRect(0, top, W, H);
-      g.restore();
-      // rim light
-      g.strokeStyle = 'rgba(255,214,160,.16)'; g.lineWidth = 1.2;
-      rect(); g.stroke();
+      g.fillStyle = gl; g.fillRect(0, top, w, PH);
       // blades of grass along the back edge
-      for (let i = 0; i < W / 5; i++) {
-        const bx = u.rand(4, W - 4), bh = u.rand(5, 13), lean = u.rand(-4, 4);
+      g.lineCap = 'round';
+      for (let i = 0; i < w / 5; i++) {
+        const bx = u.rand(4, w - 4), bh = u.rand(5, 13), lean = u.rand(-4, 4);
         g.strokeStyle = u.pick(['#2f6a3a', '#3f7a45', '#56934f', '#244f2e']);
-        g.lineWidth = u.rand(0.9, 1.7); g.lineCap = 'round';
+        g.lineWidth = u.rand(0.9, 1.7);
         g.beginPath(); g.moveTo(bx, top + 2); g.quadraticCurveTo(bx + lean * 0.4, top - bh * 0.5, bx + lean, top - bh); g.stroke();
       }
       return c;
     }
 
-    /* ---------- seeds, wet soil, sprouts, blooms ---------- */
+    function geom(Lt, e) {
+      const cx = Lt.homeCx + (Lt.finCx - Lt.homeCx) * e;
+      const top = Lt.homeTop + (Lt.finTop - Lt.homeTop) * e;
+      return { cx: cx, top: top, x0: cx - Lt.lw / 2 - (padOf(Lt, 'L', e)), x1: cx + Lt.lw / 2 + (padOf(Lt, 'R', e)) };
+    }
+    // Plots start with a little soil all round and end up just touching their neighbours.
+    let padStart = 0;
+    function padOf(Lt, side, e) {
+      const end = side === 'L' ? Lt.padEL : Lt.padER;
+      return padStart + (end - padStart) * e;
+    }
+
+    function drawSoil(g, Lt, t, e, rf) {
+      const pa = easeOutCubic(clamp01((t - T(Lt.idx * 110)) / T(650)));      // the plot fades in, one after another
+      Lt.pa = pa;
+      Lt.g = geom(Lt, e);
+      if (pa <= 0) return;
+      const G = Lt.g, y0 = G.top + (1 - pa) * 10, y1 = y0 + PH;
+      if (!Lt.last) G.x1 += 0.7 * (1 - rf);                   // neighbours overlap a hair so no seam shows
+      const rl = Lt.first ? rr0 : rr0 * rf, rr = Lt.last ? rr0 : rr0 * rf;
+      g.save();
+      g.globalAlpha = pa;
+      g.save();
+      patchPath(g, G.x0, y0, G.x1, y1, rl, rr); g.clip();
+      g.drawImage(Lt.tile, G.cx - Lt.tileW / 2, y0 - GM, Lt.tileW, PH + GM);
+      g.restore();
+      // grass pokes out above the soil; neighbours share the blades along their seam
+      const mL = Lt.first ? 3 : 3 * rf, mR = Lt.last ? 3 : 3 * rf;
+      g.save();
+      g.beginPath(); g.rect(G.x0 + mL, y0 - GM, (G.x1 - mR) - (G.x0 + mL), GM + 3); g.clip();
+      g.drawImage(Lt.tile, G.cx - Lt.tileW / 2, y0 - GM, Lt.tileW, PH + GM);
+      g.restore();
+      patchRim(g, G.x0, y0, G.x1, y1, rl, rr, Lt.first ? 1 : rf, Lt.last ? 1 : rf);
+      g.restore();
+    }
+
+    /* ---------- seeds, wet soil, plants, blooms ---------- */
+    function drawWet(g, f, t) {
+      const a = easeOutCubic(clamp01((t - f.tw) / T(700)));
+      if (a <= 0) return;
+      const sz = f.r * 2.1;
+      g.globalAlpha = a;
+      g.drawImage(wetSprite(), f.lx - sz / 2, f.ly + f.sh - sz / 2, sz, sz);
+      g.globalAlpha = 1;
+    }
+
     function drawSeed(g, f, t) {
       const a = clamp01((t - f.seedAt) / 450);
       if (a <= 0) return;
-      const sprout = clamp01((t - (f.t0 - 600)) / 600);
-      if (sprout > 0.5) return;
+      const gone = clamp01((t - f.tg) / T(350));          // the seed splits and fades as the shoot rises
+      if (gone >= 1) return;
+      const k = f.r * 0.28 / 9 * (0.5 + 0.5 * easeOutBack(a));
       g.save();
-      g.translate(f.x, f.y);
-      g.globalAlpha = a * (1 - sprout / 0.5);
-      const s = f.r * 0.2 * (0.5 + 0.5 * easeOutBack(a));
-      // little mound + shadow
-      g.fillStyle = 'rgba(0,0,0,.35)';
-      g.beginPath(); g.ellipse(s * 0.2, s * 0.8, s * 2, s * 0.7, 0, 0, 6.283); g.fill();
+      g.translate(f.lx, f.ly + f.sh);
+      g.globalAlpha = a * (1 - gone);
       g.rotate(f.seedRot);
-      const gr = g.createLinearGradient(-s * 1.4, -s, s * 1.4, s);
-      gr.addColorStop(0, '#f1d9a0'); gr.addColorStop(0.55, '#b98a4a'); gr.addColorStop(1, '#6b4624');
-      g.fillStyle = gr;
-      g.beginPath();
-      g.moveTo(-s * 1.5, 0); g.bezierCurveTo(-s * 0.6, -s * 1.2, s * 0.8, -s * 1.1, s * 1.5, 0);
-      g.bezierCurveTo(s * 0.8, s * 1.1, -s * 0.6, s * 1.2, -s * 1.5, 0); g.fill();
-      g.strokeStyle = 'rgba(70,40,15,.45)'; g.lineWidth = Math.max(.6, s * 0.12);
-      g.beginPath(); g.moveTo(-s * 1.1, 0); g.lineTo(s * 1.2, 0); g.stroke();
+      g.drawImage(sprites.seed || seedSprite(), -24 * k, -16 * k, 48 * k, 34 * k);
       g.restore();
     }
 
-    function drawWet(g, f, t) {
-      const a = easeOutCubic(clamp01((t - f.tw) / 700));
-      if (a <= 0) return;
-      const rg = g.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 1.05);
-      rg.addColorStop(0, 'rgba(0,0,0,' + (0.5 * a) + ')');
-      rg.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = rg;
-      g.beginPath(); g.arc(f.x, f.y, f.r * 1.05, 0, 6.283); g.fill();
-    }
-
-    function drawSprout(g, f, t) {
-      const q = easeOutCubic(clamp01((t - (f.t0 - 650)) / 650));
-      if (q <= 0) return;
-      const fade = 1 - clamp01((t - f.t0 - 150) / 350);
-      if (fade <= 0) return;
-      const hgt = f.r * 1.25 * q;
-      const sway = Math.sin(t / 380 + f.la) * 0.06;
-      g.save();
-      g.translate(f.x, f.y);
-      g.globalAlpha = fade;
-      g.rotate(f.lean * 0.5 + sway);
-      g.strokeStyle = '#4d9a52'; g.lineWidth = Math.max(1.3, f.r * 0.13); g.lineCap = 'round';
-      g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(f.r * 0.08, -hgt * 0.5, 0, -hgt); g.stroke();
-      const lf = f.r * 0.55 * q;
-      [[-1, 0.62, -0.55], [1, 0.82, 0.55]].forEach(function (c) {
-        const lg = g.createLinearGradient(0, 0, c[0] * lf * 1.6, 0);
-        lg.addColorStop(0, '#3c8a48'); lg.addColorStop(1, '#7fcf7a');
-        g.fillStyle = lg;
-        g.save(); g.translate(0, -hgt * c[1]); g.rotate(c[2]);
-        g.beginPath(); g.ellipse(c[0] * lf * 0.8, 0, lf, lf * 0.42, 0, 0, 6.283); g.fill();
-        g.restore();
-      });
-      g.restore();
-    }
-
-    function drawFlower(g, f, p, t) {
-      const open = easeOutBack(clamp01((p - 0.15) / 0.85));
-      const bud = easeOutCubic(clamp01(p * 3));
-      const sway = Math.sin(t / 900 + f.la) * 0.05 * clamp01(p);
-      g.save();
-      g.translate(f.x, f.y);
-      if (f.leaf) {
+    /** The shoot: a stem that rises from the seed, putting out leaves. Returns where the tip is. */
+    function drawPlant(g, f, t) {
+      const q = easeOutCubic(clamp01((t - f.tg) / f.stemMs));
+      if (q <= 0) return null;
+      const sway = App.reduced ? 0 : Math.sin(t / 650 + f.la) * f.sh * 0.07 * q;
+      const bx = f.lx, by = f.ly + f.sh;
+      const tx = f.lx + sway, ty = f.ly + f.sh * (1 - q);
+      const cx = bx + f.bend * q + sway * 0.5, cy = (by + ty) / 2;
+      g.strokeStyle = f.stemCol; g.lineWidth = Math.max(1.3, f.r * 0.15); g.lineCap = 'round';
+      g.beginPath(); g.moveTo(bx, by); g.quadraticCurveTo(cx, cy, tx, ty); g.stroke();
+      for (let k = 0; k < 3; k++) {
+        const lq = easeOutBack(clamp01((q - LEAF_AT[k]) / 0.4));
+        if (lq <= 0) continue;
+        const s = LEAF_AT[k] / q, a = 1 - s;
+        const lx = a * a * bx + 2 * a * s * cx + s * s * tx, ly = a * a * by + 2 * a * s * cy + s * s * ty;
+        const len = f.r * (0.95 - k * 0.1) * lq;
         g.save();
-        g.rotate(f.la);
-        const lr = f.r * 0.95 * easeOutCubic(clamp01(p * 1.5));
-        const lg = g.createLinearGradient(0, 0, lr * 1.6, 0);
-        lg.addColorStop(0, f.leaf); lg.addColorStop(1, mix(f.leaf, 'w', 0.3));
-        g.fillStyle = lg;
-        g.beginPath(); g.ellipse(lr * 0.9, 0, lr * 0.8, lr * 0.3, 0, 0, 6.283); g.fill();
+        g.translate(lx, ly);
+        g.scale((k % 2 ? 1 : -1) * f.side, 1);
+        g.rotate(-0.55 - k * 0.12 + sway * 0.05);
+        g.drawImage(leafSprite(f.leafCol[k]), 0, -len * 0.25, len, len * 0.5);
         g.restore();
       }
+      return { x: tx, y: ty };
+    }
+
+    function drawFlower(g, f, p, hx, hy, t) {
+      const open = easeOutBack(clamp01((p - 0.15) / 0.85));
+      const bud = easeOutCubic(clamp01(p * 3));
+      const sway = App.reduced ? 0 : Math.sin(t / 900 + f.la) * 0.05 * clamp01(p);
+      g.save();
+      g.translate(hx, hy);
       g.rotate(f.rot + sway + (1 - clamp01(p)) * 0.9);
       const budA = (1 - clamp01((p - 0.2) / 0.35));
       if (budA > 0.01) {
@@ -321,10 +511,37 @@
       g.restore();
     }
 
+    function drawContent(g, Lt, t) {
+      if (Lt.pa <= 0) return;
+      const G = Lt.g, fl = Lt.flowers;
+      g.save();
+      g.translate(G.cx, G.top + (1 - Lt.pa) * 10);
+      for (let i = 0; i < fl.length; i++) drawWet(g, fl[i], t);
+      for (let i = 0; i < fl.length; i++) drawSeed(g, fl[i], t);
+      for (let i = 0; i < fl.length; i++) {
+        const f = fl[i];
+        const tipPt = drawPlant(g, f, t);
+        if (!tipPt) continue;
+        const p = clamp01((t - f.tb) / f.bm);
+        if (p > 0) drawFlower(g, f, p, tipPt.x, tipPt.y, t);
+      }
+      g.restore();
+    }
+
     /* ---------- the gardener ---------- */
-    function drawGardener(g, gx, gy, t) {
+    function gardenerAt(t) {
+      for (let i = 0; i < plan.length; i++) {
+        const s = plan[i];
+        if (t >= s.t0 && t < s.t1) {
+          const p = (t - s.t0) / (s.t1 - s.t0);
+          return { x: s.x0 + (s.x1 - s.x0) * p, y: s.y, pour: s.pour, top: s.top, dist: s.d0 + Math.abs(s.x1 - s.x0) * p };
+        }
+      }
+      return null;
+    }
+
+    function drawGardener(g, gx, gy, ph, tilt) {
       const h = gh;
-      const ph = t / 190;
       const sw = Math.sin(ph);
       g.save();
       g.translate(gx, gy);
@@ -408,10 +625,10 @@
       g.fillStyle = '#fff3ea';
       g.beginPath(); g.arc(h * 0.075, -h * 0.79, h * 0.03, 0, 6.283); g.fill();
 
-      // watering can, tilted forward
+      // watering can: carried level, tipped forward while pouring
       g.save();
       g.translate(h * 0.32, -h * 0.64);
-      g.rotate(0.2);
+      g.rotate(0.2 + tilt * 0.45);
       const cg = g.createLinearGradient(-h * 0.09, 0, h * 0.11, 0);
       cg.addColorStop(0, '#9cc7de'); cg.addColorStop(0.5, '#6aa5c6'); cg.addColorStop(1, '#3f7b9f');
       g.fillStyle = cg;
@@ -427,11 +644,19 @@
       g.restore();
     }
 
+    /* ---------- the loop ---------- */
     function run(dpr) {
       const g = canvas.getContext('2d');
-      const pw = gh * 0.5;
       const start = performance.now();
-      let prev = start, acc = 0;
+      let prev = start, acc = 0, tilt = 0, nextTw = 0, gathering = false, burst = false, finished = false;
+
+      function twinkle(at) {
+        const Lt = u.pick(letters);
+        if (!Lt.flowers.length || !Lt.g) return;
+        const f = u.pick(Lt.flowers);
+        twinkles.push({ x: Lt.g.cx + f.lx, y: Lt.g.top + f.ly, s: f.r * u.rand(0.9, 1.6), t0: at, life: u.rand(700, 1100) });
+      }
+
       (function frame(now) {
         if (!alive) return;
         const t = now - start;
@@ -439,14 +664,13 @@
         prev = now;
         g.setTransform(dpr, 0, 0, dpr, 0, 0);
         g.clearRect(0, 0, W, H);
-        g.drawImage(bedImg, 0, 0, W, H);
 
-        for (let i = 0; i < flowers.length; i++) drawWet(g, flowers[i], t);
-        for (let i = 0; i < flowers.length; i++) { drawSeed(g, flowers[i], t); drawSprout(g, flowers[i], t); }
-        for (let i = 0; i < flowers.length; i++) {
-          const f = flowers[i], p = clamp01((t - f.t0) / o.bloomMs);
-          if (p > 0) drawFlower(g, f, p, t);
-        }
+        // the plots, then what grows in them
+        const e = easeInOutCubic(clamp01((t - tc) / T(CONVERGE)));
+        const rf = 1 - clamp01((e - 0.55) / 0.4);               // corners square off just before the plots touch
+        if (t >= tc && !gathering) { gathering = true; if (o.onConverge) o.onConverge(); }
+        for (let i = 0; i < letters.length; i++) drawSoil(g, letters[i], t, e, rf);
+        for (let i = 0; i < letters.length; i++) drawContent(g, letters[i], t);
 
         // ripples where water lands
         for (let i = ripples.length - 1; i >= 0; i--) {
@@ -458,16 +682,20 @@
         }
 
         // gardener + water
-        const gx = -pw + (t - walkStart) * speed;
-        const walking = t >= walkStart && gx < W + pw * 1.5;
-        if (walking) {
-          drawGardener(g, gx, head - 8, t);
-          const tipX = gx + tipOff, tipY = head - 8 - tipUp;
-          acc += dt * 140;
-          while (acc >= 1) {
-            acc--;
-            drops.push({ x: tipX + u.rand(-3, 3), y: tipY + u.rand(0, 3), vx: u.rand(14, 46), vy: u.rand(20, 80), land: head + u.rand(0.15, 0.95) * (H - head), len: u.rand(3, 6) });
+        const gd = gardenerAt(t);
+        if (gd) {
+          tilt += ((gd.pour ? 1 : 0) - tilt) * Math.min(1, dt * 9);
+          drawGardener(g, gd.x, gd.y, gd.dist * 3.6 / gh, tilt);
+          if (tilt > 0.55) {
+            const tp = canTip(gh, tilt);
+            acc += dt * 150 * tilt;
+            while (acc >= 1) {
+              acc--;
+              drops.push({ x: gd.x + tp.x + u.rand(-3, 3), y: gd.y + tp.y + u.rand(0, 3), vx: u.rand(14, 46), vy: u.rand(20, 80), land: gd.top + u.rand(0.15, 0.95) * PH, len: u.rand(3, 6) });
+            }
           }
+        } else {
+          tilt = 0;
         }
         for (let i = drops.length - 1; i >= 0; i--) {
           const dp = drops[i];
@@ -479,13 +707,31 @@
           g.beginPath(); g.moveTo(dp.x - dp.vx * 0.012, dp.y - dp.len); g.lineTo(dp.x, dp.y); g.stroke();
         }
 
-        if (t < endAt) raf = requestAnimationFrame(frame);
-        else finish();
+        // once the name has come together it glitters
+        if (t >= tA && !App.reduced) {
+          if (!burst) { burst = true; for (let i = 0; i < 34; i++) twinkle(t + u.rand(0, 600)); }
+          if (t >= nextTw) { nextTw = t + u.rand(60, 130); twinkle(t); }
+        }
+        if (twinkles.length) {
+          g.fillStyle = '#fff6d8';
+          for (let i = twinkles.length - 1; i >= 0; i--) {
+            const w = twinkles[i], k = (t - w.t0) / w.life;
+            if (k >= 1) { twinkles.splice(i, 1); continue; }
+            if (k < 0) continue;
+            const s = Math.sin(Math.PI * k);
+            g.globalAlpha = s;
+            star(g, w.x, w.y, w.s * (0.35 + 0.65 * s));
+          }
+          g.globalAlpha = 1;
+        }
+
+        if (!finished && t >= doneAt) { finished = true; finish(); }
+        raf = requestAnimationFrame(frame);
       })(start);
     }
 
     // Wait briefly for the bold font so the letter shapes are right, then start.
-    const fonts = document.fonts && document.fonts.load ? document.fonts.load('800 100px Jost') : Promise.resolve();
+    const fonts = document.fonts && document.fonts.load ? document.fonts.load(font(100)) : Promise.resolve();
     Promise.race([fonts, new Promise(function (r) { setTimeout(r, 1200); })]).then(build, build);
 
     return {
