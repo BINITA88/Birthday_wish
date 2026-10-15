@@ -4,10 +4,11 @@
 
 /* Phones & small tablets (portrait) */
 @media (max-width: 720px) {
-  .fs-cards { flex-direction: column; align-items: center; gap: 1rem; }
-  .fcard { width: min(88vw, 360px); padding: 1rem 1.1rem 1.2rem; gap: .4rem; }
-  .fcard-art { height: clamp(130px, 22dvh, 190px); }
-  .fcard p { min-height: 0; }
+  .fs-cards { flex-direction: row; align-items: flex-end; gap: .4rem; }
+  .fs-cards { gap: .6rem; }
+  .fcard { width: 44vw; gap: .8rem; }
+  .fcard-art { height: clamp(170px, 34dvh, 280px); }
+  .fcard .btn { padding: .85em 1.2em; }
   .btn { padding: .95em 1.5em; }
   .d-btns .btn { width: min(100%, 320px); }
   .balloon { opacity: .95; }
@@ -24,9 +25,8 @@
   .fs-h1 { font-size: clamp(1.2rem, 3.6vw, 1.8rem); }
   .fs-h2 { font-size: clamp(1.4rem, 4vw, 2rem); }
   .fs-cards { flex-direction: row; margin-top: .8rem; }
-  .fcard { width: min(40vw, 300px); padding: .7rem .9rem .9rem; }
-  .fcard-art { height: 90px; }
-  .fcard p { font-size: .95rem; }
+  .fcard { width: min(34vw, 240px); gap: .5rem; }
+  .fcard-art { height: clamp(110px, 40dvh, 170px); }
   .fcard .btn { min-height: 42px; padding: .7em 1.2em; }
 
   .scene-photo { flex-direction: row; justify-content: center; gap: 4vw; padding-left: 4vw; padding-right: 4vw; }

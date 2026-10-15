@@ -4,13 +4,11 @@
 
   function cardHTML(kind, seed) {
     const F = C.flowers[kind];
-    const art = Flowers.render(kind, u.mulberry(seed));
+    const art = '<img class="fimg ' + kind + '" src="' + u.esc(F.image) + '" alt="' + u.esc(F.title) + '" draggable="false">';
     return '<article class="fcard fade-up" data-kind="' + kind + '">' +
       '<div class="fcard-glow"></div>' +
       '<div class="petal-layer"></div>' +
       '<div class="fcard-art"><div class="sway" style="--sw:' + (4 + seed % 3) + 's;--swd:-' + (seed % 4) + 's;--sa:2.2deg">' + art + '</div></div>' +
-      '<h3>' + u.esc(F.title) + ' ' + F.emoji + '</h3>' +
-      '<p>' + u.esc(F.description) + '</p>' +
       '<button class="btn" type="button" data-choose>' + u.esc(F.button) + '</button>' +
       '</article>';
   }

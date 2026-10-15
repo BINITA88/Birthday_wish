@@ -109,7 +109,7 @@
         '<h1 class="finale-title"><span class="l1"></span><span class="l2"></span></h1>' +
         '<button class="btn primary next fade-up" type="button">' + u.esc(T.cakeNext) + '</button>';
 
-      FX.balloons(sec, { count: 6, dim: true, prefill: true });
+      FX.balloons(sec, { count: 4, dim: true, prefill: true });
       const fx = FX.field(sec, { motes: 32, rgb: '255,205,120', rate: 6, max: 40 });
       ctx.add(fx.destroy);
 
