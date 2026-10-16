@@ -1,89 +1,306 @@
-/* SCENE 4 – The magical flower garden (also exports App.Garden.build for scene 5). */
+/* SCENE 4 – The garden (also exports App.Garden.build for scene 5).
+   A summer field under a blue sky with the sun high up. Hills of flowers roll back to the horizon (painted once on a
+   canvas), the field in front is built from the real flower photographs, shrinking row by row with distance. */
 (function (App) {
-  const { CONFIG: C, u, FX, Flowers } = App;
+  const { CONFIG: C, u, FX } = App;
 
-  /* Which complementary plants join the dominant flower. */
-  const COMPANIONS = {
-    sunflower: ['daisy', 'lavender', 'daisy'],
-    rose: ['lavender', 'tulip', 'daisy']
+  const HORIZON = 50;                 // % of the scene height where the flat field meets the hills
+  const NEAR_ROWS = 3;                // only the closest rows sway plant by plant; the far ones sway as a whole
+  const S_MAX = 1.3;                  // size of the closest row (1 = the base unit)
+  const S_DOM = 0.1;                  // rows smaller than this are painted on the canvas, larger ones are real <img>s
+
+  /* Colours of the tiny flowers on the far hills. */
+  const PALETTE = {
+    sunflower: { petals: ['#f5b800', '#f9c80e', '#eaa400', '#ffd43b', '#f0a30a', '#fbbf1a'], rare: '#b3261e', rareP: 0.07, center: '#4a2a0c' },
+    rose: { petals: ['#c2223a', '#d63b52', '#a81c33', '#e45a73', '#b01f3b'], rare: '#f2a1b4', rareP: 0.12, center: '#6b1020' }
   };
-  const SCALE = { sunflower: 1, rose: 1.15, daisy: 0.55, lavender: 0.6, tulip: 0.62 };
+  const HAZE = '140,128,168';         // the dusky violet of far-away air
 
-  function grassLayer(rng, cls, n, hMin, hMax, palette) {
-    let out = '<svg class="g-grass ' + cls + '" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">';
-    const groups = 4;
-    for (let g = 0; g < groups; g++) {
-      out += '<g class="gr" style="transition-delay:' + (g * 0.4).toFixed(2) + 's"><g class="gsw" style="--sw:' + (3 + g * 0.8).toFixed(1) + 's;--swd:-' + g + 's">';
-      for (let i = 0; i < n / groups; i++) {
-        const x = rng() * 1000, h = hMin + rng() * (hMax - hMin), b = (rng() - 0.5) * 36, w = 5 + rng() * 9;
-        const col = palette[Math.floor(rng() * palette.length)];
-        out += '<path d="M' + x.toFixed(1) + ' 200Q' + (x + b * 0.3).toFixed(1) + ' ' + (200 - h * 0.6).toFixed(1) + ' ' + (x + b).toFixed(1) + ' ' + (200 - h).toFixed(1) +
-          'Q' + (x + b * 0.6 + w).toFixed(1) + ' ' + (200 - h * 0.5).toFixed(1) + ' ' + (x + w).toFixed(1) + ' 200Z" fill="' + col + '"/>';
-      }
-      out += '</g></g>';
-    }
-    return out + '</svg>';
+  const imgCache = {};
+  function loadImg(src) {
+    return imgCache[src] || (imgCache[src] = new Promise(function (resolve) {
+      const i = new Image();
+      i.onload = function () { resolve(i); };
+      i.onerror = function () { resolve(null); };
+      i.src = src;
+    }));
   }
 
-  /** Lays out one row of plants and returns its HTML. */
-  function rowHTML(rng, flower, spec, small) {
-    const n = Math.round(spec.n * (small ? 0.7 : 1));
-    const comp = COMPANIONS[flower];
+  function look(flower) { return C.gardenFlowers[flower] || C.gardenFlowers.sunflower; }
+  function unitSize() { return Math.min(window.innerWidth * 0.23, window.innerHeight * 0.19, 140); }
+
+  /** Picks an index according to the weights. */
+  function pickWeighted(rng, weights) {
+    const r = rng();
+    let acc = 0;
+    for (let i = 0; i < weights.length; i++) { acc += weights[i]; if (r < acc) return i; }
+    return weights.length - 1;
+  }
+
+  /* ---------- the DOM field: real photographs, far rows first ---------- */
+  function fieldHTML(rng, flower, small) {
+    const L = look(flower);
+    const vw = window.innerWidth;
+    const unit = unitSize();
+    const N = small ? 9 : 10;
+    const k = (HORIZON + 2) / S_MAX;                // screen distance below the horizon grows with size
     let html = '';
-    for (let i = 0; i < n; i++) {
-      const x = -2 + (i + 0.15 + rng() * 0.7) / n * 104;
-      const bottom = spec.y[0] + rng() * (spec.y[1] - spec.y[0]);
-      const kind = rng() < spec.dom ? flower : comp[Math.floor(rng() * comp.length)];
-      const k = SCALE[kind] * (spec.w[0] + rng() * (spec.w[1] - spec.w[0]));
-      const d = Math.abs(x - 50) / 50 * 2.1 + rng() * 1.3 + spec.row * 0.25;
-      const sway = (1.4 + rng() * 2.2).toFixed(2);
-      html += '<div class="plant" style="left:' + x.toFixed(1) + '%;bottom:' + bottom.toFixed(1) + '%;--k:' + k.toFixed(2) + ';--d:' + d.toFixed(2) + 's">' +
-        '<div class="sway" style="--sw:' + (3.2 + rng() * 2.6).toFixed(2) + 's;--swd:-' + (rng() * 5).toFixed(2) + 's;--sa:' + sway + 'deg">' +
-        Flowers.render(kind, rng) + '</div></div>';
+    for (let i = 0; i < N; i++) {
+      const s = S_DOM * Math.pow(S_MAX / S_DOM, i / (N - 1));
+      const bottom = HORIZON - k * s;               // % from the bottom of the scene
+      const w = unit * s * L.wk;                    // flower width in px
+      const near = i >= N - NEAR_ROWS;
+      const gap = k * s * 0.36;                     // depth jitter so a row isn't ruler-straight
+      const n = Math.min(small ? 90 : 140, Math.round(vw * 1.06 / (w * 0.95)));
+      const plants = [];
+      for (let j = 0; j < n; j++) {
+        plants.push({
+          x: -3 + (j + 0.15 + rng() * 0.7) / n * 106,
+          dy: (rng() - 0.35) * gap,
+          pw: w * (0.85 + rng() * 0.3),
+          d: i / N * 2.2 + rng() * 1.3,
+          flip: rng() < 0.5 ? -1 : 1,
+          tilt: (rng() - 0.5) * 7,
+          v: pickWeighted(rng, L.weights),
+          sw: 3.2 + rng() * 2.6, swd: -rng() * 5, sa: 1 + rng() * 1.4
+        });
+      }
+      plants.sort(function (p, q) { return q.dy - p.dy; });            // higher (further) ones first
+      html += '<div class="g-row' + (near ? ' near' : '') + '" style="bottom:' + bottom.toFixed(2) + '%;height:' + (w * L.ar * 1.2).toFixed(0) +
+        'px;--rs:' + (4 + rng() * 3).toFixed(1) + 's;--rd:-' + (rng() * 6).toFixed(1) + 's">';
+      plants.forEach(function (p) {
+        html += '<div class="plant" style="left:' + p.x.toFixed(1) + '%;bottom:' + p.dy.toFixed(2) + 'vh;width:' + p.pw.toFixed(1) + 'px;--d:' + p.d.toFixed(2) + 's;--fx:' + p.flip + ';--tilt:' + p.tilt.toFixed(1) + 'deg">' +
+          '<div class="pl"' + (near ? ' style="--sw:' + p.sw.toFixed(2) + 's;--swd:' + p.swd.toFixed(2) + 's;--sa:' + p.sa.toFixed(2) + 'deg"' : '') + '>' +
+          '<img src="' + u.esc(L.images[p.v]) + '" alt="" draggable="false" decoding="async"></div></div>';
+      });
+      html += '</div>';
+      if (!near && i < N - NEAR_ROWS - 1) {         // blue haze between the distant rows
+        html += '<div class="g-fog" style="bottom:' + bottom.toFixed(2) + '%;height:' + (HORIZON - bottom).toFixed(2) + '%"></div>';
+      }
     }
     return html;
   }
 
-  const ROWS = [
-    { row: 0, n: 12, y: [27, 34], w: [0.55, 0.75], dom: 0.55 },
-    { row: 1, n: 10, y: [13, 22], w: [0.75, 1.05], dom: 0.72 },
-    { row: 2, n: 8,  y: [0, 9],   w: [0.9, 1.4], dom: 0.88 }
+  /* ---------- canvas painting ---------- */
+  function ridge(x, W, base, amp, seed) {
+    const t = x / W * 6.2832;
+    return base + amp * (Math.sin(t * 1.3 + seed) * 0.55 + Math.sin(t * 2.7 + seed * 1.7) * 0.3 + Math.sin(t * 5.1 + seed * 2.3) * 0.15);
+  }
+
+  function dot(g, x, y, r, pal, rng) {
+    g.fillStyle = rng() < pal.rareP ? pal.rare : pal.petals[(rng() * pal.petals.length) | 0];
+    g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill();
+    if (r > 1.1) { g.fillStyle = pal.center; g.beginPath(); g.arc(x, y + r * 0.05, r * 0.46, 0, 6.2832); g.fill(); }
+  }
+
+  /** One rolling hill, back to front: meadow colour, patches of tiny flowers, trees, then a veil of haze. */
+  function hill(g, W, H, horizonY, spec, pal, rng) {
+    const step = 4, ys = [];
+    for (let x = 0; x <= W + step; x += step) ys.push(ridge(x, W, H * spec.base, H * spec.amp, spec.seed));
+    const ridgeAt = function (x) { return ys[Math.max(0, Math.min(ys.length - 1, Math.round(x / step)))]; };
+    const yBottom = horizonY + 4;
+    const yTop = Math.min.apply(null, ys);
+    const body = function () {
+      g.beginPath(); g.moveTo(0, yBottom);
+      for (let i = 0; i < ys.length; i++) g.lineTo(i * step, ys[i]);
+      g.lineTo(W + step, yBottom); g.closePath();
+    };
+    body();
+    const gr = g.createLinearGradient(0, yTop, 0, yBottom);
+    gr.addColorStop(0, spec.top); gr.addColorStop(1, spec.bottom);
+    g.fillStyle = gr; g.fill();
+
+    if (spec.density > 0) {
+      g.save(); body(); g.clip();
+      for (let y = yTop; y < yBottom; ) {
+        const sz = spec.size[0] + (spec.size[1] - spec.size[0]) * (y - yTop) / (yBottom - yTop);
+        for (let x = rng() * sz * 2; x < W; x += sz * 2.1) {
+          if (y < ridgeAt(x) + sz) continue;
+          const n = Math.sin(x * 0.007 + spec.seed * 3 + y * 0.02) * Math.cos(x * 0.0031 - spec.seed + y * 0.045);
+          if (rng() > Math.max(0, Math.min(1, spec.density + n * 0.5))) continue;   // patches of meadow between fields
+          dot(g, x + (rng() - 0.5) * sz, y + (rng() - 0.5) * sz * 0.6, sz, pal, rng);
+        }
+        y += sz * 1.5;
+      }
+      g.restore();
+    }
+
+    for (let i = 0; i < (spec.trees || 0); i++) {          // little clumps of trees along the ridge
+      const tx = rng() * W, ty = ridgeAt(tx) + 1, sz = 2 + rng() * 3;
+      for (let j = 0; j < 3; j++) {
+        const cx = tx + j * sz * 0.9, cy = ty - sz * (0.5 + (j % 2) * 0.25);
+        g.fillStyle = '#41603a';
+        g.beginPath(); g.ellipse(cx, cy, sz * 0.55, sz * 0.95, 0, 0, 6.2832); g.fill();
+        g.fillStyle = 'rgba(120,160,95,.55)';
+        g.beginPath(); g.ellipse(cx + sz * 0.12, cy - sz * 0.2, sz * 0.3, sz * 0.6, 0, 0, 6.2832); g.fill();
+      }
+    }
+
+    if (spec.haze > 0) {
+      body();
+      const hz = g.createLinearGradient(0, yTop, 0, yBottom);
+      hz.addColorStop(0, 'rgba(' + HAZE + ',' + spec.haze + ')'); hz.addColorStop(1, 'rgba(' + HAZE + ',' + (spec.haze * 0.35) + ')');
+      g.fillStyle = hz; g.fill();
+    }
+  }
+
+  const HILLS = [
+    { base: 0.30, amp: 0.035, seed: 0.7, top: '#1f2d62', bottom: '#4b4c86', density: 0, haze: 0 },                                    // far mountains
+    { base: 0.345, amp: 0.03, seed: 2.1, top: '#566f76', bottom: '#86966f', density: 0.55, size: [0.9, 1.3], haze: 0.42, trees: 22 },
+    { base: 0.395, amp: 0.035, seed: 3.4, top: '#617f69', bottom: '#8ea65f', density: 0.78, size: [1.3, 1.9], haze: 0.28, trees: 12 },
+    { base: 0.44, amp: 0.03, seed: 5.2, top: '#7fa05f', bottom: '#9db355', density: 0.92, size: [1.9, 2.7], haze: 0.16 },
+    { base: 0.478, amp: 0.015, seed: 6.5, top: '#789a50', bottom: '#95a94c', density: 0.97, size: [2.6, 3.6], haze: 0.08 }
   ];
+
+  /** Hills, the floor of the field and its grass. Sprites of the far rows are added once the photos have loaded. */
+  function paintScenery(cv, W, H, dpr, rng, flower) {
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const g = cv.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const pal = PALETTE[flower] || PALETTE.sunflower;
+    const horizonY = H * (1 - HORIZON / 100);
+
+    HILLS.forEach(function (spec) { hill(g, W, H, horizonY, spec, pal, rng); });
+
+    // the floor: hazy and golden far away, deep green close up
+    const fh = H - horizonY;
+    const gr = g.createLinearGradient(0, horizonY, 0, H);
+    gr.addColorStop(0, '#b9c77a'); gr.addColorStop(0.07, '#9db55a'); gr.addColorStop(0.25, '#7a9a3e'); gr.addColorStop(0.6, '#4f7229'); gr.addColorStop(1, '#2c4a1b');
+    g.fillStyle = gr; g.fillRect(0, horizonY, W, fh);
+    for (let i = 0; i < 160; i++) {                                // soft light and shade on the ground
+      const t = Math.pow(rng(), 1.4), y = horizonY + t * fh, rx = (40 + rng() * 90) * (0.2 + t * 1.6);
+      g.fillStyle = rng() < 0.5 ? 'rgba(25,50,12,.06)' : 'rgba(215,205,115,.06)';
+      g.beginPath(); g.ellipse(rng() * W, y, rx, rx * 0.2, 0, 0, 6.2832); g.fill();
+    }
+    g.lineCap = 'round';
+    const greens = ['rgba(58,98,32,.55)', 'rgba(88,128,44,.5)', 'rgba(36,72,22,.55)', 'rgba(130,150,60,.45)'];
+    for (let i = 0; i < 9000; i++) {                               // blades, bigger the closer they are
+      const t = Math.pow(rng(), 1.8), x = rng() * W, y = horizonY + t * fh, len = 2 + t * 22, lean = (rng() - 0.5) * len * 0.8;
+      g.strokeStyle = greens[(rng() * greens.length) | 0]; g.lineWidth = 0.6 + t * 1.4;
+      g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + lean * 0.3, y - len * 0.6, x + lean, y - len); g.stroke();
+    }
+
+    // far rows of real flowers (tiny), then a veil of haze over them
+    const L = look(flower), unit = unitSize();
+    Promise.all(L.images.map(loadImg)).then(function (imgs) {
+      const k = (HORIZON + 2) / S_MAX, rows = 12;
+      g.imageSmoothingQuality = 'high';
+      for (let i = 0; i < rows; i++) {
+        const s = 0.012 * Math.pow(0.092 / 0.012, i / (rows - 1));
+        const yBase = H * (1 - (HORIZON - k * s) / 100);
+        const w = unit * s * L.wk, h = w * L.ar, n = Math.ceil(W * 1.1 / (w * 0.9)), gap = H * k * s * 0.36 / 100;
+        const spots = [];
+        for (let j = 0; j < n; j++) spots.push({ x: -0.05 * W + (j + rng()) / n * 1.1 * W, y: yBase + (0.35 - rng()) * gap, v: pickWeighted(rng, L.weights) });
+        spots.sort(function (a, b) { return a.y - b.y; });
+        spots.forEach(function (p) {
+          const img = imgs[p.v];
+          if (w < 4 || !img) { dot(g, p.x, p.y - h * 0.8, Math.max(0.8, w * 0.4), pal, rng); return; }
+          g.fillStyle = 'rgba(20,35,8,.26)';
+          g.beginPath(); g.ellipse(p.x - w * 0.12, p.y, w * 0.34, w * 0.07, 0, 0, 6.2832); g.fill();
+          g.drawImage(img, p.x - w / 2, p.y - h, w, h);
+        });
+      }
+      const y0 = horizonY - 2, y1 = H * (1 - (HORIZON - k * S_DOM) / 100);
+      const hz = g.createLinearGradient(0, y0, 0, y1);
+      hz.addColorStop(0, 'rgba(' + HAZE + ',0)'); hz.addColorStop(0.2, 'rgba(' + HAZE + ',.22)'); hz.addColorStop(1, 'rgba(' + HAZE + ',0)');
+      g.fillStyle = hz; g.fillRect(0, y0, W, y1 - y0);
+    });
+  }
+
+  /** Blades of grass in the foreground, standing in front of the nearest flowers. */
+  function paintFront(cv, W, H, dpr, rng) {
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const g = cv.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.lineCap = 'round';
+    const greens = ['#3f7a2a', '#4f8f33', '#2f6320', '#63a042', '#35702a'];
+    for (let i = 0; i < Math.round(W * 0.9); i++) {
+      const x = rng() * W, len = 26 + Math.pow(rng(), 2.2) * (H - 30), lean = (rng() - 0.5) * len * 0.5;
+      g.strokeStyle = greens[(rng() * greens.length) | 0]; g.lineWidth = 1.8 + rng() * 2.4; g.globalAlpha = 0.85;
+      g.beginPath(); g.moveTo(x, H + 4); g.quadraticCurveTo(x + lean * 0.2, H - len * 0.55, x + lean, H - len); g.stroke();
+    }
+    g.globalAlpha = 1;
+    const sh = g.createLinearGradient(0, H * 0.4, 0, H);
+    sh.addColorStop(0, 'rgba(10,25,5,0)'); sh.addColorStop(1, 'rgba(10,25,5,.5)');
+    g.fillStyle = sh; g.fillRect(0, 0, W, H);
+  }
+
+  /** A scatter of stars in the upper sky, brighter and rarer the lower they sit. */
+  function paintStars(cv, W, H, dpr, rng) {
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const g = cv.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    for (let i = 0; i < 260; i++) {
+      const x = rng() * W, y = Math.pow(rng(), 1.5) * H;
+      if (Math.hypot(x - W * 0.82, y - H * 0.27) < Math.min(W, H) * 0.3) { rng(); rng(); continue; }   // keep the sun's halo clear
+      const big = rng() < 0.07, r = big ? 1.1 + rng() * 0.8 : 0.35 + rng() * 0.7;
+      g.fillStyle = 'rgba(255,' + (240 + ((rng() * 15) | 0)) + ',' + (215 + ((rng() * 40) | 0)) + ',' + (0.35 + rng() * 0.6) * (1 - y / H * 0.7) + ')';
+      g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill();
+      if (big) {
+        const gl = g.createRadialGradient(x, y, 0, x, y, r * 5);
+        gl.addColorStop(0, 'rgba(255,240,210,.35)'); gl.addColorStop(1, 'rgba(255,240,210,0)');
+        g.fillStyle = gl; g.beginPath(); g.arc(x, y, r * 5, 0, 6.2832); g.fill();
+      }
+    }
+  }
+
+  /** A few soft cumulus clouds on a wide strip that drifts slowly across the sky. */
+  function paintClouds(cv, W, H, dpr, rng) {
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const g = cv.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    for (let c = 0; c < 5; c++) {
+      const cx = rng() * W, cy = H * (0.2 + rng() * 0.55), size = 90 + rng() * 150;
+      for (let i = 0; i < 18; i++) {
+        const px = cx + (rng() - 0.5) * size * 1.7, py = cy + (rng() - 0.5) * size * 0.3 - (1 - Math.abs(px - cx) / (size * 0.85)) * size * 0.12;
+        const r = size * (0.22 + rng() * 0.26) * (1 - Math.min(0.5, Math.abs(px - cx) / (size * 1.6)));
+        const rg = g.createRadialGradient(px, py - r * 0.2, 0, px, py, r);
+        rg.addColorStop(0, 'rgba(175,160,200,.8)'); rg.addColorStop(0.6, 'rgba(120,115,170,.42)'); rg.addColorStop(1, 'rgba(90,95,150,0)');
+        g.fillStyle = rg; g.beginPath(); g.arc(px, py, r, 0, 6.2832); g.fill();
+      }
+      for (let i = 0; i < 5; i++) {                                // soft shaded underside
+        const ux = cx + (rng() - 0.5) * size, uy = cy + size * 0.14, ur = size * (0.3 + rng() * 0.3);
+        g.save(); g.translate(ux, uy); g.scale(1, 0.3);
+        const ug = g.createRadialGradient(0, 0, 0, 0, 0, ur);
+        ug.addColorStop(0, 'rgba(20,30,80,.22)'); ug.addColorStop(1, 'rgba(20,30,80,0)');
+        g.fillStyle = ug; g.beginPath(); g.arc(0, 0, ur, 0, 6.2832); g.fill();
+        g.restore();
+      }
+    }
+  }
 
   const Garden = {
     /**
      * Garden.build(parent, { flower, animate, seed })
-     * animate=false renders the fully bloomed garden instantly (used by the photo scene).
+     * animate=true starts with the near flowers not yet grown; call grow() to let them rise.
+     * animate=false shows the full field at once (used by the photo scene).
      */
     build(parent, o) {
-      const flower = o.flower || 'sunflower';
-      const rng = u.mulberry(o.seed || 1);
+      const flower = C.gardenFlowers[o.flower] ? o.flower : 'sunflower';
+      const seed = o.seed || 1;
+      const rng = u.mulberry(seed);
       const small = App.isSmall();
       const root = document.createElement('div');
-      root.className = 'garden' + (o.animate ? '' : ' static s-light s-sky s-ground s-grass');
-
-      const hills =
-        '<svg class="g-hills" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">' +
-        '<path d="M0 200V120C120 70 220 100 340 90C470 80 560 40 700 80C820 112 920 70 1000 96V200Z" fill="#41627a" opacity=".55"/>' +
-        '<path d="M0 200V140C150 100 260 150 400 128C540 106 660 70 800 118C900 150 960 120 1000 130V200Z" fill="#2a5039"/></svg>';
+      root.className = 'garden';
 
       root.innerHTML =
-        '<div class="g-sky"></div><div class="g-rays"></div><div class="g-sun"></div><div class="g-beam"></div>' +
-        hills + '<div class="g-ground"></div>' +
-        grassLayer(rng, 'back', 56, 40, 85, ['#2b5a36', '#2f6a3e', '#245030', '#35703f']) +
-        '<div class="g-rows' + (o.animate ? ' pre' : '') + '">' +
-          '<div class="g-row">' + rowHTML(rng, flower, ROWS[0], small) + '</div><div class="g-fog"></div>' +
-          '<div class="g-row">' + rowHTML(rng, flower, ROWS[1], small) + '</div><div class="g-fog f1"></div>' +
-          '<div class="g-row">' + rowHTML(rng, flower, ROWS[2], small) + '</div>' +
-        '</div>' +
-        grassLayer(rng, 'front', 70, 30, 70, ['#3f8a4c', '#4a9a55', '#357a43', '#58a65e']) +
-        '<div class="g-glow"></div>';
-
+        '<div class="g-sky"></div><canvas class="g-stars"></canvas><canvas class="g-clouds"></canvas>' +
+        '<div class="g-sun"></div><div class="g-rays"></div><div class="g-sun-disc"></div>' +
+        '<canvas class="g-back"></canvas>' +
+        '<div class="g-rows' + (o.animate ? ' pre' : '') + '">' + fieldHTML(rng, flower, small) + '</div>' +
+        '<div class="g-dusk"></div><canvas class="g-front"></canvas><div class="g-glow"></div>';
       parent.appendChild(root);
+
+      const W = root.clientWidth || window.innerWidth, H = root.clientHeight || window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const paint = u.mulberry(seed + 7);
+      paintScenery(root.querySelector('.g-back'), W, H, dpr, paint, flower);
+      paintStars(root.querySelector('.g-stars'), W, Math.round(H * 0.52), dpr, paint);
+      paintClouds(root.querySelector('.g-clouds'), Math.round(W * 1.3), Math.round(H * 0.46), dpr, paint);
+      paintFront(root.querySelector('.g-front'), W, Math.round(H * 0.18), dpr, paint);
 
       return {
         root: root,
-        stage(name) { root.classList.add('s-' + name); },
         grow() { const r = root.querySelector('.g-rows'); r.classList.remove('pre'); r.classList.add('grow'); }
       };
     }
@@ -95,10 +312,11 @@
     init(sec, ctx) {
       const flower = App.state.flower || 'sunflower';
       const g = Garden.build(sec, { flower: flower, animate: true, seed: App.state.gardenSeed });
+      sec.classList.add('dawn');
 
-      const fx = FX.field(sec, { motes: 40, rgb: '255,226,160', size: 0.9 });
+      const fx = FX.field(sec, { motes: 40, rgb: '255,236,170', size: 0.9 });
       ctx.add(fx.destroy);
-      sec.querySelector('.fx-canvas').classList.add('late');   // sunlit motes fade in with the dawn
+      sec.querySelector('.fx-canvas').classList.add('late');
 
       const msg = document.createElement('p');
       msg.className = 'garden-msg fade-up';
@@ -106,18 +324,9 @@
       sec.appendChild(msg);
 
       (async function () {
-        await ctx.sleep(1400);            // 1. complete darkness
-        g.stage('light');                 // 2. the first warm beam
-        await ctx.sleep(2300);
-        g.stage('sky');                   //    sunrise expands
-        sec.classList.add('dawn');
-        await ctx.sleep(1500);
-        g.stage('ground');                // 3. the garden emerges
-        await ctx.sleep(1600);
-        g.stage('grass');
-        await ctx.sleep(1500);
-        g.grow();                         // 4. flowers grow, unfold and bloom
-        await ctx.sleep(App.reduced ? 5000 : 9200);
+        await ctx.sleep(900);             // the daylit field is already there; the flowers in front rise into it
+        g.grow();
+        await ctx.sleep(App.reduced ? 4000 : 6800);
         msg.classList.add('in');
         await ctx.sleep(4200);
         App.SceneManager.go('photo', { mode: 'cross', duration: 2800 });
