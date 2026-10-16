@@ -26,8 +26,11 @@
         App.audio.play('music');          // begins during the reveal and keeps looping until a flower is chosen
         fx.setConfetti(true);
 
+        // Paint the garden's scenery in the background now, so it is long ready by the time a flower is chosen.
+        ctx.later(function () { App.Garden.prewarm('sunflower', App.state.gardenSeed); App.Garden.prewarm('rose', App.state.gardenSeed); }, 1200);
+
         await ctx.sleep(2300 + C.timing.celebrationHold);
-        App.SceneManager.go('flower', { mode: 'black', duration: 1600, hold: 400 });
+        App.SceneManager.go('flower', { mode: 'cross', duration: 1000 });      // melts straight into the flower choice: no black screen
       })();
     }
   });
