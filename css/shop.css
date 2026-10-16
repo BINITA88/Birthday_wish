@@ -1,0 +1,84 @@
+/* ==========================================================================
+   SCENE 3b: the rose shop
+   ========================================================================== */
+.scene-shop { background: radial-gradient(ellipse at 50% 55%, #2a1c34 0, #130d1c 70%, #08090D 100%); gap: clamp(2px, 1.2dvh, 12px); }
+
+.shop-caption { position: relative; z-index: 6; width: min(94vw, 900px); height: clamp(52px, 11dvh, 92px); flex: none; }
+.shop-cap {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 4vw;
+  font-family: var(--script); font-size: clamp(1.7rem, 5.4vw, 3rem); line-height: 1.1; color: #fff4e2;
+  text-shadow: 0 2px 22px rgba(255,190,120,.45), 0 1px 3px rgba(0,0,0,.6);
+}
+
+.shop-stage {
+  position: relative; flex: none; container-type: inline-size;
+  width: min(96vw, calc((100dvh - clamp(52px, 11dvh, 92px) - 28px) * 5 / 3)); aspect-ratio: 5 / 3;
+  border-radius: clamp(8px, 1.6cqw, 18px); overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(244,199,107,.25), 0 24px 70px rgba(0,0,0,.6), 0 0 80px rgba(244,160,120,.12);
+}
+.sh-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* twinkling string lights, gentle breathing, blinking */
+.sh-bulb { animation: shTwinkle 2.4s ease-in-out infinite; }
+@keyframes shTwinkle { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.sh-kbob { animation: shBreathe 3.4s ease-in-out infinite; }
+@keyframes shBreathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.6px); } }
+.sh-blink { transform-box: fill-box; transform-origin: center; animation: shBlink 5s infinite; }
+@keyframes shBlink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+/* the girl */
+.sh-arm { transition: transform 1s var(--ease); }
+.sh-girl .sh-gbq { opacity: 0; transition: opacity .35s; }
+.sh-girl.has .sh-gbq { opacity: 1; }
+.sh-girl.receive .sh-arm.r { transform: rotate(-82deg); }
+.sh-girl.walking .sh-gbody { animation: shBob .46s ease-in-out infinite; }
+.sh-girl.walking .sh-leg.a { animation: shLegA .92s ease-in-out infinite; }
+.sh-girl.walking .sh-leg.b { animation: shLegB .92s ease-in-out infinite; }
+.sh-girl.walking .sh-arm.l { animation: shArmA .92s ease-in-out infinite; }
+.sh-girl.walking:not(.has) .sh-arm.r { animation: shArmB .92s ease-in-out infinite; }
+@keyframes shBob  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes shLegA { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-20deg); } }
+@keyframes shLegB { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
+@keyframes shArmA { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(18deg); } }
+@keyframes shArmB { 0%, 100% { transform: rotate(18deg); } 50% { transform: rotate(-18deg); } }
+
+/* the shopkeeper's arm reaching over the counter with the bouquet */
+.sh-karm { transform-origin: 0 0; transition: transform 1.4s var(--ease); }
+.sh-kbq-in { transform-origin: 0 0; transition: transform 1.4s var(--ease); }
+.sh-karm.give { transform: rotate(40deg); }
+.sh-karm.give .sh-kbq-in { transform: rotate(-65deg); }
+.sh-kbq.gone { opacity: 0; }
+
+/* speech bubbles */
+.shop-bubble {
+  position: absolute; z-index: 5; width: 25%; padding: .55em .8em; border-radius: 1.1em;
+  background: #fff8ee; color: #3a2230; box-shadow: 0 6px 20px rgba(0,0,0,.4);
+  font: 600 clamp(11px, 2.5cqw, 17px)/1.25 var(--serif); text-align: center;
+  opacity: 0; transform: translateY(8px) scale(.9); transition: opacity .4s var(--ease), transform .4s var(--ease); pointer-events: none;
+}
+.shop-bubble.on { opacity: 1; transform: none; }
+.shop-bubble::after { content: ''; position: absolute; bottom: -.55em; width: 1.1em; height: 1.1em; background: inherit; transform: rotate(45deg); border-radius: 0 0 .3em 0; }
+.girl-b   { left: 24%; top: 33%; }
+.girl-b::after   { right: 18%; }
+.keeper-b { left: 73%; top: 25%; width: 24%; }
+.keeper-b::after { left: 12%; }
+
+/* hearts floating up after the handover */
+.shop-hearts { position: absolute; left: 49%; top: 56%; width: 0; height: 0; z-index: 4; pointer-events: none; }
+.shop-hearts i {
+  position: absolute; font-style: normal; color: #ff7c9c; text-shadow: 0 0 12px rgba(255,124,156,.7);
+  opacity: 0; animation: shHeart 2.4s ease-out forwards;
+}
+@keyframes shHeart {
+  0%   { opacity: 0; transform: translate(0, 0) scale(.5); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.15); }
+}
+
+.shop-skip { position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); z-index: 8; min-height: 40px; padding: .6em 1.3em; font-size: .85rem; opacity: 0; }
+.shop-skip.in { opacity: .75; }
+.shop-skip.in:hover { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sh-bulb, .sh-kbob, .sh-blink { animation: none; }
+}

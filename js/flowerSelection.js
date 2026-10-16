@@ -80,7 +80,8 @@
         petals(card, 18);
         ctx.later(function () { petals(card, 14); }, 600);
         await ctx.sleep(2300);
-        App.SceneManager.go('garden', { mode: 'black', duration: 1800, hold: 700 });
+        // The rose leads through the little flower shop first; the sunflower goes straight to its garden.
+        App.SceneManager.go(chosen === 'rose' ? 'shop' : 'garden', { mode: 'black', duration: 1800, hold: 700 });
       }
     }
   });

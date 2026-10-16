@@ -69,6 +69,14 @@
       flowerHeading1: 'Every beautiful soul has a favorite flower...',
       flowerHeading2: 'Which flower would you choose, Pratima?',
 
+      shopCaption1: 'A little rose shop on the corner...',
+      shopCaption2: 'Every rose is a small piece of love. 🌹',
+      shopGirl1: 'Good evening! A bouquet of your finest roses, please?',
+      shopKeeper1: 'Of course, dear. The loveliest ones, just for you.',
+      shopGirl2: 'Thank you, they are beautiful! 🌹',
+      shopKeeper2: 'Enjoy them. Come again soon!',
+      shopSkip: 'Skip ›',
+
       gardenMessage: 'You are prettier than these flowers...',
 
       photoLine1: 'Some people make the world a little more beautiful just by being in it.',
