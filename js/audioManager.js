@@ -15,7 +15,7 @@
     init() {
       Object.keys(C.tracks).forEach(function (id) {
         const cfg = C.tracks[id];
-        const t = { id: id, volume: cfg.volume == null ? 1 : cfg.volume, loop: !!cfg.loop, ok: true, el: null, played: false, fade: null };
+        const t = { id: id, volume: cfg.volume == null ? 1 : cfg.volume, loop: !!cfg.loop, ok: true, el: null, played: false, fade: null, want: false };
         try {
           const a = new Audio();
           a.preload = 'auto';
@@ -38,7 +38,7 @@
       skip = skip || [];
       Object.keys(tracks).forEach(function (id) {
         const t = tracks[id];
-        if (!t.ok || skip.indexOf(id) > -1) return;
+        if (!t.ok || skip.indexOf(id) > -1 || !t.el.paused) return;   // leave anything already playing alone
         const a = t.el;
         a.muted = true;
         const p = a.play();
@@ -68,10 +68,79 @@
       return a;
     },
 
+    /**
+     * Starts a looping track straight away; if the browser refuses (no tap yet) it starts on the first tap or key
+     * press instead. opts.ignore is a selector – taps on matching elements don't count (e.g. the "begin" button).
+     */
+    playWhenAllowed(id, opts) {
+      const t = tracks[id];
+      if (!t || !t.ok) return;
+      t.want = true;
+      const a = t.el;
+      if (!a.paused) return;
+      clearInterval(t.fade);
+      try { a.currentTime = 0; } catch (e) {}
+      a.volume = eff(t);
+      a.muted = muted;
+      const events = ['pointerdown', 'pointerup', 'keydown', 'touchend'];
+      const off = function () { events.forEach(function (ev) { document.removeEventListener(ev, retry, true); }); };
+      const attempt = function () {
+        const p = a.play();
+        if (p && p.then) p.then(function () { t.played = true; off(); }).catch(function () {});
+        else off();
+      };
+      function retry(e) {
+        if (!t.want) return off();
+        if (!a.paused) return off();
+        if (opts && opts.ignore && e.target && e.target.closest && e.target.closest(opts.ignore)) return;
+        attempt();
+      }
+      const first = a.play();
+      if (first && first.then) first.then(function () { t.played = true; }).catch(function () { events.forEach(function (ev) { document.addEventListener(ev, retry, true); }); });
+    },
+
+    /**
+     * One short hit of a track: plays it from the start at the given pitch/speed, then fades it out after ms so the
+     * rest of the file never plays. Used for the countdown: tik · tik · tok.
+     */
+    tick(id, rate, ms) {
+      const t = tracks[id];
+      if (!t || !t.ok) return;
+      const a = t.el;
+      clearInterval(t.fade); clearTimeout(t.cut);
+      try { a.pause(); a.currentTime = 0; } catch (e) {}
+      a.preservesPitch = false; a.mozPreservesPitch = false; a.webkitPreservesPitch = false;   // slower = lower, like a deeper "tok"
+      a.playbackRate = rate || 1;
+      a.volume = eff(t);
+      a.muted = muted;
+      t.played = true;
+      const p = a.play();
+      if (p && p.catch) p.catch(function () {});
+      ms = ms || 1000;
+      t.cut = setTimeout(function () { A.fadeOut(id, 150); }, Math.max(0, ms - 150));
+    },
+
+    /** Starts a track silently and brings it up to full volume over ms. */
+    fadeIn(id, ms) {
+      const t = tracks[id];
+      if (!t || !t.ok || (t.loop && !t.el.paused)) return;
+      const a = A.play(id);
+      if (!a) return;
+      t.want = true;
+      const v1 = eff(t), t0 = performance.now();
+      ms = ms || 1500;
+      a.volume = 0;
+      t.fade = setInterval(function () {
+        const k = (performance.now() - t0) / ms;
+        if (k >= 1) { a.volume = v1; clearInterval(t.fade); } else a.volume = v1 * k;
+      }, 50);
+    },
+
     stop(id) {
       const t = tracks[id];
       if (!t || !t.ok) return;
-      clearInterval(t.fade);
+      t.want = false;
+      clearInterval(t.fade); clearTimeout(t.cut);
       t.el.pause();
       try { t.el.currentTime = 0; } catch (e) {}
       t.el.volume = eff(t);
@@ -79,6 +148,7 @@
 
     fadeOut(id, ms) {
       const t = tracks[id];
+      if (t) t.want = false;
       if (!t || !t.ok || t.el.paused) return;
       clearInterval(t.fade);
       const a = t.el, v0 = a.volume, t0 = performance.now();

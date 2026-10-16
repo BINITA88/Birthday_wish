@@ -108,7 +108,8 @@
     audio: {
       master: 0.7,
       tracks: {
-        cinematic:   { src: 'assets/audio/cinematic.mp3',                volume: 0.5 },
+        countdown:   { src: 'assets/audio/freesound_community-3min-bell-sound-count-61773.mp3', volume: 0.7 },   // only its first bell is used: tik · tik · tok
+        calm:        { src: 'assets/audio/freesound_community-calm_game_music_1-49209.mp3', volume: 0.45, loop: true },   // everywhere except the countdown and the birthday tune
         music:       { src: 'assets/audio/satokin-happy-birthday-ukulele-600716.mp3', volume: 0.55, loop: true },   // plays from the birthday scene until a flower is chosen
         celebration: { src: 'assets/audio/celebration.mp3',              volume: 0.6 },
         blow:        { src: 'assets/audio/candle-blow.mp3',              volume: 0.6 },

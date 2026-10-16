@@ -175,7 +175,7 @@
       ctx.on(nextBtn, 'click', function () {
         if (nextBtn.disabled) return;
         nextBtn.disabled = true;
-        App.audio.stopAll();
+        ['celebration', 'voice', 'blow'].forEach(App.audio.stop);   // the calm music carries on into dinner
         App.SceneManager.go('dinner', { mode: 'black', duration: 1600, hold: 500 });
       });
 

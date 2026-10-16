@@ -9,6 +9,9 @@
       const fx = FX.field(sec, { motes: 14, size: 0.7 });
       ctx.add(fx.destroy);
 
+      // Calm music from the start. If the browser blocks it, it starts on the first tap (but not on the begin button).
+      App.audio.playWhenAllowed('calm', { ignore: '.btn' });
+
       const bloom = FX.flowerName(sec.querySelector('.name-wrap'), C.name, {
         maxWidth: 1400,
         onConverge: function () { glow.classList.add('on'); }

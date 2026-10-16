@@ -27,8 +27,9 @@ Nothing below is required for the site to run – missing files are handled grac
 | File | Purpose | If missing |
 |---|---|---|
 | `assets/pratima.jpg` | **Her photo** (scene 5). Also tried: `.png`, `.jpeg`, `.webp` | Elegant "P · PRATIMA" monogram frame |
+| `assets/audio/freesound_community-calm_game_music_1-49209.mp3` | Calm background music: plays from the start (or from the first tap if the browser blocks autoplay), pauses for the countdown and the birthday tune, then returns after the flower is chosen and plays to the end (set in `js/config.js`) | Silent |
 | `assets/audio/satokin-happy-birthday-ukulele-600716.mp3` | Birthday tune: starts by itself during the scene 2 reveal, loops through the flower choice, fades out once a flower is chosen (set in `js/config.js`) | Silent |
-| `assets/audio/cinematic.mp3` | Subtle riser/whoosh when "Click to begin" is pressed (≈ 4–6 s) | Silent |
+| `assets/audio/freesound_community-3min-bell-sound-count-61773.mp3` | Countdown: only its first bell is used – one hit per number, 3 · 2 · 1 = tik · tik · tok (the last one pitched lower), then it stops | Silent |
 | `assets/audio/celebration.mp3` | Cheer / jingle when the last candle goes out | Silent |
 | `assets/audio/candle-blow.mp3` | Short puff of breath for each candle (< 1 s) | Silent |
 | `assets/audio/happy-birthday-pratima.mp3` | Optional voice message, plays after the celebration sound | Skipped |
