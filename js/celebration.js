@@ -23,11 +23,10 @@
         u.letters(title.querySelector('.l2'), line2, 85);
         title.classList.add('reveal');
         await ctx.sleep(600);
-        App.audio.play('music');          // begins during the reveal
+        App.audio.play('music');          // begins during the reveal and keeps looping until a flower is chosen
         fx.setConfetti(true);
 
         await ctx.sleep(2300 + C.timing.celebrationHold);
-        App.audio.fadeOut('music', 2800);  // carry the tune softly into the next chapter
         App.SceneManager.go('flower', { mode: 'black', duration: 1600, hold: 400 });
       })();
     }

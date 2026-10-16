@@ -27,7 +27,7 @@ Nothing below is required for the site to run – missing files are handled grac
 | File | Purpose | If missing |
 |---|---|---|
 | `assets/pratima.jpg` | **Her photo** (scene 5). Also tried: `.png`, `.jpeg`, `.webp` | Elegant "P · PRATIMA" monogram frame |
-| `assets/audio/birthday-music.mp3` | Birthday tune, starts during scene 2 reveal, loops, fades into scene 3 | Silent |
+| `assets/audio/satokin-happy-birthday-ukulele-600716.mp3` | Birthday tune: starts by itself during the scene 2 reveal, loops through the flower choice, fades out once a flower is chosen (set in `js/config.js`) | Silent |
 | `assets/audio/cinematic.mp3` | Subtle riser/whoosh when "Click to begin" is pressed (≈ 4–6 s) | Silent |
 | `assets/audio/celebration.mp3` | Cheer / jingle when the last candle goes out | Silent |
 | `assets/audio/candle-blow.mp3` | Short puff of breath for each candle (< 1 s) | Silent |

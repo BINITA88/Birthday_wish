@@ -70,6 +70,7 @@
         if (chosen) return;
         chosen = card.dataset.kind;
         App.state.flower = chosen;           // persists into the garden
+        App.audio.fadeOut('music', 1800);    // the birthday tune ends once she has chosen
         cards.forEach(function (c) {
           if (c === card) { c.classList.add('chosen', 'active'); c.classList.remove('faded'); }
           else { c.classList.add('faded'); c.classList.remove('active'); }

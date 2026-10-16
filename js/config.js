@@ -109,7 +109,7 @@
       master: 0.7,
       tracks: {
         cinematic:   { src: 'assets/audio/cinematic.mp3',                volume: 0.5 },
-        music:       { src: 'assets/audio/birthday-music.mp3',           volume: 0.55, loop: true },
+        music:       { src: 'assets/audio/satokin-happy-birthday-ukulele-600716.mp3', volume: 0.55, loop: true },   // plays from the birthday scene until a flower is chosen
         celebration: { src: 'assets/audio/celebration.mp3',              volume: 0.6 },
         blow:        { src: 'assets/audio/candle-blow.mp3',              volume: 0.6 },
         voice:       { src: 'assets/audio/happy-birthday-pratima.mp3',   volume: 0.85 }
