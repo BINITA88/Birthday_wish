@@ -69,7 +69,7 @@
       flowerHeading1: 'Every beautiful soul has a favorite flower...',
       flowerHeading2: 'Which flower would you choose, Pratima?',
 
-      gardenMessage: 'Look what your little choice created...',
+      gardenMessage: 'You are prettier than these flowers...',
 
       photoLine1: 'Some people make the world a little more beautiful just by being in it.',
       photoLine2: 'And today, this little garden is all yours, Pratima. 🌷',
