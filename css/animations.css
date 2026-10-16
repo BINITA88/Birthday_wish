@@ -35,6 +35,11 @@
 
 /* Flowers */
 @keyframes sway { from { transform: rotate(calc(var(--sa, 2deg) * -1)); } to { transform: rotate(var(--sa, 2deg)); } }
+@keyframes rowSway { from { transform: skewX(-1.4deg); } to { transform: skewX(1.4deg); } }
+@keyframes twinkle { from { opacity: .62; } to { opacity: 1; } }
+@keyframes cloudDrift { from { transform: translateX(0); } to { transform: translateX(-9%); } }
+@keyframes shadowIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes plantGrow { from { transform: scale(.04); } to { transform: scale(1); } }
 @keyframes grassSway { from { transform: skewX(-2.5deg); } to { transform: skewX(2.5deg); } }
 @keyframes stemGrow   { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @keyframes leafOpen   { from { transform: scale(0) rotate(-35deg); } 70% { transform: scale(1.08) rotate(4deg); } to { transform: scale(1) rotate(0); } }

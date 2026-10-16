@@ -32,6 +32,17 @@
     /* ---- Floating balloons (celebration + cake scenes) ---- */
     balloonImage: 'assets/images/heart-balloon-bouquet.png',
 
+    /* ---- The garden (scenes 4 + 5) ----
+       Photos that make up the field; `weights` is how often each appears (they add up to 1).
+       ar = image height / width, wk = how much wider to draw it (for photos with airy margins). */
+    gardenFlowers: {
+      sunflower: {
+        images: ['assets/images/sunflower-clean.png', 'assets/images/sunflower-gold.png', 'assets/images/sunflower-red.png'],
+        weights: [0.54, 0.2, 0.26], ar: 1.5, wk: 1
+      },
+      rose: { images: ['assets/images/rose.png'], weights: [1], ar: 1, wk: 1.35 }
+    },
+
     /* ---- The two flowers (scene 3) ---- */
     flowers: {
       sunflower: {

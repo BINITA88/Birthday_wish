@@ -56,7 +56,7 @@
 /* ---------- Reduced motion: calmer, still beautiful ---------- */
 @media (prefers-reduced-motion: reduce) {
   .balloon { animation: none; transform: translateY(-55dvh); }
-  .b-sway, .sway, .gsw, .flame, .d-flame, .d-glow, .intro-glow, .g-rays, .photo-rays, .cake-spot, .cel-glow, .fs-bg, .d-bokeh i { animation: none !important; }
+  .b-sway, .sway, .gsw, .flame, .d-flame, .d-glow, .intro-glow, .g-rays, .g-clouds, .g-stars, .g-row, .pl, .photo-rays, .cake-spot, .cel-glow, .fs-bg, .d-bokeh i { animation: none !important; }
   .fade-up, .fcard, .photo-wrap, .spot { transition-duration: .5s !important; }
   .cake-drop.land { animation-duration: 1s; }
   .num { animation-duration: 1s; }
