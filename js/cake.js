@@ -89,7 +89,8 @@
   /** The candles: small ones around the visible ring of the two lower tiers, the big one alone on top. */
   function candleList() {
     const rings = [
-      { topY: 236, R: 120, ry: 15, deg: [16, 46, 134, 164] }                // middle tier only: the bottom tier carries the writing
+      { topY: 172, R: 96,  ry: 11, deg: [12, 32, 54, 126, 148, 168] },        // top tier, around the sparkler
+      { topY: 236, R: 121, ry: 15, deg: [10, 28, 46, 64, 82, 98, 116, 134, 152, 170] }   // middle tier, all the way round; the bottom tier carries the writing
     ];
     const list = [];
     rings.forEach(function (r) {
@@ -99,8 +100,8 @@
       });
     });
     list.sort(function (a, b) { return a.base - b.base; });                  // back to front
-    list.forEach(function (c, i) { c.i = i; c.ci = (i * 0.28).toFixed(2); });
-    list.push({ x: 200, base: 174, h: 84, main: true, i: list.length, ci: (list.length * 0.28 + 0.6).toFixed(2) });
+    list.forEach(function (c, i) { c.i = i; c.ci = (i * 0.2).toFixed(2); });
+    list.push({ x: 200, base: 174, h: 84, main: true, i: list.length, ci: (list.length * 0.2 + 0.6).toFixed(2) });
     return list;
   }
 
@@ -215,8 +216,8 @@
         main.classList.remove('fizz', 'dying');
         snuff(main);                                        // … the light closes …
         S.candlesOut = 1;
-        smalls.forEach(function (c, i) { ctx.later(function () { App.audio.play('blow'); snuff(c); }, 120 + i * 190); });   // … and the small candles blow out
-        ctx.later(finale, 120 + smalls.length * 190 + 900);
+        smalls.forEach(function (c, i) { ctx.later(function () { App.audio.play('blow'); snuff(c); }, 120 + i * 100); });   // … and the small candles blow out
+        ctx.later(finale, 120 + smalls.length * 100 + 900);
       }
       ctx.on(main, 'click', function (e) { e.preventDefault(); lightSparkler(); });
       ctx.on(main, 'keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); lightSparkler(); } });

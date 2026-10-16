@@ -31,9 +31,9 @@
       const cards = Array.from(sec.querySelectorAll('.fcard'));
       let chosen = null;
 
-      ctx.show(sec.querySelector('.fs-h1'), 500);
-      ctx.show(sec.querySelector('.fs-h2'), 2200);
-      cards.forEach(function (c, i) { ctx.show(c, 3300 + i * 400); });
+      ctx.show(sec.querySelector('.fs-h1'), 150);
+      ctx.show(sec.querySelector('.fs-h2'), 1000);
+      cards.forEach(function (c, i) { ctx.show(c, 1800 + i * 350); });
 
       function petals(card, n) {
         const layer = card.querySelector('.petal-layer');

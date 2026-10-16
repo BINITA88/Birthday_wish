@@ -16,6 +16,31 @@
   };
   const HAZE = '140,128,168';         // the dusky violet of far-away air
 
+  /* Time slicing: while the scenery is painted in the background, the painters are generators that call over() and
+     yield, so the page can draw a frame in between and never stalls. With no budget set (sliceEnd = Infinity) they run through at once. */
+  let sliceEnd = Infinity;
+  const over = function () { return performance.now() > sliceEnd; };
+  function runSync(it, input) {                                     // paint everything now (the garden was opened before it was ready)
+    for (;;) {
+      const r = it.next(input);
+      input = undefined;
+      if (r.done) return;
+      if (r.value && r.value.then) { r.value.then(function (v) { runSync(it, v); }); return; }
+    }
+  }
+  const rest = function () { return new Promise(function (r) { setTimeout(r, 8); }); };
+  async function runSliced(it) {                                    // paint ~8 ms at a time, with a rest in between
+    let input;
+    for (;;) {
+      sliceEnd = performance.now() + 8;
+      let r;
+      try { r = it.next(input); } finally { sliceEnd = Infinity; }
+      input = undefined;
+      if (r.done) return;
+      if (r.value && r.value.then) input = await r.value; else await rest();
+    }
+  }
+
   const imgCache = {};
   function loadImg(src) {
     return imgCache[src] || (imgCache[src] = new Promise(function (resolve) {
@@ -94,7 +119,7 @@
   }
 
   /** One rolling hill, back to front: meadow colour, patches of tiny flowers, trees, then a veil of haze. */
-  function hill(g, W, H, horizonY, spec, pal, rng) {
+  function* hill(g, W, H, horizonY, spec, pal, rng) {
     const step = 4, ys = [];
     for (let x = 0; x <= W + step; x += step) ys.push(ridge(x, W, H * spec.base, H * spec.amp, spec.seed));
     const ridgeAt = function (x) { return ys[Math.max(0, Math.min(ys.length - 1, Math.round(x / step)))]; };
@@ -113,6 +138,7 @@
     if (spec.density > 0) {
       g.save(); body(); g.clip();
       for (let y = yTop; y < yBottom; ) {
+        if (over()) yield;
         const sz = spec.size[0] + (spec.size[1] - spec.size[0]) * (y - yTop) / (yBottom - yTop);
         for (let x = rng() * sz * 2; x < W; x += sz * 2.1) {
           if (y < ridgeAt(x) + sz) continue;
@@ -153,67 +179,63 @@
   ];
 
   /**
-   * The scenery as a list of steps (hills, the floor, grass blades, the far rows of real flowers) so that it can be
-   * painted a little at a time. The last step returns a promise: the flower photos have to be loaded first.
+   * The scenery: hills, the floor, grass blades, then the far rows of real flowers. A generator, so it can be painted a
+   * few milliseconds at a time. It yields a promise while the flower photos load.
    */
-  function sceneryStages(cv, W, H, dpr, rng, flower) {
+  function* scenery(cv, W, H, dpr, rng, flower) {
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     const g = cv.getContext('2d');
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     const pal = PALETTE[flower] || PALETTE.sunflower;
     const horizonY = H * (1 - HORIZON / 100), fh = H - horizonY;
 
-    return [
-      function () { HILLS.forEach(function (spec) { hill(g, W, H, horizonY, spec, pal, rng); }); },
+    for (let i = 0; i < HILLS.length; i++) yield* hill(g, W, H, horizonY, HILLS[i], pal, rng);
 
-      function () {                                                  // the floor: hazy and golden far away, deep green close up
-        const gr = g.createLinearGradient(0, horizonY, 0, H);
-        gr.addColorStop(0, '#b9c77a'); gr.addColorStop(0.07, '#9db55a'); gr.addColorStop(0.25, '#7a9a3e'); gr.addColorStop(0.6, '#4f7229'); gr.addColorStop(1, '#2c4a1b');
-        g.fillStyle = gr; g.fillRect(0, horizonY, W, fh);
-        for (let i = 0; i < 160; i++) {                              // soft light and shade on the ground
-          const t = Math.pow(rng(), 1.4), y = horizonY + t * fh, rx = (40 + rng() * 90) * (0.2 + t * 1.6);
-          g.fillStyle = rng() < 0.5 ? 'rgba(25,50,12,.06)' : 'rgba(215,205,115,.06)';
-          g.beginPath(); g.ellipse(rng() * W, y, rx, rx * 0.2, 0, 0, 6.2832); g.fill();
-        }
-      },
+    // the floor: hazy and golden far away, deep green close up
+    const gr = g.createLinearGradient(0, horizonY, 0, H);
+    gr.addColorStop(0, '#b9c77a'); gr.addColorStop(0.07, '#9db55a'); gr.addColorStop(0.25, '#7a9a3e'); gr.addColorStop(0.6, '#4f7229'); gr.addColorStop(1, '#2c4a1b');
+    g.fillStyle = gr; g.fillRect(0, horizonY, W, fh);
+    for (let i = 0; i < 160; i++) {                                // soft light and shade on the ground
+      const t = Math.pow(rng(), 1.4), y = horizonY + t * fh, rx = (40 + rng() * 90) * (0.2 + t * 1.6);
+      g.fillStyle = rng() < 0.5 ? 'rgba(25,50,12,.06)' : 'rgba(215,205,115,.06)';
+      g.beginPath(); g.ellipse(rng() * W, y, rx, rx * 0.2, 0, 0, 6.2832); g.fill();
+    }
+    yield;
 
-      function () {
-        g.lineCap = 'round';
-        const greens = ['rgba(58,98,32,.55)', 'rgba(88,128,44,.5)', 'rgba(36,72,22,.55)', 'rgba(130,150,60,.45)'];
-        for (let i = 0; i < 9000; i++) {                             // blades, bigger the closer they are
-          const t = Math.pow(rng(), 1.8), x = rng() * W, y = horizonY + t * fh, len = 2 + t * 22, lean = (rng() - 0.5) * len * 0.8;
-          g.strokeStyle = greens[(rng() * greens.length) | 0]; g.lineWidth = 0.6 + t * 1.4;
-          g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + lean * 0.3, y - len * 0.6, x + lean, y - len); g.stroke();
-        }
-      },
+    g.lineCap = 'round';
+    const greens = ['rgba(58,98,32,.55)', 'rgba(88,128,44,.5)', 'rgba(36,72,22,.55)', 'rgba(130,150,60,.45)'];
+    for (let i = 0; i < 9000; i++) {                               // blades, bigger the closer they are
+      if ((i & 127) === 0 && over()) yield;
+      const t = Math.pow(rng(), 1.8), x = rng() * W, y = horizonY + t * fh, len = 2 + t * 22, lean = (rng() - 0.5) * len * 0.8;
+      g.strokeStyle = greens[(rng() * greens.length) | 0]; g.lineWidth = 0.6 + t * 1.4;
+      g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + lean * 0.3, y - len * 0.6, x + lean, y - len); g.stroke();
+    }
 
-      function () {                                                  // far rows of real flowers (tiny), then a veil of haze over them
-        const L = look(flower), unit = unitSize();
-        return Promise.all(L.images.map(loadImg)).then(function (imgs) {
-          const k = (HORIZON + 2) / S_MAX, rows = 12;
-          g.imageSmoothingQuality = 'high';
-          for (let i = 0; i < rows; i++) {
-            const sc = 0.012 * Math.pow(0.092 / 0.012, i / (rows - 1));
-            const yBase = H * (1 - (HORIZON - k * sc) / 100);
-            const w = unit * sc * L.wk, h = w * L.ar, n = Math.ceil(W * 1.1 / (w * 0.9)), gap = H * k * sc * 0.36 / 100;
-            const spots = [];
-            for (let j = 0; j < n; j++) spots.push({ x: -0.05 * W + (j + rng()) / n * 1.1 * W, y: yBase + (0.35 - rng()) * gap, v: pickWeighted(rng, L.weights) });
-            spots.sort(function (a, b) { return a.y - b.y; });
-            spots.forEach(function (p) {
-              const img = imgs[p.v];
-              if (w < 4 || !img) { dot(g, p.x, p.y - h * 0.8, Math.max(0.8, w * 0.4), pal, rng); return; }
-              g.fillStyle = 'rgba(20,35,8,.26)';
-              g.beginPath(); g.ellipse(p.x - w * 0.12, p.y, w * 0.34, w * 0.07, 0, 0, 6.2832); g.fill();
-              g.drawImage(img, p.x - w / 2, p.y - h, w, h);
-            });
-          }
-          const y0 = horizonY - 2, y1 = H * (1 - (HORIZON - k * S_DOM) / 100);
-          const hz = g.createLinearGradient(0, y0, 0, y1);
-          hz.addColorStop(0, 'rgba(' + HAZE + ',0)'); hz.addColorStop(0.2, 'rgba(' + HAZE + ',.22)'); hz.addColorStop(1, 'rgba(' + HAZE + ',0)');
-          g.fillStyle = hz; g.fillRect(0, y0, W, y1 - y0);
-        });
+    // far rows of real flowers (tiny), then a veil of haze over them
+    const L = look(flower), unit = unitSize();
+    const imgs = yield Promise.all(L.images.map(loadImg));
+    const k = (HORIZON + 2) / S_MAX, rows = 12;
+    g.imageSmoothingQuality = 'high';
+    for (let i = 0; i < rows; i++) {
+      const sc = 0.012 * Math.pow(0.092 / 0.012, i / (rows - 1));
+      const yBase = H * (1 - (HORIZON - k * sc) / 100);
+      const w = unit * sc * L.wk, h = w * L.ar, n = Math.ceil(W * 1.1 / (w * 0.9)), gap = H * k * sc * 0.36 / 100;
+      const spots = [];
+      for (let j = 0; j < n; j++) spots.push({ x: -0.05 * W + (j + rng()) / n * 1.1 * W, y: yBase + (0.35 - rng()) * gap, v: pickWeighted(rng, L.weights) });
+      spots.sort(function (a, b) { return a.y - b.y; });
+      for (let q = 0; q < spots.length; q++) {
+        if ((q & 63) === 0 && over()) yield;
+        const p = spots[q], img = imgs[p.v];
+        if (w < 4 || !img) { dot(g, p.x, p.y - h * 0.8, Math.max(0.8, w * 0.4), pal, rng); continue; }
+        g.fillStyle = 'rgba(20,35,8,.26)';
+        g.beginPath(); g.ellipse(p.x - w * 0.12, p.y, w * 0.34, w * 0.07, 0, 0, 6.2832); g.fill();
+        g.drawImage(img, p.x - w / 2, p.y - h, w, h);
       }
-    ];
+    }
+    const y0 = horizonY - 2, y1 = H * (1 - (HORIZON - k * S_DOM) / 100);
+    const hz = g.createLinearGradient(0, y0, 0, y1);
+    hz.addColorStop(0, 'rgba(' + HAZE + ',0)'); hz.addColorStop(0.2, 'rgba(' + HAZE + ',.22)'); hz.addColorStop(1, 'rgba(' + HAZE + ',0)');
+    g.fillStyle = hz; g.fillRect(0, y0, W, y1 - y0);
   }
 
   /** Blades of grass in the foreground, standing in front of the nearest flowers. */
@@ -283,29 +305,28 @@
      painted in the background, one small step per timer tick, so that choosing a flower needs almost no waiting. */
   const painted = {};                     // key -> { seed, back, stars, clouds, front }: finished canvases, ready to be copied
   const pending = {};
-  const tick = function () { return new Promise(function (r) { setTimeout(r, 0); }); };
   function sizes() { return { W: window.innerWidth, H: window.innerHeight, dpr: Math.min(window.devicePixelRatio || 1, 1.5) }; }
   function keyOf(flower, seed, z) { return [flower, seed, z.W, z.H, z.dpr].join('|'); }
   function paintRngs(seed) { return { back: u.mulberry(seed + 7), stars: u.mulberry(seed + 8), clouds: u.mulberry(seed + 9), front: u.mulberry(seed + 10) }; }
   function copyCanvas(dst, src) { dst.width = src.width; dst.height = src.height; dst.getContext('2d').drawImage(src, 0, 0); }
 
+  let chain = Promise.resolve();          // gardens are painted one after another, never two at once
   function prewarm(flower, seed) {
     seed = seed || 1;
     if (!C.gardenFlowers[flower]) return;
     const z = sizes(), key = keyOf(flower, seed, z);
     if (painted[key] || pending[key]) return;
     pending[key] = true;
-    const r = paintRngs(seed), c = { seed: seed, back: document.createElement('canvas'), stars: document.createElement('canvas'), clouds: document.createElement('canvas'), front: document.createElement('canvas') };
-    (async function () {
-      await tick();
-      const steps = sceneryStages(c.back, z.W, z.H, z.dpr, r.back, flower);
-      for (let i = 0; i < steps.length; i++) { await steps[i](); await tick(); }
-      paintStars(c.stars, z.W, Math.round(z.H * 0.52), z.dpr, r.stars); await tick();
-      paintClouds(c.clouds, Math.round(z.W * 1.3), Math.round(z.H * 0.46), z.dpr, r.clouds); await tick();
+    chain = chain.then(async function () {
+      const r = paintRngs(seed), c = { seed: seed, back: document.createElement('canvas'), stars: document.createElement('canvas'), clouds: document.createElement('canvas'), front: document.createElement('canvas') };
+      await rest();
+      await runSliced(scenery(c.back, z.W, z.H, z.dpr, r.back, flower));
+      paintStars(c.stars, z.W, Math.round(z.H * 0.52), z.dpr, r.stars); await rest();
+      paintClouds(c.clouds, Math.round(z.W * 1.3), Math.round(z.H * 0.46), z.dpr, r.clouds); await rest();
       paintFront(c.front, z.W, Math.round(z.H * 0.18), z.dpr, r.front);
       Object.keys(painted).forEach(function (k) { if (painted[k].seed !== seed) delete painted[k]; });   // forget an earlier run's scenery
       painted[key] = c;
-    })().catch(function (e) { console.warn(e); }).then(function () { delete pending[key]; });
+    }).catch(function (e) { console.warn(e); }).then(function () { delete pending[key]; });
   }
 
   const Garden = {
@@ -337,7 +358,7 @@
         Object.keys(cv).forEach(function (k) { copyCanvas(cv[k], done[k]); });
       } else {                                                       // not ready (e.g. opened directly): paint now
         const r = paintRngs(seed);
-        sceneryStages(cv.back, z.W, z.H, z.dpr, r.back, flower).forEach(function (st) { st(); });
+        runSync(scenery(cv.back, z.W, z.H, z.dpr, r.back, flower));
         paintStars(cv.stars, z.W, Math.round(z.H * 0.52), z.dpr, r.stars);
         paintClouds(cv.clouds, Math.round(z.W * 1.3), Math.round(z.H * 0.46), z.dpr, r.clouds);
         paintFront(cv.front, z.W, Math.round(z.H * 0.18), z.dpr, r.front);
