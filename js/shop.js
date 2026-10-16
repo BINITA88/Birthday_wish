@@ -277,7 +277,7 @@
       function leave() {
         if (leaving) return;
         leaving = true;
-        App.SceneManager.go('garden', { mode: 'black', duration: 1600, hold: 500 });
+        App.SceneManager.go('cake', { mode: 'black', duration: 1600, hold: 500 });   // the rose story carries on to the cake
       }
       ctx.on(skip, 'click', leave);
       ctx.show(skip, 2500);
