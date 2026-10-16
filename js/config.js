@@ -8,6 +8,7 @@
     /* ---- Who is this for? ---- */
     name: 'Pratima',
     greeting: 'Happy Birthday, Pratima!',          // split at the first comma into two lines
+    cakeMessage: 'Happy Birthday Princess',         // written on the bottom tier of the cake
 
     /* ---- Photograph (scene 5) ----
        The first file that exists is used. Put her photo at assets/pratima.jpg.
@@ -75,8 +76,6 @@
       photoLine2: 'And today, this little garden is all yours, Pratima. 🌷',
       photoButton: "Let's Go to the Cake 🎂",
 
-      cakeWish: 'Make a wish, Pratima... ✨',
-      cakeHint: 'Tap the candles to blow them out.',
       cakeNext: "Let's Have Dinner Together 🍽️",
 
       dinner1: 'One last little surprise...',
@@ -109,6 +108,7 @@
       master: 0.7,
       tracks: {
         countdown:   { src: 'assets/audio/freesound_community-3min-bell-sound-count-61773.mp3', volume: 0.7 },   // only its first bell is used: tik · tik · tok
+        sparkler:    { src: 'assets/audio/freesound_community-firework-candle-76282.mp3', volume: 0.8 },   // the cake's sparkler: only its first seconds are played
         calm:        { src: 'assets/audio/freesound_community-calm_game_music_1-49209.mp3', volume: 0.45, loop: true },   // everywhere except the countdown and the birthday tune
         music:       { src: 'assets/audio/satokin-happy-birthday-ukulele-600716.mp3', volume: 0.55, loop: true },   // plays from the birthday scene until a flower is chosen
         celebration: { src: 'assets/audio/celebration.mp3',              volume: 0.6 },
@@ -119,6 +119,7 @@
 
     /* ---- Pacing (milliseconds) ---- */
     timing: {
+      sparklerBurn: 6500,     // how long the cake's sparkler fountain burns (and its sound plays), in ms
       celebrationHold: 3000   // how long the birthday celebration stays on screen after the reveal
     }
   };

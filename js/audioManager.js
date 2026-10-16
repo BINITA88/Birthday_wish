@@ -18,7 +18,7 @@
         const t = { id: id, volume: cfg.volume == null ? 1 : cfg.volume, loop: !!cfg.loop, ok: true, el: null, played: false, fade: null, want: false };
         try {
           const a = new Audio();
-          a.preload = 'auto';
+          a.preload = (id === 'calm' || id === 'sparkler') ? 'auto' : 'metadata';   // only the opening music is fetched up front; the rest loads when it is first needed
           a.loop = t.loop;
           a.addEventListener('error', function () { t.ok = false; });
           a.src = cfg.src;
@@ -118,6 +118,17 @@
       if (p && p.catch) p.catch(function () {});
       ms = ms || 1000;
       t.cut = setTimeout(function () { A.fadeOut(id, 150); }, Math.max(0, ms - 150));
+    },
+
+    /** Plays the first ms of a track, fading it out over the last fadeMs, then stops it (the file may be much longer). */
+    clip(id, ms, fadeMs) {
+      const t = tracks[id];
+      if (!t || !t.ok) return;
+      const a = A.play(id);
+      if (!a) return;
+      fadeMs = fadeMs || 800;
+      clearTimeout(t.cut);
+      t.cut = setTimeout(function () { A.fadeOut(id, fadeMs); }, Math.max(0, ms - fadeMs));
     },
 
     /** Starts a track silently and brings it up to full volume over ms. */

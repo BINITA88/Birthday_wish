@@ -53,13 +53,6 @@
 }
 
 /* Cake */
-@keyframes cakeDrop {
-  0%   { opacity: 1; transform: translateY(-140dvh) rotate(-2deg); animation-timing-function: cubic-bezier(.45, 0, .85, .65); }
-  56%  { opacity: 1; transform: translateY(0) rotate(0); animation-timing-function: ease-out; }
-  70%  { transform: translateY(-1.6%); animation-timing-function: ease-in-out; }
-  84%  { transform: translateY(0); }
-  100% { opacity: 1; transform: translateY(0); }
-}
 @keyframes flicker {
   0%   { transform: scale(1, 1) skewX(0deg); }
   25%  { transform: scale(.93, 1.08) skewX(2.5deg); }
@@ -74,6 +67,20 @@
   50%  { transform: scale(.75, .7) skewX(-12deg); opacity: .9; }
   100% { transform: scale(.05); opacity: 0; }
 }
+@keyframes critBob { from { transform: translateY(0) rotate(-2.5deg); } to { transform: translateY(-7px) rotate(2.5deg); } }
+@keyframes critHop { from { transform: translateY(0) scale(1.05, .93) rotate(-4deg); } to { transform: translateY(-24px) scale(.97, 1.05) rotate(4deg); } }
+@keyframes headTilt { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+@keyframes earWiggle { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+@keyframes armWave { from { transform: rotate(-16deg); } to { transform: rotate(14deg); } }
+@keyframes hitL { from { transform: rotate(-26deg); } to { transform: rotate(9deg); } }
+@keyframes hitR { from { transform: rotate(26deg); } to { transform: rotate(-9deg); } }
+@keyframes strum { from { transform: rotate(-13deg); } to { transform: rotate(15deg); } }
+@keyframes shake { from { transform: rotate(-11deg); } to { transform: rotate(11deg); } }
+@keyframes flapL { from { transform: rotate(-20deg); } to { transform: rotate(16deg); } }
+@keyframes flapR { from { transform: rotate(20deg); } to { transform: rotate(-16deg); } }
+@keyframes sing { from { transform: scaleY(.35); } to { transform: scaleY(1.1); } }
+@keyframes noteFloat { 0% { opacity: 0; transform: translate(0, 6px) scale(.6); } 18% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, -38px) rotate(16deg) scale(1.05); } }
+@keyframes fountainFlicker { from { transform: scale(.88, .8); opacity: .85; } to { transform: scale(1.08, 1.12); opacity: 1; } }
 @keyframes puff {
   0%   { opacity: 0; transform: translate(0, 0) scale(.6); }
   18%  { opacity: .7; }

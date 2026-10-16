@@ -25,6 +25,9 @@
       const fx = FX.field(sec, { motes: 34 });
       ctx.add(fx.destroy);
 
+      // While she decides, the garden's scenery is painted quietly in the background, so it opens at once afterwards.
+      ctx.later(function () { App.Garden.prewarm('sunflower', App.state.gardenSeed); App.Garden.prewarm('rose', App.state.gardenSeed); }, 500);
+
       const cards = Array.from(sec.querySelectorAll('.fcard'));
       let chosen = null;
 
@@ -78,9 +81,9 @@
         });
         sec.classList.add('picked');
         petals(card, 18);
-        ctx.later(function () { petals(card, 14); }, 600);
-        await ctx.sleep(2300);
-        App.SceneManager.go('garden', { mode: 'black', duration: 1800, hold: 700 });
+        ctx.later(function () { petals(card, 14); }, 450);
+        await ctx.sleep(900);
+        App.SceneManager.go('garden', { mode: 'cross', duration: 900 });      // straight into the garden: no black screen
       }
     }
   });

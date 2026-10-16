@@ -58,6 +58,7 @@
     }
 
     const conf = [];
+    const fountains = [];
     let emit = !!opt.confetti, acc = 0, raf = 0, last = performance.now(), alive = true;
     const cap = Math.round(opt.max * scale) + 20;
 
@@ -89,6 +90,21 @@
       if (emit) {
         acc += dt * opt.rate * scale;
         while (acc >= 1) { acc--; if (conf.length < cap) conf.push(falling()); }
+      }
+
+      for (let i = fountains.length - 1; i >= 0; i--) {                 // sparkler fountains shoot sparks upward
+        const f = fountains[i];
+        if (!f.on) { fountains.splice(i, 1); continue; }
+        f.acc += dt * f.rate * scale;
+        while (f.acc >= 1) {
+          f.acc--;
+          const a = -1.5708 + u.rand(-0.2, 0.2) * (Math.random() < 0.18 ? 2.6 : 1), sp = u.rand(380, 860) * f.power;
+          conf.push({
+            x: f.x + u.rand(-2, 2), y: f.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 560, drag: 0.992,
+            w: u.rand(8, 20), h: u.rand(1.6, 2.8), rot: a, vr: 0, fl: 0, vf: 0,
+            col: u.pick(['#fff6c8', '#ffe27a', '#ffc04a', '#ffffff', '#ffd9a0']), life: u.rand(0.5, 1.3), sway: 0, ph: 0
+          });
+        }
       }
 
       for (let i = conf.length - 1; i >= 0; i--) {
@@ -125,6 +141,25 @@
             fl: u.rand(0, 6.28), vf: u.rand(5, 11),
             col: golden ? u.pick(['#F4C76B', '#FFE29A', '#e9a94a', '#FFF3E0']) : u.pick(COLORS),
             life: u.rand(1.6, 2.6), sway: 0, ph: 0
+          });
+        }
+      },
+      /** A cold-sparkler fountain at (x, y): returns a handle; handle.stop() lets it die away. */
+      fountain(x, y, power) {
+        const f = { x: x, y: y, power: power || 1, rate: 300, acc: 0, on: true, stop() { f.on = false; } };
+        fountains.push(f);
+        return f;
+      },
+      /** Small, bright, short-lived sparks – like a sparkler. */
+      sparks(x, y, n) {
+        n = Math.round((n || 6) * (App.reduced ? 0.5 : 1));
+        for (let i = 0; i < n; i++) {
+          const a = u.rand(0, 6.283), sp = u.rand(60, 340);
+          conf.push({
+            x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60, g: 420, drag: 0.97,
+            w: u.rand(1.8, 3.2), h: u.rand(1.8, 3.2), rot: 0, vr: 0, fl: 0, vf: 0,
+            col: u.pick(['#fff6c8', '#ffe27a', '#ffc04a', '#ffffff']),
+            life: u.rand(0.35, 0.9), sway: 0, ph: 0
           });
         }
       },
