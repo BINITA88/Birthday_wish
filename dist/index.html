@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08090D">
+  <title>For Pratima</title>
+
+  <!-- Fonts are hosted in assets/fonts (no Google request), so the first paint never waits on the network -->
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <!-- Every scene is mounted into #stage by the scene manager -->
+  <main id="stage" aria-live="polite"></main>
+
+  <!-- Full-screen black curtain used for cinematic transitions -->
+  <div id="veil" aria-hidden="true"></div>
+
+  <!-- Mute / unmute -->
+  <button id="sound-btn" type="button" aria-label="Mute sound" aria-pressed="false">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path class="spk" d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
+      <path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <noscript><p style="color:#FFF3E0;text-align:center;padding:2rem;font-family:serif">This birthday surprise needs JavaScript to be enabled ✨</p></noscript>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/audioManager.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/flowerName.js"></script>
+  <script src="js/flowers.js"></script>
+  <script src="js/sceneManager.js"></script>
+  <script src="js/nameScene.js"></script>
+  <script src="js/intro.js"></script>
+  <script src="js/celebration.js"></script>
+  <script src="js/letterScene.js"></script>
+  <script src="js/flowerSelection.js"></script>
+  <script src="js/garden.js"></script>
+  <script src="js/photoReveal.js"></script>
+  <script src="js/critters.js"></script>
+  <script src="js/cake.js"></script>
+  <script src="js/dinner.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

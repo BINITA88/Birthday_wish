@@ -28,17 +28,26 @@
       if (r.value && r.value.then) { r.value.then(function (v) { runSync(it, v); }); return; }
     }
   }
-  const rest = function () { return new Promise(function (r) { setTimeout(r, 8); }); };
-  async function runSliced(it) {                                    // paint ~8 ms at a time, with a rest in between
-    let input;
-    for (;;) {
-      sliceEnd = performance.now() + 8;
-      let r;
-      try { r = it.next(input); } finally { sliceEnd = Infinity; }
-      input = undefined;
-      if (r.done) return;
-      if (r.value && r.value.then) input = await r.value; else await rest();
+  /* Waits for an idle moment of the browser (a frame with time to spare), so the painting never steals time from animations. */
+  const idle = function () {
+    return new Promise(function (r) {
+      if (window.requestIdleCallback) window.requestIdleCallback(r, { timeout: 500 });
+      else setTimeout(function () { r({ timeRemaining: function () { return 8; } }); }, 24);
+    });
+  };
+  /* A photo drawn at 3–20 px is smoother and much faster to draw from a copy that was already shrunk by halves. */
+  const mipCache = new Map();
+  function mipFor(img, w) {
+    let chain = mipCache.get(img);
+    if (!chain) { chain = [img]; mipCache.set(img, chain); }
+    while (chain[chain.length - 1].width / 2 >= w && chain[chain.length - 1].width > 8) {
+      const prev = chain[chain.length - 1], c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(prev.width / 2)); c.height = Math.max(1, Math.round(prev.height / 2));
+      const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(prev, 0, 0, c.width, c.height);
+      chain.push(c);
     }
+    for (let i = chain.length - 1; i >= 0; i--) if (chain[i].width >= w) return chain[i];
+    return chain[0];
   }
 
   const imgCache = {};
@@ -215,7 +224,6 @@
     const L = look(flower), unit = unitSize();
     const imgs = yield Promise.all(L.images.map(loadImg));
     const k = (HORIZON + 2) / S_MAX, rows = 12;
-    g.imageSmoothingQuality = 'high';
     for (let i = 0; i < rows; i++) {
       const sc = 0.012 * Math.pow(0.092 / 0.012, i / (rows - 1));
       const yBase = H * (1 - (HORIZON - k * sc) / 100);
@@ -229,7 +237,7 @@
         if (w < 4 || !img) { dot(g, p.x, p.y - h * 0.8, Math.max(0.8, w * 0.4), pal, rng); continue; }
         g.fillStyle = 'rgba(20,35,8,.26)';
         g.beginPath(); g.ellipse(p.x - w * 0.12, p.y, w * 0.34, w * 0.07, 0, 0, 6.2832); g.fill();
-        g.drawImage(img, p.x - w / 2, p.y - h, w, h);
+        g.drawImage(mipFor(img, w), p.x - w / 2, p.y - h, w, h);
       }
     }
     const y0 = horizonY - 2, y1 = H * (1 - (HORIZON - k * S_DOM) / 100);
@@ -310,27 +318,65 @@
   function paintRngs(seed) { return { back: u.mulberry(seed + 7), stars: u.mulberry(seed + 8), clouds: u.mulberry(seed + 9), front: u.mulberry(seed + 10) }; }
   function copyCanvas(dst, src) { dst.width = src.width; dst.height = src.height; dst.getContext('2d').drawImage(src, 0, 0); }
 
-  let chain = Promise.resolve();          // gardens are painted one after another, never two at once
+  const jobs = {};                        // key -> a garden being painted ahead of time
+  const tick = function () { return new Promise(function (r) { setTimeout(r, 0); }); };
+  let urgentKey = null, pumping = false;
+
+  function* jobGen(c, z, r, flower) {
+    yield* scenery(c.back, z.W, z.H, z.dpr, r.back, flower);
+    yield; paintStars(c.stars, z.W, Math.round(z.H * 0.52), z.dpr, r.stars);
+    yield; paintClouds(c.clouds, Math.round(z.W * 1.3), Math.round(z.H * 0.46), z.dpr, r.clouds);
+    yield; paintFront(c.front, z.W, Math.round(z.H * 0.18), z.dpr, r.front);
+  }
+
+  /** Paints the queued gardens a few ms at a time in idle moments (or 14 ms at a time for the urgent one). */
+  async function pump() {
+    if (pumping) return;
+    pumping = true;
+    let d = { timeRemaining: function () { return 8; } };
+    try {
+      for (;;) {
+        const key = (urgentKey && jobs[urgentKey]) ? urgentKey : Object.keys(jobs)[0];
+        if (!key) break;
+        const job = jobs[key], urgent = key === urgentKey;
+        sliceEnd = performance.now() + (urgent ? 14 : Math.max(2, Math.min(8, d.timeRemaining() - 1)));
+        let r;
+        try { r = job.gen.next(job.input); } catch (e) { console.warn(e); delete jobs[key]; job.resolve(); continue; } finally { sliceEnd = Infinity; }
+        job.input = undefined;
+        if (r.done) {
+          Object.keys(painted).forEach(function (k) { if (painted[k].seed !== job.seed) delete painted[k]; });   // forget an earlier run's scenery
+          painted[key] = job.c; delete jobs[key]; job.resolve();
+        } else if (r.value && r.value.then) job.input = await r.value;
+        else d = urgent ? await tick() : await idle();
+      }
+    } finally { pumping = false; }
+  }
+
+  /** Queues a garden to be painted ahead of time. Returns a promise that resolves when it is ready. */
   function prewarm(flower, seed) {
     seed = seed || 1;
-    if (!C.gardenFlowers[flower]) return;
+    if (!C.gardenFlowers[flower]) return Promise.resolve();
     const z = sizes(), key = keyOf(flower, seed, z);
-    if (painted[key] || pending[key]) return;
-    pending[key] = true;
-    chain = chain.then(async function () {
-      const r = paintRngs(seed), c = { seed: seed, back: document.createElement('canvas'), stars: document.createElement('canvas'), clouds: document.createElement('canvas'), front: document.createElement('canvas') };
-      await rest();
-      await runSliced(scenery(c.back, z.W, z.H, z.dpr, r.back, flower));
-      paintStars(c.stars, z.W, Math.round(z.H * 0.52), z.dpr, r.stars); await rest();
-      paintClouds(c.clouds, Math.round(z.W * 1.3), Math.round(z.H * 0.46), z.dpr, r.clouds); await rest();
-      paintFront(c.front, z.W, Math.round(z.H * 0.18), z.dpr, r.front);
-      Object.keys(painted).forEach(function (k) { if (painted[k].seed !== seed) delete painted[k]; });   // forget an earlier run's scenery
-      painted[key] = c;
-    }).catch(function (e) { console.warn(e); }).then(function () { delete pending[key]; });
+    if (painted[key]) return Promise.resolve();
+    if (jobs[key]) return jobs[key].ready;
+    const c = { seed: seed, back: document.createElement('canvas'), stars: document.createElement('canvas'), clouds: document.createElement('canvas'), front: document.createElement('canvas') };
+    const job = { key: key, seed: seed, c: c, gen: jobGen(c, z, paintRngs(seed), flower), input: undefined };
+    job.ready = new Promise(function (res) { job.resolve = res; });
+    jobs[key] = job;
+    pump();
+    return job.ready;
+  }
+
+  /** A flower has just been chosen: paint its garden now, at full speed. */
+  function prioritize(flower, seed) {
+    const p = prewarm(flower, seed);
+    urgentKey = keyOf(flower, seed || 1, sizes());
+    return p;
   }
 
   const Garden = {
     prewarm: prewarm,
+    prioritize: prioritize,
     /**
      * Garden.build(parent, { flower, animate, seed })
      * animate=true starts with the near flowers not yet grown; call grow() to let them rise.

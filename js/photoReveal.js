@@ -111,7 +111,7 @@
       ctx.on(btn, 'click', function () {
         if (btn.disabled) return;
         btn.disabled = true;
-        App.SceneManager.go('cake', { mode: 'black', duration: 1500, hold: 400 });
+        App.SceneManager.go('celebration', { mode: 'black', duration: 1100, hold: 250 });
       });
 
       (async function () {

@@ -25,8 +25,8 @@
       const fx = FX.field(sec, { motes: 34 });
       ctx.add(fx.destroy);
 
-      // While she decides, the garden's scenery is painted quietly in the background, so it opens at once afterwards.
-      ctx.later(function () { App.Garden.prewarm('sunflower', App.state.gardenSeed); App.Garden.prewarm('rose', App.state.gardenSeed); }, 500);
+      // While she decides, the garden's scenery is painted quietly in idle moments (this screen is nearly still).
+      ctx.later(function () { App.Garden.prewarm('sunflower', App.state.gardenSeed); App.Garden.prewarm('rose', App.state.gardenSeed); }, 400);
 
       const cards = Array.from(sec.querySelectorAll('.fcard'));
       let chosen = null;
@@ -82,7 +82,9 @@
         sec.classList.add('picked');
         petals(card, 18);
         ctx.later(function () { petals(card, 14); }, 450);
-        await ctx.sleep(900);
+        // The petals play for a moment; meanwhile whatever is left of the garden is painted at full speed.
+        const ready = App.Garden.prioritize(chosen, App.state.gardenSeed);
+        await Promise.all([ctx.sleep(900), Promise.race([ready, ctx.sleep(1800)])]);
         // The rose leads through the little flower shop; the sunflower goes straight into its garden (no black screen).
         App.SceneManager.go(chosen === 'rose' ? 'shop' : 'garden', { mode: 'cross', duration: 900 });
       }

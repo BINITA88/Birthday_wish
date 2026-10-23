@@ -7,8 +7,8 @@
 
     /* ---- Who is this for? ---- */
     name: 'Pratima',
-    greeting: 'Happy Birthday, Pratima!',          // split at the first comma into two lines
-    cakeMessage: 'Happy Birthday Princess',         // written on the bottom tier of the cake
+    greeting: 'Happy Birthday, Pratima!',
+    cakeMessage: 'Happy Birthday, Pratima!',
 
     /* ---- Photograph (scene 5) ----
        The first file that exists is used. Put her photo at assets/pratima.jpg.
@@ -31,7 +31,7 @@
     photoObjectPosition: 'center 22%',             // keeps faces in frame when the photo is cropped
 
     /* ---- Floating balloons (celebration + cake scenes) ---- */
-    balloonImage: 'assets/images/heart-balloon-bouquet.png',
+    balloonImage: 'assets/images/heart-balloon-bouquet-small.png',    // 372 px, shadow baked in (the big original is kept alongside)
 
     /* ---- The garden (scenes 4 + 5) ----
        Photos that make up the field; `weights` is how often each appears (they add up to 1).
@@ -62,13 +62,13 @@
 
     /* ---- All on-screen wording ---- */
     text: {
-      waitLine: 'Something is waiting for you...',
-      waitButton: 'Click to Begin',
+      waitLine: 'Hey beautiful,',
+      waitButton: 'Tap for music & begin ♡',
       introLine: 'Something special is waiting for you...',
       introButton: 'Click to begin ✨',
 
-      flowerHeading1: 'Every beautiful soul has a favorite flower...',
-      flowerHeading2: 'Which flower would you choose, Pratima?',
+      flowerHeading1: 'A Little Garden for You',
+      flowerHeading2: 'Every flower has its own beauty, just like you. ❤️ Choose a flower and see what blooms for you…',
 
       shopCaption1: 'A little rose shop on the corner...',
       shopCaption2: 'Every rose is a small piece of love. 🌹',
@@ -78,13 +78,13 @@
       shopKeeper2: 'Enjoy them. Come again soon!',
       shopSkip: 'Skip ›',
 
-      gardenMessage: 'You are prettier than these flowers...',
+      gardenMessage: 'A little garden, made with love for you…',
 
-      photoLine1: 'Some people make the world a little more beautiful just by being in it.',
-      photoLine2: 'And today, this little garden is all yours, Pratima. 🌷',
-      photoButton: "Let's Go to the Cake 🎂",
+      photoLine1: 'A garden of little memories.',
+      photoLine2: 'Pratima, this little world was made just for you. ❤️🌺',
+      photoButton: 'A birthday wish for you ♡',
 
-      cakeNext: "Let's Have Dinner Together 🍽️",
+      cakeNext: 'Open your letter ♡',
 
       dinner1: 'One last little surprise...',
       dinner2: 'Because birthdays deserve more than just cake...',

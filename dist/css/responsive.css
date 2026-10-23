@@ -1,0 +1,69 @@
+/* ==========================================================================
+   Responsive layout + reduced-motion
+   ========================================================================== */
+
+/* Phones & small tablets (portrait) */
+@media (max-width: 900px) {
+  /* no room beside the cake: the performers stand in a row on the table below it */
+  .cheer { bottom: 2.2dvh; width: 50% !important; left: 0; }
+  .cheer.right { left: auto; right: 0; }
+  .crit { width: clamp(58px, 21vw, 104px); }
+  .crit:nth-child(3) { display: none; }
+  .finale .cheer { opacity: 0; transition: opacity .8s; }
+}
+
+@media (max-width: 720px) {
+  .fs-cards { flex-direction: row; align-items: flex-end; gap: .4rem; }
+  .fs-cards { gap: .6rem; }
+  .fcard { width: 44vw; gap: .8rem; }
+  .fcard-art { height: clamp(170px, 34dvh, 280px); }
+  .fcard .btn { padding: .85em 1.2em; }
+  .btn { padding: .95em 1.5em; }
+  .d-btns .btn { width: min(100%, 320px); }
+  .balloon { opacity: .95; }
+}
+
+/* Tablets / large phones: keep two cards side by side only when there is room */
+@media (min-width: 721px) and (max-width: 900px) {
+  .fcard { width: 44vw; }
+}
+
+/* Short landscape screens (phones turned sideways) */
+@media (max-height: 520px) and (orientation: landscape) {
+  .fs-head { gap: .2rem; }
+  .fs-h1 { font-size: clamp(1.2rem, 3.6vw, 1.8rem); }
+  .fs-h2 { font-size: clamp(1.4rem, 4vw, 2rem); }
+  .fs-cards { flex-direction: row; margin-top: .8rem; }
+  .fcard { width: min(34vw, 240px); gap: .5rem; }
+  .fcard-art { height: clamp(110px, 40dvh, 170px); }
+  .fcard .btn { min-height: 42px; padding: .7em 1.2em; }
+
+  .scene-photo { flex-direction: row; justify-content: center; gap: 4vw; padding-left: 4vw; padding-right: 4vw; }
+  .photo-wrap { height: min(74dvh, 300px); margin: 0; }
+  .photo-text { margin: 0; width: min(52vw, 520px); }
+  .pt1 { font-size: clamp(1rem, 2.6vw, 1.35rem); }
+  .pt2 { font-size: clamp(1.1rem, 3vw, 1.5rem); }
+
+  .table { height: 22dvh; }
+  .scene-cake { --cw: min(96vw, 640px, calc(52dvh / .92)); }
+  .finale-title { padding-top: 3rem; }
+  .scene-cake .next { bottom: 3dvh; }
+
+  .scene-dinner { --art-w: min(max(100vw, 70dvh), 80dvh, 900px); }
+  .d-content { padding-bottom: calc(var(--art-h) * .6); }
+  .d3 { font-size: clamp(1.5rem, 5vw, 2.4rem); }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .cel-title .l1 { letter-spacing: .12em; }
+}
+
+/* ---------- Reduced motion: calmer, still beautiful ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .balloon { animation: none; transform: translateY(-55dvh); }
+  .b-sway, .sway, .gsw, .flame, .d-flame, .d-glow, .intro-glow, .g-rays, .g-clouds, .g-stars, .g-row, .pl, .photo-rays, .cake-spot, .cel-glow, .crit svg, .crit .head, .crit .ear-l, .crit .ear-r, .crit .arm, .crit .mouth-sing, .crit .note, .fs-bg, .d-bokeh i { animation: none !important; }
+  .fade-up, .fcard, .photo-wrap, .spot { transition-duration: .5s !important; }
+  .num { animation-duration: 1s; }
+  .pfly { animation-duration: 1s; }
+}

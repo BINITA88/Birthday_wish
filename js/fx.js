@@ -33,7 +33,7 @@
     canvas.setAttribute('aria-hidden', 'true');
     parent.appendChild(canvas);
     const g = canvas.getContext('2d');
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = 1;                       // soft glows and confetti: full resolution would only cost speed
     let w = 0, h = 0;
 
     function resize() {
@@ -184,7 +184,7 @@
     const fit = (o.dim ? 0.8 : 1) * (App.isSmall() ? 0.72 : 1);
     let html = '';
     for (let i = 0; i < n; i++) {
-      const w = u.rand(120, 190) * fit;
+      const w = u.rand(130, 205) * fit;
       const dur = u.rand(15, 27);
       const delay = o.prefill ? -u.rand(0, dur) : u.rand(-dur * 0.5, 2);
       const x = (i + u.rand(0.1, 0.9)) / n * 100;
