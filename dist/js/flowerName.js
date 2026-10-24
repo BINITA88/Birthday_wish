@@ -187,11 +187,10 @@
       const gapRatio = 0.1;
       const widths = chars.map(function (ch) { return m.measureText(ch).width; });
 
-      // Wide screens: one row of plots. Narrow screens: two rows, so each letter can still stand well apart.
+      // The finished name is centred, but each flower-letter starts as a separate
+      // surprise somewhere across the full screen.
       const narrow = W < 700 && n > 3;
-      const split = Math.ceil(n / 2);
-      const rows = (narrow ? [range(0, split), range(split, n)] : [range(0, n)]).filter(function (r) { return r.length; });
-      const Wn = narrow ? W * 0.88 : Math.min(780, W * 0.56);          // width of the finished name
+      const Wn = narrow ? W * 0.91 : Math.min(835, W * 0.59);          // width of the finished name
       const fs = 100 * Wn / (widths.reduce(function (a, b) { return a + b; }, 0) + gapRatio * 100 * (n - 1));
       const capH = fs * capRatio, gapF = gapRatio * fs;
       const lw = widths.map(function (w) { return w * fs / 100; });
@@ -199,8 +198,7 @@
       const d = Math.max(6.5, capH / 9.5);                                 // flower spacing
       const textH = Math.round(capH * 1.55);
       PH = textH + 12;                                                   // height of one row of letters
-      const rowH = PH;
-      H = rowH * rows.length;
+      H = Math.max(PH * 2.5, Math.min(window.innerHeight * 0.84, 760));
       const padS = Math.max(7, capH * 0.17);                             // breathing room around a lone letter
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -212,24 +210,18 @@
       /* ----- letters: where each one starts out, and where it ends up ----- */
       chars.forEach(function (ch, j) { letters.push({ idx: j, ch: ch, lw: lw[j], flowers: [], g: null }); });
 
-      let gap = Infinity;
-      rows.forEach(function (row) {
-        if (row.length < 2) return;
-        const tot = row.reduce(function (a, j) { return a + lw[j] + 2 * padS; }, 0);
-        gap = Math.min(gap, (W - 12 - tot) / (row.length - 1));
+      const scatter = [
+        [0.14, 0.10], [0.51, 0.06], [0.84, 0.18], [0.19, 0.51],
+        [0.50, 0.39], [0.81, 0.61], [0.44, 0.75]
+      ].sort(function () { return Math.random() - 0.5; });
+      letters.forEach(function (Lt, j) {
+        const p = scatter[j % scatter.length];
+        const minX = Lt.lw / 2 + padS, maxX = W - minX;
+        Lt.homeCx = Math.max(minX, Math.min(maxX, p[0] * W + u.rand(-W * 0.035, W * 0.035)));
+        Lt.homeTop = Math.max(0, Math.min(H - PH, p[1] * (H - PH) + u.rand(-H * 0.025, H * 0.025)));
       });
-      gap = Math.max(capH * 0.3, Math.min(gap, capH * 1.4));
-      rows.forEach(function (row, ri) {
-        const tot = row.reduce(function (a, j) { return a + lw[j] + 2 * padS; }, 0) + gap * (row.length - 1);
-        let x = (W - tot) / 2;
-        row.forEach(function (j) {
-          letters[j].homeCx = x + padS + lw[j] / 2;
-          letters[j].homeTop = ri * rowH;
-          letters[j].row = ri;
-          x += lw[j] + 2 * padS + gap;
-        });
-      });
-      const finTop = rows.length === 1 ? 0 : (H - PH) / 2;
+      const gap = gapRatio * fs;
+      const finTop = (H - PH) / 2;
       let fx = (W - Wn) / 2;
       letters.forEach(function (Lt, j) { Lt.finCx = fx + lw[j] / 2; Lt.finTop = finTop; fx += lw[j] + gapF; });
 
@@ -264,10 +256,10 @@
         Lt.flowers.sort(function (a, b) { return a.ly - b.ly; });         // back rows first
       });
 
-      /* ----- nobody waters: each letter wakes up by itself, left to right ----- */
+      /* ----- letters bloom in a random order across the screen ----- */
       let last = 0;
-      letters.forEach(function (Lt) {
-        const t0 = T(GROW_START + Lt.idx * GROW_STEP);
+      letters.slice().sort(function () { return Math.random() - 0.5; }).forEach(function (Lt) {
+        const t0 = T(GROW_START + u.rand(0, 950));
         Lt.flowers.forEach(function (f) {
           const s = clamp01((f.lx + Lt.lw / 2) / Lt.lw);                        // 0 at the letter's left edge, 1 at its right
           f.tg = t0 + s * T(GROW_SPAN) + u.rand(0, T(160));                     // the seed cracks, a shoot rises
@@ -423,4 +415,127 @@
       destroy() { alive = false; cancelAnimationFrame(raf); canvas.remove(); }
     };
   };
+
+  const plantGrowingFlowerName = FX.flowerName;
+
+  /* A photographic replacement for the procedural flower sprites above. */
+  FX.flowerName = function (parent, text, opts) {
+    const o = Object.assign({ onConverge: null }, opts || {});
+    const chars = Array.from(String(text).toUpperCase());
+    const scatter = [[13, 13], [49, 8], [84, 18], [17, 50], [51, 40], [82, 62], [45, 77]]
+      .sort(function () { return Math.random() - 0.5; });
+    const layer = document.createElement('div');
+    layer.className = 'real-flower-name';
+    parent.appendChild(layer);
+    let alive = true, finish;
+    const timers = [];
+    const later = function (fn, ms) { const id = setTimeout(function () { if (alive) fn(); }, ms); timers.push(id); return id; };
+    const done = new Promise(function (resolve) { finish = resolve; });
+    const letters = chars.map(function (ch, i) {
+      const el = document.createElement('span'), p = scatter[i % scatter.length];
+      el.className = 'rf-letter';
+      el.textContent = ch;
+      el.style.left = (p[0] + u.rand(-3, 3)).toFixed(2) + '%';
+      el.style.top = (p[1] + u.rand(-3, 3)).toFixed(2) + '%';
+      el.style.setProperty('--photo-x', (i * 17 + u.rand(-7, 7)).toFixed(1) + '%');
+      layer.appendChild(el);
+      return el;
+    });
+    requestAnimationFrame(function () {
+      letters.forEach(function (el, i) { later(function () { el.classList.add('in'); }, 280 + u.rand(0, 900) + i * 40); });
+      later(function () {
+        const width = layer.clientWidth || window.innerWidth;
+        const total = letters.reduce(function (sum, el) { return sum + el.getBoundingClientRect().width; }, 0);
+        let x = Math.max(0, (width - total) / 2);
+        letters.forEach(function (el) { const w = el.getBoundingClientRect().width; el.style.left = (x + w / 2) + 'px'; el.style.top = '50%'; x += w; });
+        layer.classList.add('gather');
+        if (o.onConverge) o.onConverge();
+      }, 3900);
+      later(function () { finish(); }, 6300);
+    });
+    return { done: done, destroy: function () { alive = false; timers.forEach(clearTimeout); layer.remove(); } };
+  };
+
+  /* Individual photographic blooms grow into each letter, then the letter groups gather. */
+  FX.flowerName = function (parent, text, opts) {
+    const o = Object.assign({ onConverge: null }, opts || {});
+    const chars = Array.from(String(text).toUpperCase());
+    const layer = document.createElement('div');
+    layer.className = 'garden-letter-field';
+    parent.appendChild(layer);
+    let alive = true, finish;
+    const timers = [];
+    const later = function (fn, ms) { const id = setTimeout(function () { if (alive) fn(); }, ms); timers.push(id); return id; };
+    const done = new Promise(function (resolve) { finish = resolve; });
+
+    function build() {
+      if (!alive) return;
+      const W = layer.clientWidth || window.innerWidth;
+      const H = layer.clientHeight || window.innerHeight;
+      const measure = document.createElement('canvas').getContext('2d');
+      measure.font = font(100);
+      const widths = chars.map(function (ch) { return measure.measureText(ch).width; });
+      const targetW = W < 700 ? W * .86 : Math.min(790, W * .58);
+      const gap = Math.max(3, targetW * .012);
+      const fs = 100 * (targetW - gap * (chars.length - 1)) / widths.reduce(function (sum, w) { return sum + w; }, 0);
+      const capH = fs * ((measure.measureText('H').actualBoundingBoxAscent || 72) / 100);
+      const letterW = widths.map(function (w) { return w * fs / 100; });
+      const letterH = capH + 10;
+      const scatter = [[.10,.13],[.49,.08],[.83,.18],[.16,.53],[.52,.43],[.84,.64],[.43,.77]]
+        .sort(function () { return Math.random() - .5; });
+      let finalX = (W - (letterW.reduce(function (sum, w) { return sum + w; }, 0) + gap * (chars.length - 1))) / 2;
+      const groups = [];
+
+      chars.forEach(function (ch, index) {
+        const group = document.createElement('div');
+        const p = scatter[index];
+        group.className = 'rf-bloom-letter';
+        group.style.width = letterW[index] + 'px';
+        group.style.height = letterH + 'px';
+        group.style.left = Math.max(2, Math.min(W - letterW[index] - 2, p[0] * W - letterW[index] / 2 + u.rand(-W * .025, W * .025))) + 'px';
+        group.style.top = Math.max(2, Math.min(H - letterH - 2, p[1] * H - letterH / 2 + u.rand(-H * .025, H * .025))) + 'px';
+        group.dataset.finalLeft = finalX + 'px';
+        finalX += letterW[index] + gap;
+
+        const glyph = document.createElement('canvas');
+        glyph.width = Math.ceil(letterW[index] + 4); glyph.height = Math.ceil(letterH + 4);
+        const g = glyph.getContext('2d', { willReadFrequently: true });
+        g.font = font(fs); g.fillStyle = '#000'; g.textBaseline = 'alphabetic'; g.fillText(ch, 0, capH);
+        const pixels = g.getImageData(0, 0, glyph.width, glyph.height).data;
+        const step = Math.max(11, capH / 7.5);
+        let bloomIndex = 0;
+        for (let y = step * .5; y < capH; y += step) {
+          for (let x = step * .5 + ((Math.round(y / step) % 2) * step * .45); x < letterW[index]; x += step) {
+            const px = pixels[(Math.min(glyph.height - 1, Math.round(y)) * glyph.width + Math.min(glyph.width - 1, Math.round(x))) * 4 + 3];
+            if (px < 120) continue;
+            const bloom = document.createElement('span');
+            const image = document.createElement('img');
+            bloom.className = 'rf-bloom';
+            bloom.style.left = (x - step * .85) + 'px'; bloom.style.top = (y - step * .85) + 'px';
+            bloom.style.setProperty('--size', (step * u.rand(1.45, 1.95)).toFixed(1) + 'px');
+            bloom.style.setProperty('--rot', u.rand(-18, 18).toFixed(1) + 'deg');
+            bloom.style.setProperty('--delay', (u.rand(0, 1200) + bloomIndex++ * 12).toFixed(0) + 'ms');
+            image.src = u.pick(['assets/images/rose.png', 'assets/images/sunflower-clean.png', 'assets/images/sunflower-gold.png']);
+            image.alt = ''; image.draggable = false;
+            bloom.appendChild(image); group.appendChild(bloom);
+          }
+        }
+        layer.appendChild(group); groups.push(group);
+      });
+
+      later(function () { groups.forEach(function (group) { group.classList.add('grown'); }); }, 180);
+      later(function () {
+        groups.forEach(function (group) { group.style.left = group.dataset.finalLeft; group.style.top = ((H - letterH) / 2) + 'px'; group.classList.add('gather'); });
+        layer.classList.add('gather');
+        if (o.onConverge) o.onConverge();
+      }, 4300);
+      later(function () { finish(); }, 6750);
+    }
+    const fonts = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    Promise.race([fonts, new Promise(function (resolve) { setTimeout(resolve, 900); })]).then(build, build);
+    return { done: done, destroy: function () { alive = false; timers.forEach(clearTimeout); layer.remove(); } };
+  };
+
+  // Use the original plant-growing animation requested for this scene.
+  FX.flowerName = plantGrowingFlowerName;
 })(window.App = window.App || {});
