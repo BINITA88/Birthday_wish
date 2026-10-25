@@ -1,47 +1,13 @@
-/* SCENE 6 – The grand birthday cake: a cold sparkler in the middle of the top, small candles on the lower tiers, the
-   name piped on the bottom tier. Tapping the sparkler lights it: a fountain of sparks shoots up while its sound plays.
-   When it dies away the small candles blow out one by one and the finale begins. */
+/* SCENE 6 – The birthday cake is built in front of her, flat-design style: a board, sponge with pink cream, white frosting
+   swept on with a spatula, scalloped cream piped on top, berries and a plaque with the greeting. A cold sparkler stands in
+   the middle of the top, small candles beside it. Tapping the sparkler lights it: a fountain of sparks shoots up while its
+   sound plays. When it dies away the small candles blow out one by one and the finale begins. */
 (function (App) {
   const { CONFIG: C, u, FX } = App;
   const NS = 'http://www.w3.org/2000/svg';
   const STRIPES = ['#F4B6C2', '#FFF3E0', '#F4C76B', '#FAF7F2'];
 
   /* ---------- SVG cake ---------- */
-  function tier(cx, topY, rx, h, fill, rimFill) {
-    const ry = rx * 0.125;
-    return { cx: cx, topY: topY, rx: rx, ry: ry, h: h,
-      html:
-        '<path d="M' + (cx - rx) + ' ' + topY + 'v' + h + 'a' + rx + ' ' + ry + ' 0 0 0 ' + (rx * 2) + ' 0v-' + h + 'z" fill="' + fill + '"/>' +
-        '<path d="M' + (cx - rx) + ' ' + topY + 'v' + h + 'a' + rx + ' ' + ry + ' 0 0 0 ' + (rx * 2) + ' 0v-' + h + 'z" fill="url(#shade)"/>' +
-        '<ellipse cx="' + cx + '" cy="' + topY + '" rx="' + rx + '" ry="' + ry + '" fill="' + rimFill + '"/>' };
-  }
-
-  /** Cream drips + piped pearls along a tier. */
-  function trim(t) {
-    let s = '';
-    const nDrip = Math.round(t.rx / 11);
-    for (let i = 0; i <= nDrip; i++) {
-      const th = Math.PI * i / nDrip, x = t.cx - t.rx * Math.cos(th), y = t.topY + t.ry * Math.sin(th);
-      const len = 7 + ((i * 37) % 17);
-      s += '<rect x="' + (x - 4.5).toFixed(1) + '" y="' + (y - 3).toFixed(1) + '" width="9" height="' + len + '" rx="4.5" fill="#FFF8EC"/>';
-    }
-    const nPearl = Math.round(t.rx / 9);
-    for (let i = 0; i <= nPearl; i++) {
-      const th = Math.PI * i / nPearl, x = t.cx - t.rx * Math.cos(th), y = t.topY + t.h + t.ry * Math.sin(th) - 4;
-      s += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.6" fill="#FFF8EC" stroke="#E6CFAE" stroke-width=".6"/>';
-    }
-    return s;
-  }
-
-  function cakeFlower(x, y, r, col) {
-    let s = '';
-    for (let i = 0; i < 5; i++) {
-      const a = i * 72 * Math.PI / 180;
-      s += '<circle cx="' + (x + Math.sin(a) * r * 0.62).toFixed(1) + '" cy="' + (y - Math.cos(a) * r * 0.62).toFixed(1) + '" r="' + (r * 0.5).toFixed(1) + '" fill="' + col + '"/>';
-    }
-    return s + '<circle cx="' + x + '" cy="' + y + '" r="' + (r * 0.34).toFixed(1) + '" fill="#F4C76B"/>';
-  }
-
   /**
    * One candle standing on (x, base). c: { x, base, w, h, fs (flame scale), i, ci (entrance order), main }.
    * Class names match the CSS (flame, glow, smoke …) so lighting, flicker and snuffing work for any size.
@@ -86,60 +52,83 @@
       '<g class="smoke"></g></g></g>';
   }
 
-  /** The candles: small ones around the visible ring of the two lower tiers, the big one alone on top. */
+  /** The candles: a few small ones along the top edge, the big sparkler in the middle. */
+  const TOP = 224, BOT = 338, X0 = 110, XM = 200, X1 = 290, SCALLOPS = 8, CANDLE_BASE = 222;
+  const BERRIES = [136, 160, 186, 214, 240, 264];
+
   function candleList() {
-    const rings = [
-      { topY: 172, R: 96,  ry: 11, deg: [12, 32, 54, 126, 148, 168] },        // top tier, around the sparkler
-      { topY: 236, R: 121, ry: 15, deg: [10, 28, 46, 64, 82, 98, 116, 134, 152, 170] }   // middle tier, all the way round; the bottom tier carries the writing
-    ];
-    const list = [];
-    rings.forEach(function (r) {
-      r.deg.forEach(function (d) {
-        const th = d * Math.PI / 180;
-        list.push({ x: 200 - r.R * Math.cos(th), base: r.topY + r.ry * Math.sin(th), w: 7, h: 30, fs: 0.62, main: false });
-      });
-    });
-    list.sort(function (a, b) { return a.base - b.base; });                  // back to front
+    const list = [124, 148, 172, 228, 252, 276].map(function (x) { return { x: x, base: CANDLE_BASE, w: 7, h: 30, fs: 0.62, main: false }; });
     list.forEach(function (c, i) { c.i = i; c.ci = (i * 0.2).toFixed(2); });
-    list.push({ x: 200, base: 174, h: 84, main: true, i: list.length, ci: (list.length * 0.2 + 0.6).toFixed(2) });
+    list.push({ x: XM, base: CANDLE_BASE, h: 84, main: true, i: list.length, ci: (list.length * 0.2 + 0.6).toFixed(2) });
     return list;
   }
 
-  function cakeSVG() {
-    const plate = '<ellipse cx="200" cy="378" rx="190" ry="22" fill="#e7d3a6"/><ellipse cx="200" cy="374" rx="190" ry="22" fill="url(#plate)"/><ellipse cx="200" cy="374" rx="168" ry="17" fill="none" stroke="#F4C76B" stroke-width="1.2" opacity=".8"/>';
-    const t1 = tier(200, 302, 160, 68, 'url(#pink)', 'url(#cream)');
-    const t2 = tier(200, 236, 130, 62, 'url(#cream2)', 'url(#cream)');
-    const t3 = tier(200, 172, 110, 54, 'url(#pink)', 'url(#cream)');
-    let flowers = '';
-    [[84, 349, 11, '#F4C76B'], [316, 349, 11, '#F4C76B'], [150, 363, 10, '#FFF3E0'], [250, 363, 10, '#FFF3E0'], [200, 367, 11, '#D84A65'],
-     [150, 262, 9, '#F4B6C2'], [250, 262, 9, '#F4B6C2'],
-     [135, 202, 8, '#FFF3E0'], [265, 202, 8, '#FFF3E0'], [200, 210, 9, '#F4C76B']].forEach(function (f) { flowers += cakeFlower(f[0], f[1], f[2], f[3]); });
-    let leaves = '';
-    [[110, 366], [290, 366], [122, 268], [278, 268]].forEach(function (p) { leaves += '<ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="9" ry="3.6" fill="#4f8a58" transform="rotate(-24 ' + p[0] + ' ' + p[1] + ')"/>'; });
+  /* Flat, two-tone shapes: every piece is a light left half and a slightly darker right half, split at x = 200. */
+  function sponge(y, h, cls) {
+    return '<g class="cp ' + cls + '"><rect x="' + X0 + '" y="' + y + '" width="90" height="' + h + '" fill="#f6edbd"/><rect x="' + XM + '" y="' + y + '" width="90" height="' + h + '" fill="#e8dda5"/></g>';
+  }
+  function creamStrip(y, cls) {
+    let s = '<rect x="' + X0 + '" y="' + y + '" width="90" height="6" fill="#fbf5d6"/><rect x="' + XM + '" y="' + y + '" width="90" height="6" fill="#ece3b7"/>';
+    for (let k = 0; k < 8; k++) {
+      const x = 114 + k * 22;
+      s += '<rect x="' + x + '" y="' + y + '" width="14" height="6" rx="3" fill="' + (x < XM ? '#f8bccb' : '#e9a2b6') + '"/>';
+    }
+    return '<g class="cp cream ' + cls + '">' + s + '</g>';
+  }
+  function strawberry(x) {
+    return '<g transform="translate(' + x + ' 218) scale(1.15)"><g class="pop berry">' +
+      '<path d="M0 -7C9 -9 12 0 0 11C-12 0 -9 -8 0 -7Z" fill="#ea3b52"/><path d="M0 -7C9 -9 12 0 0 11Z" fill="#c42a43"/>' +
+      '<path d="M-6.5 -7L0 -12L6.5 -7L0 -9Z" fill="#4f9a58"/>' +
+      '<circle cx="-3.5" cy="-1" r=".9" fill="#ffe08a"/><circle cx="3" cy="0" r=".9" fill="#ffd36e"/><circle cx="-.5" cy="4.5" r=".9" fill="#ffe08a"/>' +
+      '</g></g>';
+  }
 
-    // "Happy Birthday <name>" piped across the front of the bottom tier, bending with the cake
-    const message =
-      '<path id="cake-msg-path" d="M46 332Q200 358 354 332" fill="none"/>' +
-      '<text class="cake-msg" font-family="\'Great Vibes\',\'Brush Script MT\',cursive" font-size="31" text-anchor="middle" fill="#ffffff" stroke="#8a1f48" stroke-width="3" paint-order="stroke fill" stroke-linejoin="round" textLength="292" lengthAdjust="spacingAndGlyphs">' +
-      '<textPath href="#cake-msg-path" startOffset="50%" textLength="292" lengthAdjust="spacingAndGlyphs">' + u.esc(C.cakeMessage) + '</textPath></text>';
+  function cakeSVG() {
+    const w = (X1 - X0) / SCALLOPS;
+    let scallops = '';
+    for (let i = 0; i < SCALLOPS; i++) {
+      const cx = X0 + w * (i + 0.5), h = w / 2;
+      scallops += '<path class="pop scallop" d="M' + (cx - h) + ' ' + TOP + 'C' + (cx - h - 2) + ' ' + (TOP - 15) + ' ' + (cx - 4) + ' ' + (TOP - 17) + ' ' + cx + ' ' + (TOP - 24) +
+        'C' + (cx + 4) + ' ' + (TOP - 17) + ' ' + (cx + h + 2) + ' ' + (TOP - 15) + ' ' + (cx + h) + ' ' + TOP + 'Z" fill="' + (cx < XM ? '#ffffff' : '#e2e2e2') + '"/>';
+    }
+    let berries = '';
+    BERRIES.forEach(function (x) { berries += strawberry(x); });
+    const sprigs = [[112, 1], [288, -1]].map(function (p) {
+      return '<g transform="translate(' + p[0] + ' 220)"><g class="pop berry">' +
+        '<ellipse cx="' + (p[1] * 5) + '" cy="-5" rx="9" ry="3.6" fill="#4f9a58" transform="rotate(' + (p[1] * -35) + ' ' + (p[1] * 5) + ' -5)"/>' +
+        '<ellipse cx="' + (p[1] * 2) + '" cy="-9" rx="8" ry="3.2" fill="#3f8248" transform="rotate(' + (p[1] * -75) + ' ' + (p[1] * 2) + ' -9)"/></g></g>';
+    }).join('');
+
+    // the written message sits on a red plaque on the front of the cake
+    const msg = C.cakeMessage, fs = Math.min(24, 140 / Math.max(6, msg.length) * 2.3);
+    const plaque = '<g class="pop plaque"><path d="M200 258A80 23 0 0 0 200 304Z" fill="#c4161e"/><path d="M200 258A80 23 0 0 1 200 304Z" fill="#9e1118"/>' +
+      '<text class="cake-msg" x="200" y="287" text-anchor="middle" font-family="\'Great Vibes\',\'Brush Script MT\',cursive" font-size="' + fs.toFixed(1) + '" fill="#ffffff" textLength="132" lengthAdjust="spacingAndGlyphs">' + u.esc(msg) + '</text></g>';
+
+    const spatula = '<g class="spatula"><g class="spat-in">' +
+      '<rect x="-4" y="226" width="4" height="112" rx="1.5" fill="#f1f1f1"/><rect x="0" y="226" width="4" height="112" rx="1.5" fill="#d3d3d3"/>' +
+      '<rect x="-5.5" y="216" width="5.5" height="11" fill="#e8e8e8"/><rect x="0" y="216" width="5.5" height="11" fill="#cdcdcd"/>' +
+      '<rect x="-5" y="168" width="5" height="49" rx="2" fill="#b96b2c"/><rect x="0" y="168" width="5" height="49" rx="2" fill="#984f1c"/></g></g>';
+
+    const bag = '<g class="bag"><g class="bag-in">' +
+      '<path d="M-4 -3L4 -3L6 -10L-6 -10Z" fill="#b8b8b8"/>' +
+      '<path d="M0 -9L-6 -10L-30 -78Q-14 -92 0 -92Z" fill="#ffffff"/><path d="M0 -9L6 -10L30 -78Q14 -92 0 -92Z" fill="#e2e2e2"/></g></g>';
 
     const candles = candleList().map(candleHTML).join('');
 
-    return '<svg class="cake-svg" viewBox="0 24 400 368" role="img" aria-label="A birthday cake saying ' + u.esc(C.cakeMessage) + ', with a sparkler on top and small candles on the lower tiers">' +
+    return '<svg class="cake-svg" viewBox="50 98 300 262" role="img" aria-label="A birthday cake saying ' + u.esc(msg) + ', with a sparkler and small candles on top">' +
       '<defs>' +
-        '<linearGradient id="pink" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbd2db"/><stop offset="1" stop-color="#eba3b6"/></linearGradient>' +
-        '<linearGradient id="cream" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#f6e3c8"/></linearGradient>' +
-        '<linearGradient id="cream2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3e0"/><stop offset="1" stop-color="#ecd2ac"/></linearGradient>' +
-        '<linearGradient id="shade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".35" stop-color="#fff" stop-opacity=".08"/><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>' +
-        '<radialGradient id="plate" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#fffdf7"/><stop offset="1" stop-color="#e9dcc2"/></radialGradient>' +
         '<radialGradient id="flame" cx=".5" cy=".8" r=".8"><stop offset="0" stop-color="#fff6c8"/><stop offset=".4" stop-color="#ffd24a"/><stop offset=".8" stop-color="#ff8a24"/><stop offset="1" stop-color="#ff5a1f" stop-opacity=".9"/></radialGradient>' +
         '<linearGradient id="steel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6f7983"/><stop offset=".25" stop-color="#dfe5ea"/><stop offset=".5" stop-color="#f8fafb"/><stop offset=".75" stop-color="#aab3bb"/><stop offset="1" stop-color="#6a747e"/></linearGradient>' +
         '<pattern id="knurl" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="none"/><path d="M0 0H5M0 0V5" stroke="rgba(60,70,80,.28)" stroke-width=".8"/></pattern>' +
         '<linearGradient id="fountain" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".25" stop-color="#ffe9a8"/><stop offset=".6" stop-color="#ffb347" stop-opacity=".7"/><stop offset="1" stop-color="#ff8a24" stop-opacity="0"/></linearGradient>' +
         '<radialGradient id="glow"><stop offset="0" stop-color="#ffd37a" stop-opacity=".7"/><stop offset=".5" stop-color="#ffb04a" stop-opacity=".25"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient>' +
       '</defs>' +
-      plate + t1.html + trim(t1) + t2.html + trim(t2) + t3.html + trim(t3) + leaves + flowers + message +
-      '<g class="candles">' + candles + '</g></svg>';
+      '<g class="cp cake-board"><rect x="62" y="' + BOT + '" width="138" height="18" fill="#e0bda1"/><rect x="200" y="' + BOT + '" width="138" height="18" fill="#c9a589"/></g>' +
+      sponge(304, 34, 'cake-l1') + creamStrip(298, 'cake-s1') + sponge(264, 34, 'cake-l2') + creamStrip(258, 'cake-s2') + sponge(TOP, 34, 'cake-l3') +
+      '<rect class="frost-l" x="' + X0 + '" y="' + TOP + '" width="90" height="' + (BOT - TOP) + '" fill="#ffffff"/><rect class="frost-r" x="' + XM + '" y="' + TOP + '" width="90" height="' + (BOT - TOP) + '" fill="#e2e2e2"/>' +
+      scallops + plaque + berries + sprigs +
+      '<g class="candles">' + candles + '</g>' +
+      spatula + bag + '</svg>';
   }
 
   /* ---------- Scene ---------- */
@@ -251,14 +240,54 @@
       ctx.on(nextBtn, 'click', function () {
         if (nextBtn.disabled) return;
         nextBtn.disabled = true;
-        ['celebration', 'voice', 'blow', 'sparkler'].forEach(App.audio.stop);   // the calm music carries on into dinner
-        App.SceneManager.go('dinner', { mode: 'black', duration: 1600, hold: 500 });
+        ['celebration', 'voice', 'blow', 'sparkler'].forEach(App.audio.stop);   // the calm music carries on into the letter
+        App.SceneManager.go('letter', { mode: 'black', duration: 1600, hold: 500 });
       });
 
-      /* --- the entrance: the cake is already on the table -> candles appear -> flames light --- */
+      /* --- the entrance: the cake is built step by step --- */
+      const on = function (sel) { const el = svg.querySelector(sel); if (el) el.classList.add('on'); };
       (async function () {
-        sec.classList.add('landed');           // the cake is simply there from the start – it does not drop in
-        await ctx.sleep(900);
+        // 1. the board, then sponge and pink cream, layer by layer
+        await ctx.sleep(250);
+        sec.classList.add('landed');
+        on('.cake-board');
+        await ctx.sleep(450);
+        ['.cake-l1', '.cake-s1', '.cake-l2', '.cake-s2', '.cake-l3'].forEach(function (sel, i) { ctx.later(function () { on(sel); }, i * 340); });
+        await ctx.sleep(5 * 340 + 350);
+
+        // 2. a spatula sweeps white frosting over the sides
+        on('.spat-in');
+        await ctx.sleep(450);
+        sec.classList.add('sweep');
+        await ctx.sleep(1300 + 250);
+        svg.querySelector('.spat-in').classList.remove('on');
+        await ctx.sleep(450);
+
+        // 3. a piping bag pipes the scalloped cream along the top
+        const bag = svg.querySelector('.bag'), bagIn = svg.querySelector('.bag-in');
+        const scallops = Array.from(svg.querySelectorAll('.scallop'));
+        const step = (X1 - X0) / scallops.length;
+        bag.style.transform = 'translate(' + (X0 + step / 2) + 'px, 132px)';
+        void bag.getBoundingClientRect();
+        bagIn.classList.add('on');
+        await ctx.sleep(400);
+        for (let i = 0; i < scallops.length; i++) {
+          bag.style.transform = 'translate(' + (X0 + step * (i + 0.5)) + 'px, 214px)';
+          await ctx.sleep(230);
+          scallops[i].classList.add('on');
+          await ctx.sleep(110);
+        }
+        bag.style.transform = 'translate(' + (X1 + 40) + 'px, 140px)';
+        bagIn.classList.remove('on');
+        await ctx.sleep(500);
+
+        // 4. berries and the plaque with the greeting
+        svg.querySelectorAll('.berry').forEach(function (el, i) { ctx.later(function () { el.classList.add('on'); }, i * 110); });
+        await ctx.sleep(8 * 110 + 200);
+        on('.plaque');
+        await ctx.sleep(700);
+
+        // 5. the candles
         sec.classList.add('candles-in');
         await ctx.sleep(2200);
         sec.classList.add('lit');

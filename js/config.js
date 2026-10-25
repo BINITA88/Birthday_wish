@@ -47,22 +47,27 @@
     /* ---- The two flowers (scene 3) ---- */
     flowers: {
       sunflower: {
-        image: 'assets/images/sunflower.png',
+        image: 'assets/images/sunflower-moonlit-hero.png',
         title: 'Sunflower', emoji: '🌻',
         description: 'Like sunshine, warmth, and the little things that make life beautiful.',
-        button: 'Click me'
+        cardTitle: 'Pratima 🤍',
+        cardLine: 'This little world was made just for you.',
+        button: 'Continue ✨'
       },
       rose: {
-        image: 'assets/images/rose.png',
+        image: 'assets/images/rose-moonlit-hero.png',
         title: 'Rose', emoji: '🌹',
         description: 'Elegant, timeless, and beautiful in its own way.',
-        button: 'Click me'
+        cardTitle: 'Pratima 🌹',
+        cardLine: 'Like a rose, you make life beautiful.',
+        button: 'Continue ✨'
       }
     },
 
     /* ---- All on-screen wording ---- */
     text: {
-      waitLine: 'Hey beautiful,',
+      // waitLine: 'Some people just feel like\na little bit of magic.\nAnd you are one of them,',
+      waitGreeting: 'Hey beautiful,',
       waitButton: 'Tap for music & begin ♡',
       introLine: 'Something special is waiting for you...',
       introButton: 'Click to begin ✨',

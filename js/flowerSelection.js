@@ -9,6 +9,7 @@
       '<div class="fcard-glow"></div>' +
       '<div class="petal-layer"></div>' +
       '<div class="fcard-art"><div class="sway" style="--sw:' + (4 + seed % 3) + 's;--swd:-' + (seed % 4) + 's;--sa:2.2deg">' + art + '</div></div>' +
+      '<div class="fcard-copy"><h3>' + u.esc(F.cardTitle) + '</h3><p>' + u.esc(F.cardLine) + '</p>' + (F.cardSubline ? '<small>' + u.esc(F.cardSubline) + '</small>' : '') + '</div>' +
       '<button class="btn" type="button" data-choose>' + u.esc(F.button) + '</button>' +
       '</article>';
   }
@@ -19,20 +20,20 @@
       sec.innerHTML =
         '<div class="fs-bg"></div>' +
         '<header class="fs-head"><h2 class="fs-h1 fade-up">' + u.esc(T.flowerHeading1) + '</h2>' +
-        '<p class="fs-h2 fade-up">' + u.esc(T.flowerHeading2) + '</p></header>' +
-        '<div class="fs-cards">' + cardHTML('sunflower', 7) + cardHTML('rose', 12) + '</div>';
+        '</header>' +
+        '<div class="fs-cards">' + cardHTML('sunflower', 7) + '</div>';
 
       const fx = FX.field(sec, { motes: 34 });
       ctx.add(fx.destroy);
 
       // While she decides, the garden's scenery is painted quietly in idle moments (this screen is nearly still).
-      ctx.later(function () { App.Garden.prewarm('sunflower', App.state.gardenSeed); App.Garden.prewarm('rose', App.state.gardenSeed); }, 400);
+      // The rose card is temporarily hidden; prewarm only the available sunflower path.
+      ctx.later(function () { App.Garden.prewarm('sunflower', App.state.gardenSeed); }, 400);
 
       const cards = Array.from(sec.querySelectorAll('.fcard'));
       let chosen = null;
 
       ctx.show(sec.querySelector('.fs-h1'), 150);
-      ctx.show(sec.querySelector('.fs-h2'), 1000);
       cards.forEach(function (c, i) { ctx.show(c, 1800 + i * 350); });
 
       function petals(card, n) {
@@ -51,21 +52,7 @@
         }
       }
 
-      function activate(card) {
-        if (chosen) return;
-        cards.forEach(function (c) { c.classList.toggle('active', c === card); });
-        petals(card, 7);
-      }
-
       cards.forEach(function (card) {
-        // Hover on mouse devices …
-        ctx.on(card, 'pointerenter', function (e) { if (e.pointerType === 'mouse') activate(card); });
-        ctx.on(card, 'pointerleave', function (e) { if (e.pointerType === 'mouse' && !chosen) card.classList.remove('active'); });
-        // … and tap / click everywhere else.
-        ctx.on(card, 'click', function (e) {
-          if (e.target.closest('[data-choose]')) return;
-          activate(card);
-        });
         ctx.on(card.querySelector('[data-choose]'), 'click', function () { choose(card); });
       });
 
@@ -76,8 +63,8 @@
         App.audio.fadeOut('music', 1800);    // the birthday tune ends once she has chosen …
         App.audio.fadeIn('calm', 2600);      // … and the calm music takes over for the rest of the story
         cards.forEach(function (c) {
-          if (c === card) { c.classList.add('chosen', 'active'); c.classList.remove('faded'); }
-          else { c.classList.add('faded'); c.classList.remove('active'); }
+          if (c === card) { c.classList.add('chosen'); c.classList.remove('faded'); }
+          else { c.classList.add('faded'); }
         });
         sec.classList.add('picked');
         petals(card, 18);

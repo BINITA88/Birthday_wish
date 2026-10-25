@@ -20,19 +20,23 @@
     stepMs = stepMs || 55;
     el.textContent = '';
     let i = 0;
-    const words = text.split(' ');
-    words.forEach(function (w, wi) {
-      const word = document.createElement('span');
-      word.className = 'word';
-      for (const chr of w) {
-        const s = document.createElement('span');
-        s.className = 'ch';
-        s.textContent = chr;
-        s.style.setProperty('--i', i++);
-        word.appendChild(s);
-      }
-      el.appendChild(word);
-      if (wi < words.length - 1) el.appendChild(document.createTextNode(' '));
+    const lines = text.split('\n');
+    lines.forEach(function (line, lineIndex) {
+      const words = line.split(' ');
+      words.forEach(function (w, wi) {
+        const word = document.createElement('span');
+        word.className = 'word';
+        for (const chr of w) {
+          const s = document.createElement('span');
+          s.className = 'ch';
+          s.textContent = chr;
+          s.style.setProperty('--i', i++);
+          word.appendChild(s);
+        }
+        el.appendChild(word);
+        if (wi < words.length - 1) el.appendChild(document.createTextNode(' '));
+      });
+      if (lineIndex < lines.length - 1) el.appendChild(document.createElement('br'));
     });
     el.style.setProperty('--step', stepMs + 'ms');
     el.setAttribute('aria-label', text);

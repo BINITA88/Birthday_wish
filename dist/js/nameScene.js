@@ -8,12 +8,14 @@
         '<div class="moon-stars" aria-hidden="true"></div><div class="moon-haze" aria-hidden="true"></div>' +
         '<div class="photo-moon"><img class="moon-composite" src="assets/images/moon-pratima-composite.png" alt="Pratima in the moon"></div>' +
         '<div class="sky-name" aria-label="PRATIMA"></div>' +
-        '<div class="moon-note"><p></p><button class="moon-begin" type="button">' + u.esc(C.text.waitButton) + '</button></div>';
+        '<div class="moon-note"><p></p></div>' +
+        '<p class="moon-greeting">' + u.esc(C.text.waitGreeting) + '</p>' +
+        '<button class="moon-begin" type="button">' + u.esc(C.text.waitButton) + '</button>';
       const fx = FX.field(sec, { motes: 36, rgb: '255,233,185', size: 0.75 });
       ctx.add(fx.destroy);
       const skyName = sec.querySelector('.sky-name');
       const letters = Array.from(C.name);
-      const starts = [[30, 22], [70, 19], [85, 42], [22, 52], [78, 67], [38, 72], [57, 28]];
+      const starts = [[20, 53], [78, 51], [89, 65], [15, 70], [73, 76], [35, 78], [55, 53]];
       const shuffledStarts = starts.slice().sort(function () { return Math.random() - .5; });
       const revealOrder = letters.map(function (_, index) { return index; }).sort(function () { return Math.random() - .5; });
       const nodes = letters.map(function (letter, index) {
@@ -30,27 +32,28 @@
       });
       const note = sec.querySelector('.moon-note p');
       const noteWrap = sec.querySelector('.moon-note');
+      const greeting = sec.querySelector('.moon-greeting');
       const btn = sec.querySelector('.moon-begin');
 
-      // Big stars appear across the sky one at a time, reveal their letters, then gather into PRATIMA.
+      const quoteTyping = u.letters(note, C.text.waitLine, 43);
+      ctx.show(noteWrap, 220);
+
+      // Big stars appear below the message, reveal their letters, then gather into PRATIMA.
       revealOrder.forEach(function (letterIndex, sequence) {
-        ctx.later(function () { nodes[letterIndex].classList.add('appeared'); }, 300 + sequence * 470);
-        ctx.later(function () { nodes[letterIndex].classList.add('letter-visible'); }, 540 + sequence * 470);
+        ctx.later(function () { nodes[letterIndex].classList.add('appeared'); }, 600 + sequence * 360);
+        ctx.later(function () { nodes[letterIndex].classList.add('letter-visible'); }, 790 + sequence * 360);
       });
-      const gatherAt = 300 + letters.length * 470 + 360;
+      const gatherAt = 600 + letters.length * 360 + 360;
       ctx.later(function () {
         nodes.forEach(function (node) {
           node.style.left = node.dataset.finalLeft;
-          node.style.top = '42%';
+          node.style.top = '61%';
           node.classList.add('gathered');
         });
       }, gatherAt);
-      ctx.later(function () {
-        noteWrap.classList.add('in');
-        const typing = u.letters(note, C.text.waitLine, 115);
-        note.classList.add('reveal');
-        ctx.show(btn, typing + 400);
-      }, gatherAt + 1750);
+      note.classList.add('reveal');
+      ctx.show(greeting, gatherAt + 1400);
+      ctx.show(btn, Math.max(quoteTyping + 550, gatherAt + 2350));
       ctx.on(btn, 'click', function () {
         if (btn.disabled) return;
         btn.disabled = true;

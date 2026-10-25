@@ -210,15 +210,18 @@
       /* ----- letters: where each one starts out, and where it ends up ----- */
       chars.forEach(function (ch, j) { letters.push({ idx: j, ch: ch, lw: lw[j], flowers: [], g: null }); });
 
+      // Keep each letter in a fixed, separate anchor. In particular, the T at
+      // centre and the M at lower-right remain clearly detached.
       const scatter = [
-        [0.14, 0.10], [0.51, 0.06], [0.84, 0.18], [0.19, 0.51],
-        [0.50, 0.39], [0.81, 0.61], [0.44, 0.75]
-      ].sort(function () { return Math.random() - 0.5; });
+        [0.11, 0.10], [0.50, 0.02], [0.89, 0.10],
+        [0.50, 0.50],
+        [0.11, 0.84], [0.89, 0.84], [0.50, 0.98]
+      ];
       letters.forEach(function (Lt, j) {
         const p = scatter[j % scatter.length];
         const minX = Lt.lw / 2 + padS, maxX = W - minX;
-        Lt.homeCx = Math.max(minX, Math.min(maxX, p[0] * W + u.rand(-W * 0.035, W * 0.035)));
-        Lt.homeTop = Math.max(0, Math.min(H - PH, p[1] * (H - PH) + u.rand(-H * 0.025, H * 0.025)));
+        Lt.homeCx = Math.max(minX, Math.min(maxX, p[0] * W + u.rand(-W * 0.01, W * 0.01)));
+        Lt.homeTop = Math.max(0, Math.min(H - PH, p[1] * (H - PH) + u.rand(-H * 0.01, H * 0.01)));
       });
       const gap = gapRatio * fs;
       const finTop = (H - PH) / 2;

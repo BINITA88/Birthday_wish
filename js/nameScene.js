@@ -8,12 +8,13 @@
         '<div class="moon-stars" aria-hidden="true"></div><div class="moon-haze" aria-hidden="true"></div>' +
         '<div class="photo-moon"><img class="moon-composite" src="assets/images/moon-pratima-composite.png" alt="Pratima in the moon"></div>' +
         '<div class="sky-name" aria-label="PRATIMA"></div>' +
-        '<div class="moon-note"><p></p><button class="moon-begin" type="button">' + u.esc(C.text.waitButton) + '</button></div>';
+        '<p class="moon-greeting"></p>' +
+        '<button class="moon-begin" type="button">' + u.esc(C.text.waitButton) + '</button>';
       const fx = FX.field(sec, { motes: 36, rgb: '255,233,185', size: 0.75 });
       ctx.add(fx.destroy);
       const skyName = sec.querySelector('.sky-name');
       const letters = Array.from(C.name);
-      const starts = [[30, 22], [70, 19], [85, 42], [22, 52], [78, 67], [38, 72], [57, 28]];
+      const starts = [[11, 12], [31, 8], [50, 16], [69, 9], [88, 17], [22, 34], [78, 35]];
       const shuffledStarts = starts.slice().sort(function () { return Math.random() - .5; });
       const revealOrder = letters.map(function (_, index) { return index; }).sort(function () { return Math.random() - .5; });
       const nodes = letters.map(function (letter, index) {
@@ -28,29 +29,31 @@
         skyName.appendChild(node);
         return node;
       });
-      const note = sec.querySelector('.moon-note p');
-      const noteWrap = sec.querySelector('.moon-note');
+      const greeting = sec.querySelector('.moon-greeting');
       const btn = sec.querySelector('.moon-begin');
 
-      // Big stars appear across the sky one at a time, reveal their letters, then gather into PRATIMA.
+      // PRATIMA begins scattered as stars, then gathers into its name.
       revealOrder.forEach(function (letterIndex, sequence) {
-        ctx.later(function () { nodes[letterIndex].classList.add('appeared'); }, 300 + sequence * 470);
-        ctx.later(function () { nodes[letterIndex].classList.add('letter-visible'); }, 540 + sequence * 470);
+        ctx.later(function () { nodes[letterIndex].classList.add('appeared'); }, 600 + sequence * 360);
+        ctx.later(function () { nodes[letterIndex].classList.add('letter-visible'); }, 790 + sequence * 360);
       });
-      const gatherAt = 300 + letters.length * 470 + 360;
+      const gatherAt = 600 + letters.length * 360 + 360;
       ctx.later(function () {
         nodes.forEach(function (node) {
           node.style.left = node.dataset.finalLeft;
-          node.style.top = '42%';
+          node.style.top = '46%';
           node.classList.add('gathered');
         });
       }, gatherAt);
+
+      // Keep the greeting as the only typed line.
+      const greetingAt = gatherAt + 1650;
+      const greetingTyping = Array.from(C.text.waitGreeting).filter(function (ch) { return ch !== ' '; }).length * 120 + 1100;
       ctx.later(function () {
-        noteWrap.classList.add('in');
-        const typing = u.letters(note, C.text.waitLine, 115);
-        note.classList.add('reveal');
-        ctx.show(btn, typing + 400);
-      }, gatherAt + 1750);
+        u.letters(greeting, C.text.waitGreeting, 120);
+        greeting.classList.add('reveal', 'in');
+      }, greetingAt);
+      ctx.show(btn, greetingAt + greetingTyping + 300);
       ctx.on(btn, 'click', function () {
         if (btn.disabled) return;
         btn.disabled = true;

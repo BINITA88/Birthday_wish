@@ -9,6 +9,7 @@
       '<div class="fcard-glow"></div>' +
       '<div class="petal-layer"></div>' +
       '<div class="fcard-art"><div class="sway" style="--sw:' + (4 + seed % 3) + 's;--swd:-' + (seed % 4) + 's;--sa:2.2deg">' + art + '</div></div>' +
+      '<div class="fcard-copy"><h3>' + u.esc(F.cardTitle) + '</h3><p>' + u.esc(F.cardLine) + '</p><small>' + u.esc(F.cardSubline) + '</small></div>' +
       '<button class="btn" type="button" data-choose>' + u.esc(F.button) + '</button>' +
       '</article>';
   }
@@ -19,7 +20,7 @@
       sec.innerHTML =
         '<div class="fs-bg"></div>' +
         '<header class="fs-head"><h2 class="fs-h1 fade-up">' + u.esc(T.flowerHeading1) + '</h2>' +
-        '<p class="fs-h2 fade-up">' + u.esc(T.flowerHeading2) + '</p></header>' +
+        '</header>' +
         '<div class="fs-cards">' + cardHTML('sunflower', 7) + cardHTML('rose', 12) + '</div>';
 
       const fx = FX.field(sec, { motes: 34 });
@@ -32,7 +33,6 @@
       let chosen = null;
 
       ctx.show(sec.querySelector('.fs-h1'), 150);
-      ctx.show(sec.querySelector('.fs-h2'), 1000);
       cards.forEach(function (c, i) { ctx.show(c, 1800 + i * 350); });
 
       function petals(card, n) {
