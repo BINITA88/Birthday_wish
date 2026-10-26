@@ -20,7 +20,7 @@
       const nodes = letters.map(function (letter, index) {
         const point = shuffledStarts[index];
         const node = document.createElement('span');
-        const finalLeft = 50 + (index - (letters.length - 1) / 2) * 9.4;
+        const finalLeft = 50 + (index - (letters.length - 1) / 2) * (sec.clientWidth < 600 ? 12.4 : 9.4);   // wider spacing on phones so the name fills the width
         node.className = 'sky-name-letter';
         node.style.left = point[0] + '%';
         node.style.top = point[1] + '%';

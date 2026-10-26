@@ -67,3 +67,137 @@
   .num { animation-duration: 1s; }
   .pfly { animation-duration: 1s; }
 }
+
+/* ===================== Responsive pass: phones, tablets, laptops ===================== */
+
+/* Tablets held upright: bigger type on the opening and card screens. */
+@media (min-width: 600px) and (orientation: portrait) {
+  .moon-begin { font-size: clamp(.95rem, 2.3vw, 1.3rem); padding: 1em 1.8em; }
+  .fs-h1 { font-size: clamp(2rem, 5vw, 3.4rem); }
+  .fcard { width: min(76vw, 520px); }
+  .fimg { width: min(100%, 520px); }
+  .fcard-copy p { font-size: clamp(1.1rem, 2.8vw, 1.7rem); }
+  .fcard-copy small { font-size: clamp(.95rem, 2.3vw, 1.3rem); }
+  .fcard .btn { font-size: clamp(.95rem, 2.2vw, 1.25rem); padding: .75em 1.6em; }
+  .heart-top { font-size: clamp(.7rem, 1.6vw, 1rem); }
+  .scene-photo .photo-text .btn { font-size: clamp(.8rem, 1.8vw, 1.05rem); }
+  /* the letter on its tall layout */
+  .letter-paper { width: 62vw; height: 56dvh; padding: 2rem 2.2rem; }
+  .letter-paper h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); }
+  .letter-paper p:not(.letter-kicker):not(.letter-signoff) { font-size: clamp(1rem, 2.4vw, 1.5rem); line-height: 1.5; }
+  .letter-kicker { font-size: clamp(.7rem, 1.4vw, .95rem); }
+  .letter-signoff { font-size: clamp(1.4rem, 3vw, 2.2rem) !important; }
+  .replay-letter { font-size: clamp(.85rem, 1.8vw, 1.1rem); }
+}
+
+/* Phones (and any screen) held sideways: everything has to fit in a short, wide window. */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* photo on the left, her flower name and the button on the right */
+  .scene-photo { flex-direction: row; justify-content: flex-start; align-items: center; padding: 0 0 0 7vw; gap: 0; }
+  .scene-photo .photo-wrap { margin: 0; height: min(66dvh, 270px); flex: none; }
+  .scene-photo .photo-name { left: 34%; right: 4%; }
+  .scene-photo .photo-text { left: 34%; right: 4%; bottom: 8dvh; }
+
+  /* the letter: text sized from the window height so it always stays on the paper */
+  .letter-paper { padding: 1rem 1.6rem; }
+  .letter-paper h1 { font-size: clamp(1.2rem, 7dvh, 2rem); margin: 0 0 .15em; line-height: 1.05; }
+  .letter-paper p:not(.letter-kicker):not(.letter-signoff) { font-size: clamp(.6rem, 3.2dvh, .9rem); line-height: 1.38; margin: .3em 0; }
+  .letter-kicker { font-size: .55rem; }
+  .letter-signoff { font-size: clamp(.95rem, 4.5dvh, 1.3rem) !important; margin-top: .4rem !important; }
+  .replay-letter { font-size: .62rem; }
+
+  /* flower card and bouquet: smaller art and title so nothing is pushed off */
+  .fs-head { margin-top: 0; }
+  .fcard-art { height: clamp(90px, 34dvh, 150px); }
+  .bq-title { font-size: clamp(1.8rem, 11dvh, 3rem); }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .scene-flower .fs-head { display: none; }
+  .scene-flower { justify-content: center; padding-top: 0; padding-bottom: 0; }
+  .fs-cards { margin: 0; }
+  .letter-kicker { margin: 0 0 .5em; }
+}
+/* keep the cake's butterflies inside narrow phone screens */
+@media (max-width: 600px) { body .scene-cake { --cw: min(84vw, 860px, 62dvh); } }
+
+/* Large monitors: scale the opening and card screens up so they don't look tiny. */
+@media (min-width: 1500px) and (min-height: 900px) {
+  .moon-begin { font-size: 1.2rem; padding: 1em 2em; }
+  .moon-greeting { font-size: 4rem; }
+  .fs-h1 { font-size: 3.6rem; }
+  .fcard { width: 500px; }
+  .fimg { width: min(100%, 500px); }
+  .fcard-art { height: 400px; }
+  .fcard-copy p { font-size: 1.7rem; }
+  .fcard-copy small { font-size: 1.25rem; }
+  .fcard .btn { font-size: 1.15rem; padding: .8em 1.8em; }
+  .heart-top { font-size: 1rem; }
+  .scene-photo .photo-text .btn { font-size: 1rem; }
+}
+
+/* Phones held upright: the card and opening screens use the full width, with comfortable text. */
+@media (max-width: 600px) and (orientation: portrait) {
+  .fs-h1 { font-size: clamp(1.8rem, 8.4vw, 2.5rem); }
+  .fcard { width: min(88vw, 420px); gap: .8rem; }
+  .fcard-art { height: auto; }
+  .fcard-art .sway { height: auto; }
+  .fimg { width: 100%; }
+  .fcard-copy { width: 100%; }
+  .fcard-copy p { font-size: clamp(1.1rem, 5.2vw, 1.5rem); line-height: 1.35; }
+  .fcard-copy small { font-size: clamp(.95rem, 4.3vw, 1.2rem); line-height: 1.4; }
+  .fcard .btn { font-size: clamp(1rem, 4.4vw, 1.2rem); padding: .8em 1.9em; margin-top: .5rem; }
+  .moon-greeting { font-size: clamp(2.1rem, 9.5vw, 3.2rem); }
+  .moon-begin { font-size: clamp(.95rem, 4vw, 1.15rem); padding: 1em 1.7em; white-space: nowrap; }
+  .heart-top { font-size: clamp(.6rem, 2.6vw, .8rem); }
+  .scene-photo .photo-text .btn { font-size: clamp(.72rem, 3.1vw, .9rem); }
+}
+
+/* Letter on portrait screens (phones, upright tablets): the wide tabletop photo is rebuilt as a tall composition
+   from crops of the same image, so nothing is cut off: blurred wood, the paper in its dark frame, the candle top-left
+   and the roses bottom-right. Landscape screens keep the whole-photo layout. */
+@media (orientation: portrait) {
+  .scene-letter { background: #3a1d0d; overflow: hidden; }
+  .scene-letter::before { content: ''; position: absolute; inset: -24px; z-index: 0; background: url('../assets/images/vintage-letter-tabletop-v2.png') center / cover no-repeat; filter: blur(12px) brightness(.8) saturate(1.1); }
+  .scene-letter::after { content: none; }
+  /* candle (top-left of the photo) */
+  .scene-letter .letter-glow { display: block; position: absolute; z-index: 2; left: -3vw; top: -1vw; width: min(46vw, 260px); aspect-ratio: 1; border-radius: 0; pointer-events: none;
+    background: url('../assets/images/vintage-letter-tabletop-v2.png') 0 0 / 557% auto no-repeat;
+    -webkit-mask-image: radial-gradient(circle at 46% 48%, #000 52%, transparent 74%); mask-image: radial-gradient(circle at 46% 48%, #000 52%, transparent 74%); }
+  /* roses (right edge of the photo) */
+  .scene-letter .letter-botanicals { display: block; position: absolute; z-index: 2; right: -3vw; bottom: -2vw; width: min(38vw, 220px); aspect-ratio: 332 / 651; inset: auto -3vw -2vw auto; opacity: 1; pointer-events: none;
+    background: url('../assets/images/vintage-letter-tabletop-v2.png') 100% 100% / 504% auto no-repeat;
+    -webkit-mask-image: radial-gradient(ellipse at 68% 56%, #000 48%, transparent 76%); mask-image: radial-gradient(ellipse at 68% 56%, #000 48%, transparent 76%); }
+  .scene-letter .letter-stars { display: none; }
+  /* the framed paper */
+  .letter-paper { z-index: 5; left: 50%; top: 52%; width: min(82vw, 600px); height: auto; min-height: 56dvh; max-height: 82dvh; box-sizing: border-box; overflow: auto;
+    display: flex; flex-direction: column; justify-content: center; text-align: center;
+    padding: 1.8rem 1.5rem; border: 9px solid #1d1b18; border-radius: 3px;
+    background: url('../assets/images/vintage-letter-tabletop-v2.png') 50% 42% / 418% auto no-repeat, #ecdcbc;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .6), inset 0 0 0 1px rgba(160, 130, 80, .45), inset 0 0 26px rgba(120, 80, 40, .25);
+    transform: translate(-50%, -50%) scale(.94); }
+  .opened .letter-paper { transform: translate(-50%, -50%) scale(1); }
+  .letter-paper h1, .letter-paper p, .letter-signoff { text-align: center; }
+  .letter-paper h1 { font-size: clamp(1.9rem, 9vw, 3.2rem); }
+  .letter-paper p:not(.letter-kicker):not(.letter-signoff) { font-size: clamp(.92rem, 4vw, 1.2rem); line-height: 1.5; }
+  .letter-kicker { font-size: clamp(.6rem, 2.6vw, .8rem); }
+  .letter-signoff { font-size: clamp(1.25rem, 5.6vw, 1.9rem) !important; }
+  .replay-letter { align-self: center; font-size: clamp(.8rem, 3.4vw, 1rem); }
+}
+@media (min-width: 600px) and (orientation: portrait) {
+  .letter-paper { width: min(74vw, 620px); padding: 2.4rem 2.4rem; }
+  .letter-paper h1 { font-size: clamp(2.4rem, 6vw, 3.8rem); }
+  .letter-paper p:not(.letter-kicker):not(.letter-signoff) { font-size: clamp(1.05rem, 2.5vw, 1.5rem); }
+}
+@media (orientation: portrait) {
+  .scene-letter { background: repeating-linear-gradient(180deg, transparent 0 150px, rgba(18, 7, 2, .6) 150px 153px, transparent 153px 156px), radial-gradient(ellipse at 28% 22%, #86491f 0, #55290f 52%, #2a1408 100%); }
+  .scene-letter::before { opacity: .3; filter: blur(3px) brightness(.7) contrast(1.15); mix-blend-mode: overlay; }
+}
+
+/* Opening screen on phones: a bigger name with the greeting and the button close underneath it (no big gaps). */
+@media (max-width: 600px) and (orientation: portrait) {
+  .sky-name-letter { width: 64px; }
+  .sky-name-letter b { font-size: clamp(2.7rem, 12.8vw, 3.8rem); }
+  .sky-name-letter i { font-size: clamp(3.6rem, 15vw, 5.2rem); }
+  .moon-greeting { top: 56%; }
+  .moon-begin { top: 65%; }
+}

@@ -574,7 +574,7 @@ body.started #sound-btn { opacity: 1; }
 .letter-paper h1 { margin-top: .25rem; font-size: clamp(2rem, 4.7vw, 4rem); color: #38271e; }
 .letter-paper p:not(.letter-kicker):not(.letter-signoff) { font-size: clamp(.94rem, 1.7vw, 1.22rem); line-height: 1.58; color: #33251e; }
 .letter-kicker { color: #765441; }.letter-signoff { color: #3e2d23; }.replay-letter { color: #5b4032; border-bottom-color: #92715a; }
-@media (max-width: 720px) { .scene-letter { background-size: auto 100%; background-repeat: no-repeat; background-color: #4b2613; }.letter-paper { top: 48%; width: 65vw; min-width: 0; height: 62dvh; padding: 1rem 1.35rem; }.letter-paper h1 { font-size: clamp(1.75rem, 8vw, 2.6rem); }.letter-paper p:not(.letter-kicker):not(.letter-signoff) { font-size: clamp(.85rem, 3.7vw, 1.02rem); line-height: 1.45; } }
+@media (max-width: 720px), (orientation: portrait) { .scene-letter { background-size: auto 100%; background-repeat: no-repeat; background-color: #4b2613; }.letter-paper { top: 48%; width: 65vw; min-width: 0; height: 62dvh; padding: 1rem 1.35rem; }.letter-paper h1 { font-size: clamp(1.75rem, 8vw, 2.6rem); }.letter-paper p:not(.letter-kicker):not(.letter-signoff) { font-size: clamp(.85rem, 3.7vw, 1.02rem); line-height: 1.45; } }
 
 
 .letter-paper:focus, .letter-paper:focus-visible { outline: none; }
@@ -582,7 +582,7 @@ body.started #sound-btn { opacity: 1; }
 /* Letter on desktop: show the WHOLE tabletop photo (no zoom/crop) and fit the text to its paper. */
 .letter-paper { scrollbar-width: none; -ms-overflow-style: none; }
 .letter-paper::-webkit-scrollbar { display: none; }
-@media (min-width: 721px) {
+@media (min-width: 721px) and (orientation: landscape) {
   .scene-letter { --w: min(100vw, calc(100dvh * 16 / 9)); background: #2c1509; }
   .scene-letter::before, .scene-letter::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: url('../assets/images/vintage-letter-tabletop-v2.png') center / cover no-repeat; }
   .scene-letter::before { inset: -30px; filter: blur(24px) brightness(.6); }

@@ -82,8 +82,10 @@
         W = sec.clientWidth; H = sec.clientHeight;
         canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
         g.setTransform(dpr, 0, 0, dpr, 0, 0);
-        hs = Math.min(W * 0.42, H * 0.37) / 16;             // pixels per heart unit
-        cx = W / 2; cy = H * 0.44;
+        // the heart and its two-line caption share the height; hs = pixels per heart unit (the heart is about 33 units tall)
+        const capH = Math.max(70, Math.min(104, H * 0.16));
+        hs = Math.min(W * 0.42 / 16, H * 0.37 / 16, (H - capH - 20) / 33);
+        cx = W / 2; cy = (H - (33 * hs + capH)) / 2 + 16.4 * hs;
         caption.style.top = (cy + hs * 16.4 + Math.max(6, H * 0.012)) + 'px';
       }
       resize();

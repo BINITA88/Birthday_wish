@@ -136,7 +136,7 @@
         sec.classList.add('rays-on');                 // 6. rays + particles
         await ctx.sleep(1800);
         // 7. her name blooms from little flowers underneath the framed photo (the old two text lines are gone)
-        const bloom = FX.flowerName(nameBox, C.name, { maxWidth: 1150, finAt: 0.68 });
+        const bloom = FX.flowerName(nameBox, C.name, { maxWidth: 1150, finAt: (window.innerHeight < 500 && window.innerWidth > window.innerHeight) ? 0.5 : 0.68 });
         ctx.add(bloom.destroy);
         await bloom.done;
         // put the button a small, fixed distance under the lowest flower of the name, whatever the window size
