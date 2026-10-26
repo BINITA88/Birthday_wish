@@ -50,16 +50,16 @@
         image: 'assets/images/sunflower-moonlit-hero.png',
         title: 'Sunflower', emoji: '🌻',
         description: 'Like sunshine, warmth, and the little things that make life beautiful.',
-        cardTitle: 'Pratima 🤍',
         cardLine: 'This little world was made just for you.',
+        cardSubline: 'A little surprise, a little happiness, and lots of beautiful wishes. 🌻',
         button: 'Continue ✨'
       },
       rose: {
         image: 'assets/images/rose-moonlit-hero.png',
         title: 'Rose', emoji: '🌹',
         description: 'Elegant, timeless, and beautiful in its own way.',
-        cardTitle: 'Pratima 🌹',
         cardLine: 'Like a rose, you make life beautiful.',
+        cardSubline: 'A little surprise, a little happiness, and lots of beautiful wishes. 🌹',
         button: 'Continue ✨'
       }
     },
@@ -84,12 +84,15 @@
       shopSkip: 'Skip ›',
 
       gardenMessage: 'A little garden, made with love for you…',
+      bouquetTitle: 'Happy Birthday, Pratima',
 
       photoLine1: 'A garden of little memories.',
       photoLine2: 'Pratima, this little world was made just for you. ❤️🌺',
       photoButton: 'A birthday wish for you ♡',
 
       cakeNext: 'Open your letter ♡',
+      heartTop: 'I PROGRAMMED THIS HEARTBEAT',
+      heartScript: 'for you 💗',
 
       dinner1: 'One last little surprise...',
       dinner2: 'Because birthdays deserve more than just cake...',

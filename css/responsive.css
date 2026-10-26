@@ -45,7 +45,7 @@
   .pt2 { font-size: clamp(1.1rem, 3vw, 1.5rem); }
 
   .table { height: 22dvh; }
-  .scene-cake { --cw: min(96vw, 640px, calc(52dvh / .92)); }
+  .scene-cake { --cw: min(96vw, 860px, 60dvh); }
   .finale-title { padding-top: 3rem; }
   .scene-cake .next { bottom: 3dvh; }
 

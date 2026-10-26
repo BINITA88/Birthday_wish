@@ -61,7 +61,9 @@
         App.state.started = true;
         document.body.classList.add('started');
         App.audio.fadeIn('calm', 1200);
-        App.SceneManager.go('blossom', { mode: 'black', duration: 900, hold: 200 });
+        // The flower-letter 'blossom' screen is switched off (its scene stays below): go straight to the sunflower card screen.
+        // App.SceneManager.go('blossom', { mode: 'black', duration: 900, hold: 200 });
+        App.SceneManager.go('flower', { mode: 'black', duration: 900, hold: 200 });
       });
     }
   });

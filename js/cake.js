@@ -1,11 +1,11 @@
-/* SCENE 6 – The birthday cake is built in front of her, flat-design style: a board, sponge with pink cream, white frosting
-   swept on with a spatula, scalloped cream piped on top, berries and a plaque with the greeting. A cold sparkler stands in
+/* SCENE 6 – A three-tier sky-blue cake on a gold-rimmed stand is built in front of her: each tier lands and is dressed with
+   frosting and pearls, the greeting appears, then butterflies settle on its sides one after another. A cold sparkler stands in
    the middle of the top, small candles beside it. Tapping the sparkler lights it: a fountain of sparks shoots up while its
    sound plays. When it dies away the small candles blow out one by one and the finale begins. */
 (function (App) {
   const { CONFIG: C, u, FX } = App;
   const NS = 'http://www.w3.org/2000/svg';
-  const STRIPES = ['#F4B6C2', '#FFF3E0', '#F4C76B', '#FAF7F2'];
+  const STRIPES = ['#ffffff', '#d4ecfb', '#f3d27a', '#bfe3fb'];
 
   /* ---------- SVG cake ---------- */
   /**
@@ -52,83 +52,142 @@
       '<g class="smoke"></g></g></g>';
   }
 
-  /** The candles: a few small ones along the top edge, the big sparkler in the middle. */
-  const TOP = 224, BOT = 338, X0 = 110, XM = 200, X1 = 290, SCALLOPS = 8, CANDLE_BASE = 222;
-  const BERRIES = [136, 160, 186, 214, 240, 264];
+  /* ---- A three-tier sky-blue cake on a gold-rimmed stand, with butterflies resting on its sides ---- */
+  const TIERS = [                                              // x, width, top y, height (bottom tier first)
+    { x: 90,  w: 220, top: 300, h: 62 },
+    { x: 120, w: 160, top: 240, h: 60 },
+    { x: 148, w: 104, top: 186, h: 54 }
+  ];
+  const CANDLE_BASE = 184, LEDGE_BASE = 238;
 
+  /** The candles: four small ones on the top tier, one each on the ledge of the middle tier, the sparkler in the middle. */
   function candleList() {
-    const list = [124, 148, 172, 228, 252, 276].map(function (x) { return { x: x, base: CANDLE_BASE, w: 7, h: 30, fs: 0.62, main: false }; });
+    const list = [[160, CANDLE_BASE], [176, CANDLE_BASE], [224, CANDLE_BASE], [240, CANDLE_BASE], [133, LEDGE_BASE], [267, LEDGE_BASE]]
+      .map(function (p) { return { x: p[0], base: p[1], w: 7, h: 30, fs: 0.62, main: false }; });
     list.forEach(function (c, i) { c.i = i; c.ci = (i * 0.2).toFixed(2); });
-    list.push({ x: XM, base: CANDLE_BASE, h: 84, main: true, i: list.length, ci: (list.length * 0.2 + 0.6).toFixed(2) });
+    list.push({ x: 200, base: CANDLE_BASE, h: 84, main: true, i: list.length, ci: (list.length * 0.2 + 0.6).toFixed(2) });
     return list;
   }
 
-  /* Flat, two-tone shapes: every piece is a light left half and a slightly darker right half, split at x = 200. */
-  function sponge(y, h, cls) {
-    return '<g class="cp ' + cls + '"><rect x="' + X0 + '" y="' + y + '" width="90" height="' + h + '" fill="#f6edbd"/><rect x="' + XM + '" y="' + y + '" width="90" height="' + h + '" fill="#e8dda5"/></g>';
-  }
-  function creamStrip(y, cls) {
-    let s = '<rect x="' + X0 + '" y="' + y + '" width="90" height="6" fill="#fbf5d6"/><rect x="' + XM + '" y="' + y + '" width="90" height="6" fill="#ece3b7"/>';
-    for (let k = 0; k < 8; k++) {
-      const x = 114 + k * 22;
-      s += '<rect x="' + x + '" y="' + y + '" width="14" height="6" rx="3" fill="' + (x < XM ? '#f8bccb' : '#e9a2b6') + '"/>';
+  /** Piped white scallops along the top edge of a tier; each pops in on its own as the piping bag passes. */
+  function scallops(t, k) {
+    const n = Math.round(t.w / 17), r = t.w / n / 2;
+    let s = '';
+    for (let i = 0; i < n; i++) {
+      const xl = t.x + i * r * 2, xr = xl + r * 2;
+      s += '<path class="pop scl scl-' + k + '" d="M' + f1(xl) + ' ' + (t.top - 3) + 'H' + f1(xr) + 'V' + t.top + 'A' + f1(r) + ' ' + f1(r * 1.15) + ' 0 0 1 ' + f1(xl) + ' ' + t.top + 'Z" fill="url(#sk-white)"/>';
     }
-    return '<g class="cp cream ' + cls + '">' + s + '</g>';
+    return s;
   }
-  function strawberry(x) {
-    return '<g transform="translate(' + x + ' 218) scale(1.15)"><g class="pop berry">' +
-      '<path d="M0 -7C9 -9 12 0 0 11C-12 0 -9 -8 0 -7Z" fill="#ea3b52"/><path d="M0 -7C9 -9 12 0 0 11Z" fill="#c42a43"/>' +
-      '<path d="M-6.5 -7L0 -12L6.5 -7L0 -9Z" fill="#4f9a58"/>' +
-      '<circle cx="-3.5" cy="-1" r=".9" fill="#ffe08a"/><circle cx="3" cy="0" r=".9" fill="#ffd36e"/><circle cx="-.5" cy="4.5" r=".9" fill="#ffe08a"/>' +
-      '</g></g>';
+  function f1(n) { return (Math.round(n * 10) / 10).toString(); }
+
+  /** A row of pearls along the foot of a tier. */
+  function pearls(t) {
+    const n = Math.round(t.w / 13), step = t.w / n;
+    let s = '';
+    for (let i = 0; i <= n; i++) {
+      const x = t.x + i * step, y = t.top + t.h - 4.5;
+      s += '<circle cx="' + f1(x) + '" cy="' + y + '" r="3.3" fill="#fff" stroke="#c9dceb" stroke-width=".6"/><circle cx="' + f1(x - 1) + '" cy="' + (y - 1.1) + '" r="1" fill="#fff"/>';
+    }
+    return s;
+  }
+
+  /** Little garlands of pearls draped across the middle tier. */
+  function garlands(t) {
+    const n = 4, w = t.w / n;
+    let s = '';
+    for (let i = 0; i < n; i++) {
+      const x0 = t.x + i * w, x1 = x0 + w, y = t.top + 14, dip = 11;
+      s += '<path d="M' + f1(x0 + 2) + ' ' + y + 'Q' + f1((x0 + x1) / 2) + ' ' + (y + dip * 2) + ' ' + f1(x1 - 2) + ' ' + y + '" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="0.1 4.4"/>';
+      s += '<path d="M' + f1(x0 + 2) + ' ' + y + 'Q' + f1((x0 + x1) / 2) + ' ' + (y + dip * 2) + ' ' + f1(x1 - 2) + ' ' + y + '" fill="none" stroke="#ffffff" stroke-opacity=".0"/>';
+      s += '<circle cx="' + f1((x0 + x1) / 2) + '" cy="' + (y + dip + 1) + '" r="2.6" fill="#f3d27a" stroke="#b58a2a" stroke-width=".6"/>';
+    }
+    return s;
+  }
+
+  /** A tiny row of white blossoms and gold dots on the top tier. */
+  function blossoms(t) {
+    let s = '';
+    for (let i = 0; i < 5; i++) {
+      const x = t.x + 14 + i * (t.w - 28) / 4, y = t.top + 25;
+      for (let k = 0; k < 5; k++) {
+        const a = k * 72 * Math.PI / 180;
+        s += '<circle cx="' + f1(x + Math.sin(a) * 3.1) + '" cy="' + f1(y - Math.cos(a) * 3.1) + '" r="2.3" fill="#fff"/>';
+      }
+      s += '<circle cx="' + f1(x) + '" cy="' + y + '" r="1.7" fill="#f3d27a"/>';
+    }
+    return s;
+  }
+
+  /** A butterfly resting on the cake (about 56 wide). Wings are sky blue, white or blush, with a gold edge. */
+  function butterfly(x, y, scale, rot, tone) {
+    const g = ['sk-bf-a', 'sk-bf-b', 'sk-bf-c'][tone % 3];
+    const half = '<path d="M2 -3C8 -26 34 -30 36 -13C37 -3 16 4 2 0Z" fill="url(#' + g + ')" stroke="#c99a3a" stroke-width="1.1" stroke-linejoin="round"/>' +
+      '<path d="M2 2C18 2 30 9 25 22C20 32 5 24 2 5Z" fill="url(#' + g + ')" stroke="#c99a3a" stroke-width="1.1" stroke-linejoin="round"/>' +
+      '<path d="M3 -2C12 -12 22 -16 30 -14M3 3C14 8 20 14 21 21" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width=".9" stroke-linecap="round"/>' +
+      '<circle cx="24" cy="-14" r="3.2" fill="#fff" fill-opacity=".85"/><circle cx="15" cy="-7" r="1.9" fill="#fff" fill-opacity=".8"/><circle cx="17" cy="14" r="2.4" fill="#fff" fill-opacity=".85"/>';
+    return '<g transform="translate(' + x + ' ' + y + ') rotate(' + rot + ') scale(' + scale + ')"><g class="pop bfly">' +
+      '<g class="bf-wings"><g>' + half + '</g><g transform="scale(-1 1)">' + half + '</g></g>' +
+      '<ellipse cx="0" cy="1" rx="2.3" ry="10.5" fill="#6b4a1e"/><path d="M-.6 -9Q-4 -17 -8 -18M.6 -9Q4 -17 8 -18" fill="none" stroke="#6b4a1e" stroke-width="1" stroke-linecap="round"/>' +
+      '<circle cx="-8" cy="-18" r="1.2" fill="#6b4a1e"/><circle cx="8" cy="-18" r="1.2" fill="#6b4a1e"/></g></g>';
   }
 
   function cakeSVG() {
-    const w = (X1 - X0) / SCALLOPS;
-    let scallops = '';
-    for (let i = 0; i < SCALLOPS; i++) {
-      const cx = X0 + w * (i + 0.5), h = w / 2;
-      scallops += '<path class="pop scallop" d="M' + (cx - h) + ' ' + TOP + 'C' + (cx - h - 2) + ' ' + (TOP - 15) + ' ' + (cx - 4) + ' ' + (TOP - 17) + ' ' + cx + ' ' + (TOP - 24) +
-        'C' + (cx + 4) + ' ' + (TOP - 17) + ' ' + (cx + h + 2) + ' ' + (TOP - 15) + ' ' + (cx + h) + ' ' + TOP + 'Z" fill="' + (cx < XM ? '#ffffff' : '#e2e2e2') + '"/>';
-    }
-    let berries = '';
-    BERRIES.forEach(function (x) { berries += strawberry(x); });
-    const sprigs = [[112, 1], [288, -1]].map(function (p) {
-      return '<g transform="translate(' + p[0] + ' 220)"><g class="pop berry">' +
-        '<ellipse cx="' + (p[1] * 5) + '" cy="-5" rx="9" ry="3.6" fill="#4f9a58" transform="rotate(' + (p[1] * -35) + ' ' + (p[1] * 5) + ' -5)"/>' +
-        '<ellipse cx="' + (p[1] * 2) + '" cy="-9" rx="8" ry="3.2" fill="#3f8248" transform="rotate(' + (p[1] * -75) + ' ' + (p[1] * 2) + ' -9)"/></g></g>';
-    }).join('');
+    const msg = C.cakeMessage;
+    const grad = function (id, a, b, c) { return '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="90" y1="0" x2="310" y2="0"><stop offset="0" stop-color="' + a + '"/><stop offset=".55" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></linearGradient>'; };
 
-    // the written message sits on a red plaque on the front of the cake
-    const msg = C.cakeMessage, fs = Math.min(24, 140 / Math.max(6, msg.length) * 2.3);
-    const plaque = '<g class="pop plaque"><path d="M200 258A80 23 0 0 0 200 304Z" fill="#c4161e"/><path d="M200 258A80 23 0 0 1 200 304Z" fill="#9e1118"/>' +
-      '<text class="cake-msg" x="200" y="287" text-anchor="middle" font-family="\'Great Vibes\',\'Brush Script MT\',cursive" font-size="' + fs.toFixed(1) + '" fill="#ffffff" textLength="132" lengthAdjust="spacingAndGlyphs">' + u.esc(msg) + '</text></g>';
+    const tiers = [];
+    TIERS.forEach(function (t, i) {
+      const k = i + 1, box = ' x="' + t.x + '" y="' + t.top + '" width="' + t.w + '" height="' + t.h + '" rx="3"';
+      tiers.push('<g class="cp cake-l' + k + '"><rect' + box + ' fill="url(#sk-sponge)"/>' +
+        '<rect class="frost frost-' + k + '"' + box + ' fill="url(#sk-sky)"/><rect class="frost frost-' + k + '"' + box + ' fill="url(#sk-shade)"/></g>');
+    });
+
+    // trims, one group per tier, so each can pop in after its tier lands
+    const t1 = TIERS[0], t2 = TIERS[1], t3 = TIERS[2];
+    const trim1 = scallops(t1, 1) + '<g class="pop cake-d1"><rect x="' + t1.x + '" y="' + (t1.top + t1.h - 13) + '" width="' + t1.w + '" height="2.4" fill="#e3bf62"/>' + pearls(t1) + '</g>';
+    const trim2 = scallops(t2, 2) + '<g class="pop cake-d2">' + garlands(t2) + '<rect x="' + t2.x + '" y="' + (t2.top + t2.h - 13) + '" width="' + t2.w + '" height="2.4" fill="#e3bf62"/>' + pearls(t2) + '</g>';
+    const trim3 = scallops(t3, 3) + '<g class="pop cake-d3">' + blossoms(t3) + pearls(t3) + '</g>';
+
+    // the greeting, written in white script across the front of the bottom tier
+    const fs = Math.min(27, 168 / Math.max(6, msg.length) * 2.3);
+    const text = '<text class="pop cake-msg" x="200" y="' + (t1.top + 33) + '" text-anchor="middle" font-family="\'Great Vibes\',\'Brush Script MT\',cursive" font-size="' + fs.toFixed(1) + '" fill="#ffffff" stroke="#3f8cc4" stroke-width="2.4" paint-order="stroke fill" stroke-linejoin="round" textLength="172" lengthAdjust="spacingAndGlyphs">' + u.esc(msg) + '</text>';
+
+    const bf = [[93, 318, 1.05, -22, 0], [307, 326, 1.0, 20, 1], [119, 262, .92, -26, 1], [281, 258, .95, 24, 0], [147, 210, .8, -20, 2], [253, 214, .78, 18, 1]]
+      .map(function (b) { return butterfly(b[0], b[1], b[2], b[3], b[4]); }).join('');
+
+    const stand = '<g class="cp cake-board">' +
+      '<path d="M178 376H222L216 392H184Z" fill="url(#sk-gold)"/><path d="M160 392H240Q246 392 246 398Q246 404 240 404H160Q154 404 154 398Q154 392 160 392Z" fill="url(#sk-gold)"/>' +
+      '<rect x="70" y="361" width="260" height="14" rx="7" fill="url(#sk-plate)" stroke="#d9b25a" stroke-width="1.4"/><rect x="82" y="364" width="236" height="2" rx="1" fill="#fff" fill-opacity=".8"/></g>';
 
     const spatula = '<g class="spatula"><g class="spat-in">' +
-      '<rect x="-4" y="226" width="4" height="112" rx="1.5" fill="#f1f1f1"/><rect x="0" y="226" width="4" height="112" rx="1.5" fill="#d3d3d3"/>' +
-      '<rect x="-5.5" y="216" width="5.5" height="11" fill="#e8e8e8"/><rect x="0" y="216" width="5.5" height="11" fill="#cdcdcd"/>' +
-      '<rect x="-5" y="168" width="5" height="49" rx="2" fill="#b96b2c"/><rect x="0" y="168" width="5" height="49" rx="2" fill="#984f1c"/></g></g>';
-
+      '<rect x="-4" y="0" width="4" height="70" rx="1.5" fill="#f1f1f1"/><rect x="0" y="0" width="4" height="70" rx="1.5" fill="#d3d3d3"/>' +
+      '<rect x="-5.5" y="-10" width="5.5" height="11" fill="#e8e8e8"/><rect x="0" y="-10" width="5.5" height="11" fill="#cdcdcd"/>' +
+      '<rect x="-5" y="-58" width="5" height="49" rx="2" fill="#b96b2c"/><rect x="0" y="-58" width="5" height="49" rx="2" fill="#984f1c"/></g></g>';
     const bag = '<g class="bag"><g class="bag-in">' +
       '<path d="M-4 -3L4 -3L6 -10L-6 -10Z" fill="#b8b8b8"/>' +
       '<path d="M0 -9L-6 -10L-30 -78Q-14 -92 0 -92Z" fill="#ffffff"/><path d="M0 -9L6 -10L30 -78Q14 -92 0 -92Z" fill="#e2e2e2"/></g></g>';
 
     const candles = candleList().map(candleHTML).join('');
 
-    return '<svg class="cake-svg" viewBox="50 98 300 262" role="img" aria-label="A birthday cake saying ' + u.esc(msg) + ', with a sparkler and small candles on top">' +
+    return '<svg class="cake-svg" viewBox="52 96 296 312" role="img" aria-label="A three-tier sky-blue birthday cake saying ' + u.esc(msg) + ', with butterflies on its sides, a sparkler and small candles on top">' +
       '<defs>' +
-        '<radialGradient id="flame" cx=".5" cy=".8" r=".8"><stop offset="0" stop-color="#fff6c8"/><stop offset=".4" stop-color="#ffd24a"/><stop offset=".8" stop-color="#ff8a24"/><stop offset="1" stop-color="#ff5a1f" stop-opacity=".9"/></radialGradient>' +
+        grad('sk-sky', '#c4e6fb', '#9fd2f3', '#76b8e6') + grad('sk-white', '#ffffff', '#f5fafe', '#dbe9f4') +
+        '<linearGradient id="sk-sponge" gradientUnits="userSpaceOnUse" x1="90" y1="0" x2="310" y2="0"><stop offset="0" stop-color="#f9f0c6"/><stop offset="1" stop-color="#e6d79b"/></linearGradient>' +
+        '<linearGradient id="sk-shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#2d6fa6" stop-opacity=".18"/></linearGradient>' +
+        '<linearGradient id="sk-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe9a2"/><stop offset=".5" stop-color="#dcae45"/><stop offset="1" stop-color="#b98a22"/></linearGradient>' +
+        '<linearGradient id="sk-plate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffdf7"/><stop offset="1" stop-color="#eadfc6"/></linearGradient>' +
+        '<linearGradient id="sk-bf-a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e4f4ff"/><stop offset=".55" stop-color="#8ec9f0"/><stop offset="1" stop-color="#4f9dd8"/></linearGradient>' +
+        '<linearGradient id="sk-bf-b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#d4ecfb"/><stop offset="1" stop-color="#9ccdee"/></linearGradient>' +
+        '<linearGradient id="sk-bf-c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2f6"/><stop offset=".55" stop-color="#f9c6d8"/><stop offset="1" stop-color="#ee98b8"/></linearGradient>' +
         '<linearGradient id="steel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6f7983"/><stop offset=".25" stop-color="#dfe5ea"/><stop offset=".5" stop-color="#f8fafb"/><stop offset=".75" stop-color="#aab3bb"/><stop offset="1" stop-color="#6a747e"/></linearGradient>' +
         '<pattern id="knurl" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="none"/><path d="M0 0H5M0 0V5" stroke="rgba(60,70,80,.28)" stroke-width=".8"/></pattern>' +
+        '<radialGradient id="flame" cx=".5" cy=".8" r=".8"><stop offset="0" stop-color="#fff6c8"/><stop offset=".4" stop-color="#ffd24a"/><stop offset=".8" stop-color="#ff8a24"/><stop offset="1" stop-color="#ff5a1f" stop-opacity=".9"/></radialGradient>' +
         '<linearGradient id="fountain" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".25" stop-color="#ffe9a8"/><stop offset=".6" stop-color="#ffb347" stop-opacity=".7"/><stop offset="1" stop-color="#ff8a24" stop-opacity="0"/></linearGradient>' +
         '<radialGradient id="glow"><stop offset="0" stop-color="#ffd37a" stop-opacity=".7"/><stop offset=".5" stop-color="#ffb04a" stop-opacity=".25"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient>' +
       '</defs>' +
-      '<g class="cp cake-board"><rect x="62" y="' + BOT + '" width="138" height="18" fill="#e0bda1"/><rect x="200" y="' + BOT + '" width="138" height="18" fill="#c9a589"/></g>' +
-      sponge(304, 34, 'cake-l1') + creamStrip(298, 'cake-s1') + sponge(264, 34, 'cake-l2') + creamStrip(258, 'cake-s2') + sponge(TOP, 34, 'cake-l3') +
-      '<rect class="frost-l" x="' + X0 + '" y="' + TOP + '" width="90" height="' + (BOT - TOP) + '" fill="#ffffff"/><rect class="frost-r" x="' + XM + '" y="' + TOP + '" width="90" height="' + (BOT - TOP) + '" fill="#e2e2e2"/>' +
-      scallops + plaque + berries + sprigs +
-      '<g class="candles">' + candles + '</g>' +
-      spatula + bag + '</svg>';
+      stand + tiers[0] + trim1 + tiers[1] + trim2 + tiers[2] + trim3 + text + bf + '<g class="candles">' + candles + '</g>' + spatula + bag +
+      '</svg>';
   }
 
   /* ---------- Scene ---------- */
@@ -139,18 +198,12 @@
       S.candlesOut = 0;
 
       sec.innerHTML =
-        '<div class="cake-bg"></div>' +
-        '<div class="cake-spot"></div>' +
-        '<div class="cake-shadow"></div>' +
         '<div class="cake-drop">' + cakeSVG() + '</div>' +
-        '<div class="table"><div class="table-trim"></div></div>' +
-        App.Critters.cheer('left') + App.Critters.cheer('right') +
         '<div class="dimmer"></div>' +
         '<h1 class="finale-title"><span class="l1"></span><span class="l2"></span></h1>' +
         '<button class="btn primary next fade-up" type="button">' + u.esc(T.cakeNext) + '</button>';
 
-      FX.balloons(sec, { count: 4, dim: true, prefill: true });
-      const fx = FX.field(sec, { motes: 32, rgb: '255,205,120', rate: 6, max: 40 });
+      const fx = FX.field(sec, { motes: 0, rgb: '255,205,120', rate: 6, max: 40 });
       ctx.add(fx.destroy);
 
       const svg = sec.querySelector('.cake-svg');
@@ -244,50 +297,51 @@
         App.SceneManager.go('letter', { mode: 'black', duration: 1600, hold: 500 });
       });
 
-      /* --- the entrance: the cake is built step by step --- */
+      /* --- the entrance: stand, then each tier: sponge lands, a spatula spreads frosting, a piping bag pipes scallops, pearls go on; then the greeting, then the butterflies one by one --- */
       const on = function (sel) { const el = svg.querySelector(sel); if (el) el.classList.add('on'); };
+      const popAll = async function (sel, gap) {
+        const els = Array.from(svg.querySelectorAll(sel));
+        for (let i = 0; i < els.length; i++) { els[i].classList.add('on'); await ctx.sleep(gap); }
+      };
       (async function () {
-        // 1. the board, then sponge and pink cream, layer by layer
         await ctx.sleep(250);
         sec.classList.add('landed');
         on('.cake-board');
-        await ctx.sleep(450);
-        ['.cake-l1', '.cake-s1', '.cake-l2', '.cake-s2', '.cake-l3'].forEach(function (sel, i) { ctx.later(function () { on(sel); }, i * 340); });
-        await ctx.sleep(5 * 340 + 350);
-
-        // 2. a spatula sweeps white frosting over the sides
-        on('.spat-in');
-        await ctx.sleep(450);
-        sec.classList.add('sweep');
-        await ctx.sleep(1300 + 250);
-        svg.querySelector('.spat-in').classList.remove('on');
-        await ctx.sleep(450);
-
-        // 3. a piping bag pipes the scalloped cream along the top
+        await ctx.sleep(600);
+        const sp = svg.querySelector('.spatula'), spIn = svg.querySelector('.spat-in');
         const bag = svg.querySelector('.bag'), bagIn = svg.querySelector('.bag-in');
-        const scallops = Array.from(svg.querySelectorAll('.scallop'));
-        const step = (X1 - X0) / scallops.length;
-        bag.style.transform = 'translate(' + (X0 + step / 2) + 'px, 132px)';
-        void bag.getBoundingClientRect();
-        bagIn.classList.add('on');
-        await ctx.sleep(400);
-        for (let i = 0; i < scallops.length; i++) {
-          bag.style.transform = 'translate(' + (X0 + step * (i + 0.5)) + 'px, 214px)';
-          await ctx.sleep(230);
-          scallops[i].classList.add('on');
-          await ctx.sleep(110);
+        const place = function (el, x, y, ms) { el.style.transition = ms ? 'transform ' + ms + 'ms linear' : 'none'; el.style.transform = 'translate(' + x + 'px,' + y + 'px)'; };
+        for (let k = 1; k <= 3; k++) {
+          const t = TIERS[k - 1];
+          on('.cake-l' + k);                                           // 1. the sponge lands
+          await ctx.sleep(520);
+          place(sp, t.x - 8, t.top - 4, 0); void sp.getBoundingClientRect(); spIn.classList.add('on');
+          await ctx.sleep(250);                                        // 2. a spatula sweeps sky-blue frosting over its sides
+          place(sp, t.x + t.w + 8, t.top - 4, 850);
+          svg.querySelectorAll('.frost-' + k).forEach(function (el) { el.classList.add('on'); });
+          await ctx.sleep(900);
+          spIn.classList.remove('on');
+          await ctx.sleep(250);
+          const sc = Array.from(svg.querySelectorAll('.scl-' + k)), step = t.w / sc.length;   // 3. a piping bag pipes white scallops along the top
+          place(bag, t.x + step / 2, t.top - 70, 0); void bag.getBoundingClientRect(); bag.style.transition = 'transform .14s ease-in-out';
+          bagIn.classList.add('on');
+          await ctx.sleep(250);
+          for (let i = 0; i < sc.length; i++) {
+            bag.style.transform = 'translate(' + (t.x + step * (i + 0.5)) + 'px,' + (t.top - 5) + 'px)';
+            await ctx.sleep(150);
+            sc[i].classList.add('on');
+            await ctx.sleep(50);
+          }
+          bag.style.transform = 'translate(' + (t.x + t.w + 50) + 'px,' + (t.top - 70) + 'px)';
+          bagIn.classList.remove('on');
+          await ctx.sleep(300);
+          svg.querySelectorAll('.cake-d' + k).forEach(function (el, i) { ctx.later(function () { el.classList.add('on'); }, i * 40); });   // 4. pearls and little decorations
+          await ctx.sleep(500);
         }
-        bag.style.transform = 'translate(' + (X1 + 40) + 'px, 140px)';
-        bagIn.classList.remove('on');
+        on('.cake-msg');                               // the greeting
+        await ctx.sleep(900);
+        await popAll('.bfly', 520);                    // butterflies settle on the sides, one after another
         await ctx.sleep(500);
-
-        // 4. berries and the plaque with the greeting
-        svg.querySelectorAll('.berry').forEach(function (el, i) { ctx.later(function () { el.classList.add('on'); }, i * 110); });
-        await ctx.sleep(8 * 110 + 200);
-        on('.plaque');
-        await ctx.sleep(700);
-
-        // 5. the candles
         sec.classList.add('candles-in');
         await ctx.sleep(2200);
         sec.classList.add('lit');

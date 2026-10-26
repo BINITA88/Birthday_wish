@@ -160,7 +160,7 @@
    * `done` resolves shortly after the letters have settled. opts.onConverge fires as they start to move.
    */
   FX.flowerName = function (parent, text, opts) {
-    const o = Object.assign({ maxWidth: 1400, bloomMs: 1100, onConverge: null }, opts || {});
+    const o = Object.assign({ maxWidth: 1400, bloomMs: 1100, onConverge: null, finAt: null }, opts || {});   // finAt: where the finished name sits, as a fraction of the parent's height (default: the middle)
     text = String(text).toUpperCase();
     const ts = App.reduced ? 0.4 : 1;                 // timeline scale
     const T = function (ms) { return ms * ts; };
@@ -217,14 +217,17 @@
         [0.50, 0.50],
         [0.11, 0.84], [0.89, 0.84], [0.50, 0.98]
       ];
+      // with finAt the name settles lower down, and the letters start in a band around that height so they never cross what is above
+      const ph = parent.clientHeight || window.innerHeight;
+      const finCenter = o.finAt == null ? H / 2 : Math.max(PH / 2, Math.min(H - PH / 2, o.finAt * ph - (ph - H) / 2));
       letters.forEach(function (Lt, j) {
         const p = scatter[j % scatter.length];
         const minX = Lt.lw / 2 + padS, maxX = W - minX;
         Lt.homeCx = Math.max(minX, Math.min(maxX, p[0] * W + u.rand(-W * 0.01, W * 0.01)));
-        Lt.homeTop = Math.max(0, Math.min(H - PH, p[1] * (H - PH) + u.rand(-H * 0.01, H * 0.01)));
+        Lt.homeTop = Math.max(0, Math.min(H - PH, (o.finAt == null ? p[1] * (H - PH) : finCenter - PH / 2 + (p[1] - 0.5) * H * 0.3) + u.rand(-H * 0.01, H * 0.01)));
       });
       const gap = gapRatio * fs;
-      const finTop = (H - PH) / 2;
+      const finTop = finCenter - PH / 2;
       let fx = (W - Wn) / 2;
       letters.forEach(function (Lt, j) { Lt.finCx = fx + lw[j] / 2; Lt.finTop = finTop; fx += lw[j] + gapF; });
 

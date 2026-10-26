@@ -9,7 +9,7 @@
       '<div class="fcard-glow"></div>' +
       '<div class="petal-layer"></div>' +
       '<div class="fcard-art"><div class="sway" style="--sw:' + (4 + seed % 3) + 's;--swd:-' + (seed % 4) + 's;--sa:2.2deg">' + art + '</div></div>' +
-      '<div class="fcard-copy"><h3>' + u.esc(F.cardTitle) + '</h3><p>' + u.esc(F.cardLine) + '</p>' + (F.cardSubline ? '<small>' + u.esc(F.cardSubline) + '</small>' : '') + '</div>' +
+      '<div class="fcard-copy"><p>' + u.esc(F.cardLine) + '</p><small>' + u.esc(F.cardSubline) + '</small></div>' +
       '<button class="btn" type="button" data-choose>' + u.esc(F.button) + '</button>' +
       '</article>';
   }
@@ -73,7 +73,9 @@
         const ready = App.Garden.prioritize(chosen, App.state.gardenSeed);
         await Promise.all([ctx.sleep(900), Promise.race([ready, ctx.sleep(1800)])]);
         // The rose leads through the little flower shop; the sunflower goes straight into its garden (no black screen).
-        App.SceneManager.go(chosen === 'rose' ? 'shop' : 'garden', { mode: 'cross', duration: 900 });
+        // Old night-to-day garden for the sunflower is switched off (garden.js is kept): the sunflower now opens the bouquet scene.
+        // App.SceneManager.go(chosen === 'rose' ? 'shop' : 'garden', { mode: 'cross', duration: 900 });
+        App.SceneManager.go(chosen === 'rose' ? 'shop' : 'bouquet', { mode: 'cross', duration: 900 });
       }
     }
   });

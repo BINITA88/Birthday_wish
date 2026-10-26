@@ -587,13 +587,134 @@ body.started #sound-btn { opacity: 1; }
   .scene-letter::before, .scene-letter::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: url('../assets/images/vintage-letter-tabletop-v2.png') center / cover no-repeat; }
   .scene-letter::before { inset: -30px; filter: blur(24px) brightness(.6); }
   .scene-letter::after { background-size: contain; }
-  .letter-paper { top: calc(50% - var(--w) * .0113); width: calc(var(--w) * .5); min-width: 0; max-width: none; height: calc(var(--w) * .36); padding: calc(var(--w) * .022) calc(var(--w) * .045); }
-  .letter-paper h1 { font-size: calc(var(--w) * .03); }
-  .letter-paper p:not(.letter-kicker):not(.letter-signoff) { font-size: calc(var(--w) * .0115); line-height: 1.55; }
+  .letter-paper { top: calc(50% - var(--w) * .0113); width: calc(var(--w) * .53); min-width: 0; max-width: none; height: calc(var(--w) * .4); padding: calc(var(--w) * .02) calc(var(--w) * .028); }
+  .letter-paper h1 { font-size: max(2rem, calc(var(--w) * .048)); line-height: 1.1; margin-bottom: .3em; }
+  .letter-paper p:not(.letter-kicker):not(.letter-signoff) { font-size: max(.95rem, calc(var(--w) * .0195)); line-height: 1.5; }
   .letter-paper { display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
   .letter-paper > * { flex: none; }
   .replay-letter { align-self: center; }
-  .letter-kicker { font-size: calc(var(--w) * .0075); }
-  .letter-signoff { font-size: calc(var(--w) * .017) !important; }
-  .replay-letter { font-size: calc(var(--w) * .0095); }
+  .letter-kicker { font-size: max(.7rem, calc(var(--w) * .0095)); }
+  .letter-signoff { font-size: max(1.2rem, calc(var(--w) * .027)) !important; }
+  .replay-letter { font-size: max(.85rem, calc(var(--w) * .0135)); }
 }
+
+/* Cake scene, minimal: a plain flat backdrop, just the big cake (no table, balloons or animals). */
+.scene-cake { --cw: min(96vw, 1000px, 78dvh); background: #5c3f46; }
+.scene-cake .cake-drop { bottom: 16dvh; }
+.scene-cake .cake-svg { filter: none; }
+
+/* Flower card: gold wish line under the greeting, Continue button right below. */
+.fcard { gap: .45rem; }
+.fcard-copy p { margin: .45rem 0 .3rem; }
+.fcard-copy small { margin-top: .15rem; color: #e8c978; }
+.fcard .btn { margin-top: .35rem; }
+
+/* Heart scene: love words gather into a beating heart on pure black. */
+.scene-heart { background: #000; }
+.heart-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.heart-caption { position: absolute; left: 0; right: 0; z-index: 2; text-align: center; opacity: 0; transition: opacity 1.8s ease; pointer-events: none; }
+.heart-caption.in { opacity: 1; }
+.heart-top { margin: 0; font: 400 clamp(.58rem, 1.5vw, .8rem) var(--sans); letter-spacing: .34em; color: rgba(255, 228, 238, .82); }
+.heart-script { margin: .55rem 0 0; font-family: var(--script); font-size: clamp(1.7rem, 4.2vw, 2.7rem); color: #ffd3e4; text-shadow: 0 0 18px rgba(255, 60, 130, .75); }
+
+/* Sunflower bouquet scene: bright cyan backdrop, title, flowers rising into a bouquet with a pink bow. */
+.scene-bouquet { justify-content: flex-start; background: linear-gradient(180deg, #14b0a6 0%, #0cc9c6 50%, #00f2f0 100%); }
+.bq-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 62%, rgba(255,255,255,.4), rgba(255,255,255,0) 52%); }
+.bq-title { position: relative; z-index: 3; margin: clamp(1rem, 4dvh, 2.4rem) 0 0; padding: 0 5vw; font: 700 clamp(1.7rem, 5.4vw, 3.2rem)/1.1 var(--sans); color: #fff; letter-spacing: .01em; text-shadow: 0 0 14px rgba(255,255,255,.55), 0 4px 10px rgba(0,60,70,.35); }
+.bq-art { position: absolute; left: 50%; bottom: 0; z-index: 2; width: min(96vw, 760px, calc(92dvh * 400 / 520)); transform: translateX(-50%); }
+.bq-svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 14px 18px rgba(0,70,80,.25)); }
+.bq-svg .sf { transform: translate(var(--cx), var(--cy)) scale(.3); opacity: 0; transition: opacity .5s ease; }
+.cluster .bq-svg .sf { opacity: 1; transform: translate(var(--cx), var(--cy)) scale(.42); transition: opacity .5s ease, transform 1s cubic-bezier(.3,1.6,.5,1); }
+.bloom .bq-svg .sf { transform: translate(var(--tx), var(--ty)) scale(calc(var(--s) * 1.15)); transition: transform 1.9s cubic-bezier(.2,.85,.25,1.04) var(--d); }
+.bq-svg .sway { transform-box: fill-box; transform-origin: 50% 50%; }
+.bloom .bq-svg .sway { animation: bqSway 4.2s ease-in-out var(--sd) infinite alternate; }
+@keyframes bqSway { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+.bq-svg .stem { fill: none; stroke: #3b8a2c; stroke-width: 5.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.bloom .bq-svg .stem { stroke-dashoffset: 0; transition: stroke-dashoffset 1.9s cubic-bezier(.3,.8,.3,1) var(--d); }
+.bq-svg .leaf { fill: #3f9230; transform-box: fill-box; transform-origin: 0 50%; transform: scale(0); }
+.leafy .bq-svg .leaf { transform: scale(1); transition: transform .7s cubic-bezier(.3,1.5,.5,1) var(--d); }
+.bq-svg .bow { transform-box: fill-box; transform-origin: 50% 40%; transform: scale(0); opacity: 0; }
+.tied .bq-svg .bow { transform: scale(1); opacity: 1; transition: transform .8s cubic-bezier(.3,1.7,.5,1), opacity .3s ease; }
+.bq-svg .blade { fill: #34b85a; opacity: .75; transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); }
+.grassy .bq-svg .blade { transform: scaleY(1); transition: transform 1.1s cubic-bezier(.3,1.2,.4,1) var(--d); animation: bqGrass 3.4s ease-in-out calc(1.2s + var(--d)) infinite alternate; }
+@keyframes bqGrass { from { transform: scaleY(1) rotate(-2deg); } to { transform: scaleY(1) rotate(2.5deg); } }
+
+/* Bouquet scene on black: a warm glow behind the flowers and an elegant gold script title. */
+.scene-bouquet { background: #000; }
+.bq-glow { background: radial-gradient(ellipse at 50% 62%, rgba(255,196,84,.2), rgba(255,170,60,.06) 38%, rgba(0,0,0,0) 62%); }
+.bq-title { margin-top: clamp(.8rem, 3.5dvh, 2.2rem); font: 400 clamp(2.9rem, 8.6vw, 6rem)/1.05 var(--script); letter-spacing: .01em; color: transparent; background: linear-gradient(180deg, #fffaf0 0%, #ffe9b5 45%, #f4c15a 100%); -webkit-background-clip: text; background-clip: text; text-shadow: none; filter: drop-shadow(0 0 16px rgba(255,190,80,.5)) drop-shadow(0 3px 6px rgba(0,0,0,.6)); }
+.bq-svg { filter: drop-shadow(0 0 26px rgba(255,190,80,.22)); }
+.bq-title { line-height: 1.25; padding: .12em 5vw .28em; margin-top: clamp(.2rem, 1.5dvh, 1rem); }
+
+/* Photo scene on vintage floral stationery (background drawn in code by js/floralBg.js). */
+.scene-photo { background: #efe3c2; scrollbar-width: none; -ms-overflow-style: none; }
+.scene-photo::-webkit-scrollbar { display: none; }
+.photo-floral { position: fixed; inset: 0; z-index: 0; pointer-events: none; transition: filter 1s ease; }
+.photo-floral.defocus { filter: blur(6px); }
+.floral-svg { display: block; width: 100%; height: 100%; }
+.fl-sway { animation: flSway 8s ease-in-out infinite alternate; }
+.fl-tl { transform-origin: 0 0; }
+.fl-br { transform-origin: 100% 100%; animation-delay: -4s; }
+@keyframes flSway { from { transform: rotate(-.45deg); } to { transform: rotate(.45deg); } }
+.scene-photo .vig { background: radial-gradient(ellipse at 50% 45%, transparent 58%, rgba(120, 82, 32, .2)); }
+.scene-photo .spot { background: radial-gradient(circle, rgba(255, 252, 238, .75), rgba(255, 244, 214, .25) 42%, transparent 68%); }
+.scene-photo .photo-wrap { height: clamp(210px, 40dvh, 420px); }
+.scene-photo .photo-frame { box-shadow: 0 0 0 1px rgba(255, 243, 224, .7), 0 18px 44px rgba(92, 52, 30, .38), 0 0 50px rgba(244, 199, 107, .3); }
+.scene-photo .photo-text { background: none; }
+.scene-photo .pt1 { color: #4a3228; text-shadow: 0 1px 0 rgba(255, 255, 255, .6); }
+.scene-photo .pt2 { color: #8f3f58; text-shadow: 0 1px 0 rgba(255, 255, 255, .6); }
+
+/* Photo scene: ornate gold frame round the arched photo, her flower-made name underneath, no text lines. */
+.scene-photo { justify-content: flex-start; padding-top: 0; }
+.scene-photo .photo-wrap { margin-top: 16dvh; height: clamp(190px, 36dvh, 400px); }
+.photo-ornate { position: absolute; left: -50%; top: -50%; width: 200%; height: 200%; z-index: 0; pointer-events: none; overflow: visible; }
+.scene-photo .photo-frame { z-index: 1; padding: 0; background: none; box-shadow: none; }
+.scene-photo .photo-frame video, .scene-photo .photo-frame img { border-radius: 50% 50% 20px 20px / 37.5% 37.5% 20px 20px; }
+.photo-name { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.scene-photo .photo-text { position: absolute; left: 0; right: 0; bottom: 2.5dvh; z-index: 7; width: auto; margin: 0; padding: 0; display: flex; justify-content: center; background: none; }
+
+/* The old celebration step is an empty hand-off scene: keep it black in case it is ever shown. */
+.scene-celebration { background: #000; }
+
+/* Photo scene: black ground (the flower border, frame and name stay as they were). */
+.scene-photo { background: #000; }
+.scene-photo .vig { background: radial-gradient(ellipse at 50% 45%, transparent 58%, rgba(0, 0, 0, .5)); }
+.scene-photo .spot { background: radial-gradient(circle, rgba(255, 228, 175, .3), rgba(255, 200, 120, .1) 42%, transparent 68%); }
+.scene-photo .photo-frame { box-shadow: none; }
+.scene-photo .spot { background: radial-gradient(circle, rgba(255, 228, 175, .1), rgba(255, 200, 120, .03) 42%, transparent 68%); }
+
+/* Realistic frame: the window sits recessed in the metal, with a faint glass sheen over the photo. */
+.scene-photo .photo-wrap { margin-top: 13dvh; height: clamp(200px, 40dvh, 440px); }
+.scene-photo .photo-frame::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: 50% 50% 20px 20px / 37.5% 37.5% 20px 20px;
+  background: linear-gradient(118deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 24%, rgba(255,255,255,0) 42%), radial-gradient(ellipse at 50% 50%, transparent 62%, rgba(0,0,0,.38) 100%);
+  box-shadow: inset 0 3px 10px rgba(0,0,0,.65), inset 0 0 0 1px rgba(0,0,0,.5); }
+
+/* Photo scene: no rotating sun-ray light or spotlight behind the framed photo. */
+.scene-photo .photo-rays, .scene-photo .spot { display: none; }
+
+/* Softer glass over the photo (the frame now has a flat gold look like a mirror, not a deep molding). */
+.scene-photo .photo-wrap { margin-top: 15dvh; }
+.scene-photo .photo-frame::after { background: linear-gradient(118deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 26%, rgba(255,255,255,0) 44%); box-shadow: inset 0 0 0 1px rgba(110,70,10,.55); }
+
+/* Photo scene button: minimal, a thin gold outline with small spaced text, right under the name. */
+.scene-photo .photo-text { bottom: 14dvh; }
+.scene-photo .photo-text .btn { min-height: 0; padding: .7em 1.9em; background: transparent; color: #f1d58a; border: 1px solid rgba(241, 213, 138, .65); border-radius: 999px; box-shadow: none; text-shadow: none; font: 400 clamp(.72rem, 1.5vw, .88rem) var(--sans); letter-spacing: .22em; text-transform: uppercase; transition: background .35s ease, color .35s ease, border-color .35s ease, opacity 1.5s var(--ease), transform 1.5s var(--ease); }
+.scene-photo .photo-text .btn:hover, .scene-photo .photo-text .btn:focus-visible { background: rgba(241, 213, 138, .14); color: #fff3cc; border-color: #f1d58a; outline: none; }
+.scene-photo .photo-wrap { margin-top: 9dvh; }
+
+/* Sky-blue three-tier cake on a deep night-sky backdrop; butterflies flap their wings while they rest on the cake. */
+body .scene-cake { --cw: min(96vw, 860px, 62dvh); background: radial-gradient(ellipse at 50% 42%, #22406a 0, #0f1d35 58%, #070d19 100%); }
+.scene-cake .cake-drop { bottom: 14dvh; }
+body .scene-cake .next { bottom: 3dvh; }
+.pop.bfly { transform-origin: 50% 50%; transition-duration: .1s, .6s; transition-timing-function: ease, cubic-bezier(.3,1.9,.5,1); }
+.bfly .bf-wings { transform-box: fill-box; transform-origin: 50% 50%; animation: bfFlap 1.1s ease-in-out infinite alternate; }
+.bfly:nth-of-type(2n) .bf-wings { animation-duration: 1.45s; animation-delay: -.5s; }
+@keyframes bfFlap { from { transform: scaleX(1); } to { transform: scaleX(.5); } }
+.scene-cake .cake-msg { filter: drop-shadow(0 1px 1px rgba(30, 90, 150, .5)); }
+
+/* Sky cake build: the spatula spreads the frosting, the piping bag pipes the scallops (each tier in turn). */
+.scene-cake .frost { transform-box: fill-box; transform-origin: 0 50%; transform: scaleX(0); }
+.scene-cake .frost.on { transform: none; transition: transform .85s linear; }
+.scene-cake .spatula, .scene-cake .bag { transform: translate(0, 0); }
+.scene-cake .bag { transition: transform .14s ease-in-out; }
+.pop.scl { transform-origin: 50% 0%; }

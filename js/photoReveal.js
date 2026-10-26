@@ -52,24 +52,32 @@
   App.SceneManager.register('photo', {
     init(sec, ctx) {
       const T = C.text;
-      const g = Garden.build(sec, { flower: App.state.flower || 'sunflower', animate: false, seed: App.state.gardenSeed });
+      // The old sunflower-garden backdrop is switched off (Garden stays in garden.js): the photo now sits on vintage floral stationery.
+      // const g = Garden.build(sec, { flower: App.state.flower || 'sunflower', animate: false, seed: App.state.gardenSeed });
+      sec.insertAdjacentHTML('afterbegin', '<div class="photo-floral" aria-hidden="true"></div>');
+      const floral = sec.querySelector('.photo-floral');
+      const g = { root: floral };                 // the intro below softens this backdrop exactly as it used to soften the garden
+      function paintFloral() { floral.innerHTML = App.floralBackground(sec.clientWidth, sec.clientHeight, { dark: true }); }
+      paintFloral();
+      let floralRaf = 0;
+      ctx.on(window, 'resize', function () { cancelAnimationFrame(floralRaf); floralRaf = requestAnimationFrame(paintFloral); });
+      ctx.add(function () { cancelAnimationFrame(floralRaf); });
 
       sec.insertAdjacentHTML('beforeend',
         '<div class="vig"></div><div class="spot"></div>' +
-        '<div class="photo-wrap"><div class="photo-rays"></div><div class="photo-frame"></div></div>' +
+        '<div class="photo-wrap"><div class="photo-rays"></div>' + App.ornateFrame() + '<div class="photo-frame"></div></div>' +
+        '<div class="photo-name"></div>' +
         '<div class="photo-text">' +
-          '<p class="pt1 fade-up">' + u.esc(T.photoLine1) + '</p>' +
-          '<p class="pt2 fade-up">' + u.esc(T.photoLine2) + '</p>' +
           '<button class="btn primary fade-up" type="button">' + u.esc(T.photoButton) + '</button>' +
         '</div>');
 
-      const fx = FX.field(sec, { motes: 56, rgb: '255,220,140', size: 1.1 });
+      const fx = FX.field(sec, { motes: 44, rgb: '255,220,140', size: 1.0 });
       ctx.add(fx.destroy);
 
       const wrap = sec.querySelector('.photo-wrap');
       const frame = sec.querySelector('.photo-frame');
       const spot = sec.querySelector('.spot');
-      const pt1 = sec.querySelector('.pt1'), pt2 = sec.querySelector('.pt2'), btn = sec.querySelector('.btn');
+      const nameBox = sec.querySelector('.photo-name'), btn = sec.querySelector('.btn');
       const flower = App.state.flower || 'sunflower';
       // Frame content: her photo, or an elegant monogram if the file is missing.
       let video = null;
@@ -110,7 +118,7 @@
       ctx.on(btn, 'click', function () {
         if (btn.disabled) return;
         btn.disabled = true;
-        App.SceneManager.go('celebration', { mode: 'black', duration: 1100, hold: 250 });
+        App.SceneManager.go('heart', { mode: 'black', duration: 1100, hold: 250 });   // straight to the heart: the old empty 'celebration' step flashed a blank pink screen
       });
 
       (async function () {
@@ -126,11 +134,26 @@
         await ctx.sleep(900);
         g.root.classList.remove('hold');
         sec.classList.add('rays-on');                 // 6. rays + particles
-        await ctx.sleep(600);
-        pt1.classList.add('in');
-        await ctx.sleep(3200);
-        pt2.classList.add('in');
-        await ctx.sleep(2600);
+        await ctx.sleep(1800);
+        // 7. her name blooms from little flowers underneath the framed photo (the old two text lines are gone)
+        const bloom = FX.flowerName(nameBox, C.name, { maxWidth: 1150, finAt: 0.68 });
+        ctx.add(bloom.destroy);
+        await bloom.done;
+        // put the button a small, fixed distance under the lowest flower of the name, whatever the window size
+        const cv = nameBox.querySelector('canvas'), photoText = sec.querySelector('.photo-text');
+        if (cv && photoText) {
+          try {
+            const w = cv.width, h = cv.height, px = cv.getContext('2d').getImageData(0, 0, w, h).data;
+            let last = -1;
+            for (let y = h - 1; y >= 0 && last < 0; y--) { for (let x = 0; x < w; x += 3) { if (px[(y * w + x) * 4 + 3] > 40) { last = y; break; } } }
+            if (last >= 0) {
+              const r = cv.getBoundingClientRect(), sr = sec.getBoundingClientRect();
+              photoText.style.bottom = 'auto';
+              photoText.style.top = Math.round(r.top - sr.top + last * r.height / h + 30) + 'px';
+            }
+          } catch (e) { /* keep the default position */ }
+        }
+        await ctx.sleep(700);
         btn.classList.add('in');
       })();
     }
