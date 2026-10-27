@@ -125,7 +125,7 @@
             bg.addColorStop(0, '#3a0c22'); bg.addColorStop(1, '#14030b');
             g.fillStyle = bg; g.fillRect(cx - 18 * hs, cy - 18 * hs, 36 * hs, 36 * hs);
             const iw = 14 * hs * beat, ih = iw * cutout.naturalHeight / cutout.naturalWidth;   // a close-up selfie: her face sits in the middle of the heart
-            g.drawImage(cutout, cx - iw / 2, cy - 9.4 * hs * beat, iw, ih);
+            g.drawImage(cutout, cx - iw / 2, cy - 7.3 * hs * beat, iw, ih);
             g.restore();
           }
         }
