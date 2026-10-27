@@ -88,11 +88,26 @@
 
       photoLine1: 'A garden of little memories.',
       photoLine2: 'Pratima, this little world was made just for you. ❤️🌺',
-      photoButton: 'A birthday wish for you ♡',
+      photoButton: 'Open your surprise 🎈',
 
-      cakeNext: 'Open your letter ♡',
-      heartTop: 'I PROGRAMMED THIS HEARTBEAT',
-      heartScript: 'for you 💗',
+      cakeNext: 'Message for You ✉️',
+      birthdayLine: 'Every little detail,\nI created just for you. 💗',
+
+      flowerCaps: [
+        { main: 'Sunflowers for Your Sunshine', sub: 'Because you light up every room ☀️' },
+        { main: 'Roses for Your Grace', sub: 'Because you make life more beautiful 🌹' },
+        { main: 'Daisies for Your Smile', sub: 'Because your joy is pure and bright 🌼' }
+      ],
+
+      wishTitle: 'A Birthday Wish for You',
+      wishCta: 'Click for Magic ✨',
+
+      msgOpen: 'OPEN',
+      msgGreeting: 'Dearest Pratima,',
+      msgP1: 'May every new day bring you soft reasons to smile, warm people to hold close, and beautiful little moments that feel like magic.',
+      msgP2: 'You deserve a world that blooms gently around you. Happy Birthday, Pratima. ❤️',
+      msgSign: 'With all my love,',
+      finalWish: 'MANY MANY HAPPY RETURNS OF THE DAY, MY DEAR BOSS ❤️🌹',
 
       dinner1: 'One last little surprise...',
       dinner2: 'Because birthdays deserve more than just cake...',

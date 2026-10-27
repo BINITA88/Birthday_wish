@@ -78,6 +78,7 @@
       const frame = sec.querySelector('.photo-frame');
       const spot = sec.querySelector('.spot');
       const nameBox = sec.querySelector('.photo-name'), btn = sec.querySelector('.btn');
+      u.hint(btn);
       const flower = App.state.flower || 'sunflower';
       // Frame content: her photo, or an elegant monogram if the file is missing.
       let video = null;

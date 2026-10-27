@@ -1,0 +1,180 @@
+/* Loaded last. 1) "tap here" treatment for every clickable call-to-action, 2) the bouquet's wish button, 3) the heart scene's
+   birthday caption with balloons, 4) the "Message for You" envelope / letter / final wish scene. */
+
+/* ---------- 1. Clickable elements: one distinct colour + a tapping finger ---------- */
+html body .btn.cta,
+html body .scene .btn.cta,
+html body .moon-begin.cta,
+.cta-look,
+.bq-wish-cta {
+  border: 1px solid rgba(255, 235, 189, .75) !important;
+  color: #fff5da !important;
+  background: rgba(18, 28, 61, .5) !important;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border-radius: 999px;
+  padding: .9em 1.4em;
+  font: 400 clamp(.76rem, 2.5vw, .95rem)/1.1 var(--sans);
+  letter-spacing: .12em;
+  text-shadow: none;
+  box-shadow: 0 0 0 0 rgba(255, 235, 189, .4), 0 4px 18px rgba(0, 0, 0, .35) !important;
+  animation: ctaPulse 2.2s ease-out infinite;
+}
+html body .btn.cta:hover, html body .scene .btn.cta:hover, html body .moon-begin.cta:hover,
+html body .btn.cta:focus-visible, .bq-wish:hover .bq-wish-cta, .bq-wish:focus-visible .bq-wish-cta { background: rgba(255, 239, 192, .18) !important; filter: none; outline: none; }
+@keyframes ctaPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 235, 189, .4), 0 4px 18px rgba(0, 0, 0, .35); }
+  70%  { box-shadow: 0 0 0 14px rgba(255, 235, 189, 0), 0 4px 18px rgba(0, 0, 0, .35); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 235, 189, 0), 0 4px 18px rgba(0, 0, 0, .35); }
+}
+
+.tap-hint {
+  --bx: 0px; --by: 0px; --ax: 0px; --ay: 0px;       /* centring offset, and how far away the finger rests (px) */
+  position: absolute; z-index: 9; pointer-events: none; line-height: 1;
+  font-size: clamp(1.9rem, 6.4vw, 2.6rem);
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .55));
+  animation: tapHint 1.4s ease-in-out infinite;
+}
+.tap-hint.side-below { left: 50%; top: 100%;    margin-top: .12em; --bx: -50%; --ay: 14px; }
+.tap-hint.side-above { left: 50%; bottom: 100%; margin-bottom: .12em; --bx: -50%; --ay: -14px; }
+.tap-hint.side-left  { right: 100%; top: 50%;   margin-right: .15em; --by: -50%; --ax: -14px; }
+.tap-hint.side-right { left: 100%;  top: 50%;   margin-left: .15em;  --by: -50%; --ax: 14px; }
+@keyframes tapHint {
+  0%, 100% { transform: translate(calc(var(--bx) + var(--ax)), calc(var(--by) + var(--ay))) scale(1); }
+  42%, 58% { transform: translate(calc(var(--bx) - var(--ax) * .35), calc(var(--by) - var(--ay) * .35)) scale(.86); }
+}
+.btn:disabled .tap-hint { display: none; }
+
+/* ---------- 2. Bouquet: "A Birthday Wish for You" + Click for Magic ---------- */
+.bq-wish {
+  position: absolute; z-index: 6; top: clamp(.8rem, 4.5dvh, 2.6rem); left: 50%;
+  width: min(94vw, 760px); padding: .2em; border: 0; background: none; color: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: clamp(.5rem, 1.8dvh, 1rem);
+  -webkit-tap-highlight-color: transparent;
+}
+.bq-wish.fade-up { transform: translate(-50%, 18px); }
+.bq-wish.fade-up.in { transform: translate(-50%, 0); }
+.bq-wish-text {
+  font: 400 clamp(2.2rem, min(8.4vw, 9.5dvh), 4.8rem)/1.12 var(--script); padding: .05em .3em .12em;
+  color: transparent; background: linear-gradient(180deg, #fffaf0 0%, #ffe9b5 45%, #f4c15a 100%);
+  -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(0 0 16px rgba(255, 190, 80, .5)) drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+}
+@media (max-width: 600px) { .bq-wish { top: 8dvh; } }
+.bq-wish-cta { position: relative; display: inline-block; }
+.bq-wish:focus-visible { outline: none; }
+
+/* top caption that names the growing flower */
+.bq-cap { position: absolute; z-index: 5; top: clamp(.8rem, 4.5dvh, 2.6rem); left: 0; right: 0; padding: 0 5vw; text-align: center; pointer-events: none; opacity: 0; transform: translateY(12px); transition: opacity .9s ease, transform .9s var(--ease); }
+.bq-cap.in { opacity: 1; transform: none; }
+.bq-cap p { margin: 0; }
+.bq-cap-main {
+  font: 400 clamp(2rem, min(7.2vw, 8.6dvh), 4.4rem)/1.12 var(--script); padding: .05em .3em .12em;
+  color: transparent; background: linear-gradient(180deg, #fffaf0 0%, #ffe9b5 45%, #f4c15a 100%);
+  -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(0 0 16px rgba(255, 190, 80, .5)) drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+}
+.bq-cap-sub { margin-top: .2em; font: italic 400 clamp(1rem, 2.6vw, 1.45rem)/1.3 var(--serif); letter-spacing: .04em; color: #ffe9c0; text-shadow: 0 2px 8px rgba(0, 0, 0, .7); }
+@media (max-width: 600px) { .bq-cap { top: 8dvh; } }
+
+/* ---------- 3. Heart scene: "Happy Birthday Pratima" with balloons beside it ---------- */
+.hb-text {
+  margin: 0 auto; max-width: 90vw; white-space: pre-line; font: 400 clamp(1.6rem, min(4.6vw, 5.4dvh), 3rem)/1.15 var(--script);
+  color: #ffe6f0; text-shadow: 0 0 18px rgba(255, 60, 130, .85), 0 0 44px rgba(255, 60, 130, .45);
+}
+
+/* ---------- 4. Message scene ---------- */
+.scene-message { background: #3a1d0d url('../assets/images/vintage-letter-tabletop.png') center / cover no-repeat; }
+.msg-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 46%, rgba(255, 200, 120, .14), rgba(0, 0, 0, .5) 90%); }
+
+.msg-stage { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: clamp(1.8rem, 6dvh, 3rem); transition: opacity .8s ease, transform .9s var(--ease); }
+.written .msg-stage { opacity: 0; transform: translateY(46px) scale(.9); pointer-events: none; }
+
+.env {
+  position: relative; width: min(82vw, 430px, 84dvh); aspect-ratio: 3 / 2; perspective: 900px;
+  opacity: 0; transform: translateY(-90%) rotate(-7deg) scale(.9);
+  transition: transform 1.2s cubic-bezier(.2, .9, .3, 1.04), opacity .7s ease;
+  filter: drop-shadow(0 22px 22px rgba(0, 0, 0, .55));
+}
+.settled .env { opacity: 1; transform: rotate(-2deg); }
+.env > div { position: absolute; }
+.env-back  { inset: 0; border-radius: 6px; background: linear-gradient(160deg, #d6b283, #bf9568); }
+.env-sheet { left: 7%; right: 7%; top: 6%; height: 90%; border-radius: 3px; background: linear-gradient(180deg, #fffaec, #f6ead0); box-shadow: inset 0 0 0 1px rgba(120, 90, 60, .18); transition: transform .95s var(--ease) .15s; }
+.rising .env-sheet { transform: translateY(-58%); }
+.env-front { inset: 0; border-radius: 6px; background: linear-gradient(160deg, #f4e1c3, #e4c79c); clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%); }
+.env-front::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 49.4%, rgba(120, 85, 50, .22) 50%, transparent 50.6%) 0 0 / 50% 100% no-repeat, linear-gradient(225deg, transparent 49.4%, rgba(120, 85, 50, .22) 50%, transparent 50.6%) 100% 0 / 50% 100% no-repeat; }
+.env-flap  { left: 0; right: 0; top: 0; height: 56%; z-index: 3; background: linear-gradient(180deg, #ecd5b0, #dbb98c); clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: 50% 0; transition: transform .95s var(--ease) .25s; }
+.opening .env-flap { transform: rotateX(180deg); }
+.env-to    { left: 9%; bottom: 11%; z-index: 4; font: 400 clamp(1rem, 3.6vw, 1.45rem) var(--script); color: #6a4529; }
+.env-to b  { font-weight: 400; }
+.env-seal  {
+  left: 50%; top: 56%; z-index: 5; width: 17%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%);
+  display: grid; place-items: center; color: #ffd6dd; font-size: clamp(1rem, 4.4vw, 1.8rem);
+  background: radial-gradient(circle at 35% 30%, #f0546d, #b3142f 58%, #72091f);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .5), inset 0 0 0 3px rgba(255, 255, 255, .1), inset 0 -3px 6px rgba(60, 0, 10, .45);
+  transition: transform .55s ease, opacity .45s ease;
+}
+.opening .env-seal { transform: translate(-50%, -50%) scale(.2) rotate(50deg); opacity: 0; }
+
+.msg-open { letter-spacing: .34em; padding-left: 2.2em; padding-right: 1.9em; }
+
+.msg-paper {
+  position: absolute; z-index: 4; left: 50%; top: 50%; width: min(88vw, 640px); min-height: min(64dvh, 520px); max-height: min(82dvh, 720px);
+  box-sizing: border-box; overflow: auto; padding: clamp(1.5rem, 5vw, 3.2rem); text-align: left; color: #3a281e;
+  background: linear-gradient(180deg, #fffaec, #f5e7c8); border-radius: 3px;
+  box-shadow: 0 26px 55px rgba(0, 0, 0, .6), inset 0 0 46px rgba(150, 110, 60, .2);
+  opacity: 0; pointer-events: none; transform: translate(-50%, -26%) scale(.55) rotate(-3deg);
+  transition: opacity .7s ease, transform 1s var(--ease);
+  scrollbar-width: none;
+}
+.msg-paper::-webkit-scrollbar { display: none; }
+.msg-paper:focus { outline: none; }
+.written .msg-paper { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) rotate(-1deg); }
+.msg-paper > * { margin: 0; }
+.msg-paper h1 { font: 400 clamp(2.3rem, 7.4vw, 3.8rem)/1.1 var(--script); color: #3a281e; margin-bottom: .35em; text-align: left; text-shadow: none; }
+.msg-paper p { font: italic 400 clamp(1.02rem, 2.8vw, 1.32rem)/1.65 var(--serif); margin-bottom: .8em; color: #33241b; }
+.msg-paper p:empty, .msg-paper h1:empty { display: none; }
+.msg-paper .mp-sign { margin-top: 1.1em; text-align: right; font: 400 clamp(1.7rem, 5.4vw, 2.5rem)/1.2 var(--script); color: #5a3a28; }
+.msg-paper .typing::after { content: ''; display: inline-block; width: 2px; height: 1.05em; margin-left: 3px; vertical-align: -.15em; background: #7a4a34; animation: caret .8s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+
+.msg-finale {
+  position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(1.6rem, 6dvh, 3rem); padding: 0 6vw; text-align: center; opacity: 0; pointer-events: none; transition: opacity 1.4s ease;
+  background: radial-gradient(ellipse at center, rgba(30, 8, 15, .93), rgba(0, 0, 0, .97)); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+}
+.party .msg-finale { opacity: 1; pointer-events: auto; }
+.mf-text {
+  position: relative; z-index: 4; margin: 0; max-width: 92vw; opacity: 0; white-space: pre-line;
+  font: 700 clamp(1.6rem, 3.7vw, 3.8rem)/1.25 var(--serif); letter-spacing: .05em; color: #ffe7a8;
+  text-shadow: 0 0 22px rgba(255, 190, 80, .75), 0 0 54px rgba(255, 120, 150, .5), 0 3px 8px rgba(0, 0, 0, .6);
+}
+.party .mf-text { animation: mfPop 1.5s cubic-bezier(.2, 1.35, .4, 1) .5s forwards; }
+@keyframes mfPop { from { opacity: 0; transform: scale(.7) translateY(24px); } to { opacity: 1; transform: none; } }
+.mf-replay { position: relative; z-index: 4; }
+.party .msg-paper { opacity: .12; }
+.msg-finale .balloons { z-index: 1; }
+.msg-finale .fx-canvas { z-index: 2; }
+
+/* Photo scene keeps its own original button look (transparent, thin gold outline, spaced capitals); only the finger is added. */
+html body .scene-photo .photo-text .btn.cta {
+  min-height: 0; padding: .7em 1.9em; border-radius: 999px;
+  background: transparent !important; color: #f1d58a !important; border: 1px solid rgba(241, 213, 138, .65) !important;
+  box-shadow: none !important; animation: none; text-shadow: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  font: 400 clamp(.72rem, 1.5vw, .88rem) var(--sans); letter-spacing: .22em; text-transform: uppercase;
+}
+html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo-text .btn.cta:focus-visible {
+  background: rgba(241, 213, 138, .14) !important; color: #fff3cc !important; border-color: #f1d58a !important; outline: none;
+}
+
+/* Message scene: the candle (top-left) and the roses (bottom-right) of the table photo always stay in view, whatever the screen shape. */
+.scene-message::before, .scene-message::after { content: ''; position: absolute; z-index: 1; pointer-events: none; background-image: url('../assets/images/vintage-letter-tabletop.png'); background-repeat: no-repeat; }
+.scene-message::before {            /* candle on its wooden coaster */
+  left: -2vw; top: -2vw; width: min(40vw, 340px); aspect-ratio: 1; background-position: 0 0; background-size: 420% auto;
+  -webkit-mask-image: radial-gradient(circle at 42% 44%, #000 46%, transparent 72%); mask-image: radial-gradient(circle at 42% 44%, #000 46%, transparent 72%);
+}
+.scene-message::after {             /* red roses and leaves */
+  right: -2vw; bottom: -2vw; width: min(44vw, 380px); aspect-ratio: 404 / 566; background-position: 100% 100%; background-size: 253% auto;
+  -webkit-mask-image: radial-gradient(ellipse at 66% 60%, #000 46%, transparent 76%); mask-image: radial-gradient(ellipse at 66% 60%, #000 46%, transparent 76%);
+}
+.msg-vignette { z-index: 0; }

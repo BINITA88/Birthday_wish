@@ -31,6 +31,7 @@
       });
       const greeting = sec.querySelector('.moon-greeting');
       const btn = sec.querySelector('.moon-begin');
+      u.hint(btn);
 
       // PRATIMA begins scattered as stars, then gathers into its name.
       revealOrder.forEach(function (letterIndex, sequence) {
@@ -61,9 +62,9 @@
         App.state.started = true;
         document.body.classList.add('started');
         App.audio.fadeIn('calm', 1200);
-        // The flower-letter 'blossom' screen is switched off (its scene stays below): go straight to the sunflower card screen.
+        // The flower-letter 'blossom' screen is switched off (its scene stays below): go straight to the bouquet (sunflowers, then roses in the same scene).
         // App.SceneManager.go('blossom', { mode: 'black', duration: 900, hold: 200 });
-        App.SceneManager.go('flower', { mode: 'black', duration: 900, hold: 200 });
+        App.SceneManager.go('bouquet', { mode: 'black', duration: 900, hold: 200 });
       });
     }
   });

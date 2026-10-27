@@ -43,6 +43,20 @@
     return i * stepMs + 1100;
   };
 
+  /** Marks an element as clickable: a distinct colour treatment plus a little finger that taps at it (removed on first click). */
+  u.hint = function (el, side) {
+    side = side || 'below';                                      // which side of the element the finger sits on
+    const EMOJI = { below: '👆', above: '👇', left: '👉', right: '👈' };
+    el.classList.add('cta');
+    const f = document.createElement('span');
+    f.className = 'tap-hint side-' + side;
+    f.setAttribute('aria-hidden', 'true');
+    f.textContent = EMOJI[side];
+    el.appendChild(f);
+    el.addEventListener('click', function () { f.remove(); }, { once: true });
+    return f;
+  };
+
   /** Escape text for safe HTML injection (config text is trusted, but be tidy). */
   u.esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

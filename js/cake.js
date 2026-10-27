@@ -133,7 +133,6 @@
   }
 
   function cakeSVG() {
-    const msg = C.cakeMessage;
     const grad = function (id, a, b, c) { return '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="90" y1="0" x2="310" y2="0"><stop offset="0" stop-color="' + a + '"/><stop offset=".55" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></linearGradient>'; };
 
     const tiers = [];
@@ -146,14 +145,16 @@
     // trims, one group per tier, so each can pop in after its tier lands
     const t1 = TIERS[0], t2 = TIERS[1], t3 = TIERS[2];
     const trim1 = scallops(t1, 1) + '<g class="pop cake-d1"><rect x="' + t1.x + '" y="' + (t1.top + t1.h - 13) + '" width="' + t1.w + '" height="2.4" fill="#e3bf62"/>' + pearls(t1) + '</g>';
-    const trim2 = scallops(t2, 2) + '<g class="pop cake-d2">' + garlands(t2) + '<rect x="' + t2.x + '" y="' + (t2.top + t2.h - 13) + '" width="' + t2.w + '" height="2.4" fill="#e3bf62"/>' + pearls(t2) + '</g>';
-    const trim3 = scallops(t3, 3) + '<g class="pop cake-d3">' + blossoms(t3) + pearls(t3) + '</g>';
+    const trim2 = scallops(t2, 2) + '<g class="pop cake-d2"><rect x="' + t2.x + '" y="' + (t2.top + t2.h - 13) + '" width="' + t2.w + '" height="2.4" fill="#e3bf62"/>' + pearls(t2) + '</g>';
+    const trim3 = scallops(t3, 3) + '<g class="pop cake-d3">' + pearls(t3) + '</g>';
 
-    // the greeting, written in white script across the front of the bottom tier
-    const fs = Math.min(27, 168 / Math.max(6, msg.length) * 2.3);
-    const text = '<text class="pop cake-msg" x="200" y="' + (t1.top + 33) + '" text-anchor="middle" font-family="\'Great Vibes\',\'Brush Script MT\',cursive" font-size="' + fs.toFixed(1) + '" fill="#ffffff" stroke="#3f8cc4" stroke-width="2.4" paint-order="stroke fill" stroke-linejoin="round" textLength="172" lengthAdjust="spacingAndGlyphs">' + u.esc(msg) + '</text>';
+    // the greeting, one word per layer: HAPPY on the top tier, BIRTHDAY in the middle, PRATIMA on the bottom (each pops in with its tier)
+    const word = function (txt, tier, k, size, len) {
+      return '<text class="pop cake-msg cake-d' + k + '" x="200" y="' + (tier.top + tier.h * 0.58).toFixed(1) + '" text-anchor="middle" font-family="Jost, Segoe UI, system-ui, sans-serif" font-weight="700" font-size="' + size + '" fill="#ffffff" stroke="#3f8cc4" stroke-width="2.6" paint-order="stroke fill" stroke-linejoin="round" textLength="' + len + '" lengthAdjust="spacing">' + u.esc(txt) + '</text>';
+    };
+    const text = word('HAPPY', t3, 3, 19, 70) + word('BIRTHDAY', t2, 2, 22, 124) + word('PRATIMA', t1, 1, 25, 152);
 
-    const bf = [[93, 318, 1.05, -22, 0], [307, 326, 1.0, 20, 1], [119, 262, .92, -26, 1], [281, 258, .95, 24, 0], [147, 210, .8, -20, 2], [253, 214, .78, 18, 1]]
+    const bf = [[93, 318, 1.05, -22, 0], [307, 326, 1.0, 20, 1], [106, 262, .92, -26, 1], [294, 258, .95, 24, 0], [134, 208, .8, -20, 2], [266, 212, .78, 18, 1]]
       .map(function (b) { return butterfly(b[0], b[1], b[2], b[3], b[4]); }).join('');
 
     const stand = '<g class="cp cake-board">' +
@@ -170,7 +171,7 @@
 
     const candles = candleList().map(candleHTML).join('');
 
-    return '<svg class="cake-svg" viewBox="52 96 296 312" role="img" aria-label="A three-tier sky-blue birthday cake saying ' + u.esc(msg) + ', with butterflies on its sides, a sparkler and small candles on top">' +
+    return '<svg class="cake-svg" viewBox="52 96 296 312" role="img" aria-label="A three-tier sky-blue birthday cake with HAPPY, BIRTHDAY and PRATIMA on its three layers, with butterflies on its sides, a sparkler and small candles on top">' +
       '<defs>' +
         grad('sk-sky', '#c4e6fb', '#9fd2f3', '#76b8e6') + grad('sk-white', '#ffffff', '#f5fafe', '#dbe9f4') +
         '<linearGradient id="sk-sponge" gradientUnits="userSpaceOnUse" x1="90" y1="0" x2="310" y2="0"><stop offset="0" stop-color="#f9f0c6"/><stop offset="1" stop-color="#e6d79b"/></linearGradient>' +
@@ -210,6 +211,7 @@
       const main = sec.querySelector('.candle.main');
       const smalls = Array.from(sec.querySelectorAll('.candle.small'));
       const nextBtn = sec.querySelector('.next');
+      u.hint(nextBtn, 'above');
       let ready = false, blowing = false;
 
       /* --- putting a candle out (flame snuffs, a little smoke curls up) --- */
@@ -294,7 +296,7 @@
         if (nextBtn.disabled) return;
         nextBtn.disabled = true;
         ['celebration', 'voice', 'blow', 'sparkler'].forEach(App.audio.stop);   // the calm music carries on into the letter
-        App.SceneManager.go('letter', { mode: 'black', duration: 1600, hold: 500 });
+        App.SceneManager.go('message', { mode: 'black', duration: 1600, hold: 500 });
       });
 
       /* --- the entrance: stand, then each tier: sponge lands, a spatula spreads frosting, a piping bag pipes scallops, pearls go on; then the greeting, then the butterflies one by one --- */
@@ -338,7 +340,6 @@
           svg.querySelectorAll('.cake-d' + k).forEach(function (el, i) { ctx.later(function () { el.classList.add('on'); }, i * 40); });   // 4. pearls and little decorations
           await ctx.sleep(500);
         }
-        on('.cake-msg');                               // the greeting
         await ctx.sleep(900);
         await popAll('.bfly', 520);                    // butterflies settle on the sides, one after another
         await ctx.sleep(500);

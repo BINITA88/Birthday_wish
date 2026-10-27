@@ -1,6 +1,6 @@
-/* SCENE – the sunflower bouquet. A bright cyan backdrop and a title; sunflower heads pop up in a little cluster,
-   rise into a bouquet while their stems grow, a pink bow ties them together, and grass springs up at the sides.
-   (This replaces the old night-to-day garden for the sunflower path; garden.js is kept but no longer used here.) */
+/* SCENE – the flower bouquet. Sunflower heads pop up in a little cluster, rise into a bouquet while their stems grow, a pink bow ties
+   them together and grass springs up at the sides. The sunflowers then fold away and roses, then daisies, grow in the same spot.
+   When the last flower has bloomed the story moves straight on to the photo. */
 (function (App) {
   const { CONFIG: C, u, FX } = App;
   const NS = 'http://www.w3.org/2000/svg';
@@ -46,6 +46,28 @@
       '<path d="M-14 -9A17 17 0 0 1 4 -17" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="2" stroke-linecap="round"/></g>';
   }
 
+  /** One rose head (a cut-out of the real rose photo), about 108 units wide, reused with <use>. */
+  function roseDef() {
+    return '<g id="rose-head"><image href="assets/images/rose-head.png" x="-54" y="-48" width="108" height="96.7"/></g>';
+  }
+
+  /** One daisy head, 50 units in radius: two rings of white petals around a golden centre. */
+  function daisyDef() {
+    let p = '';
+    for (let ring = 0; ring < 2; ring++) {
+      const n = 14, a0 = ring ? 360 / n / 2 : 0;
+      for (let i = 0; i < n; i++) {
+        p += '<ellipse cx="0" cy="' + (ring ? -27 : -31) + '" rx="' + (ring ? 6.6 : 7.4) + '" ry="' + (ring ? 17 : 19) + '" transform="rotate(' + (i * 360 / n + a0).toFixed(1) + ')" fill="' + (ring ? '#fff1f4' : '#ffffff') + '" stroke="#e8c9d2" stroke-width=".8"/>';
+      }
+    }
+    let seeds = '';
+    for (let i = 1; i < 30; i++) {
+      const r = Math.sqrt(i / 30) * 11, a = i * 137.5 * Math.PI / 180;
+      seeds += '<circle cx="' + (Math.cos(a) * r).toFixed(1) + '" cy="' + (Math.sin(a) * r).toFixed(1) + '" r="1.2" fill="#c98a12" opacity=".7"/>';
+    }
+    return '<g id="daisy-head">' + p + '<circle r="14" fill="#ffc81e"/><circle r="14" fill="none" stroke="#d99a0a" stroke-width="1.4"/>' + seeds + '<path d="M-8 -6A10 10 0 0 1 3 -10" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1.6" stroke-linecap="round"/></g>';
+  }
+
   function bouquetSVG() {
     let stems = '', leaves = '', heads = '';
     HEADS.forEach(function (h, i) {
@@ -79,7 +101,7 @@
       '</g>';
 
     return '<svg class="bq-svg" viewBox="0 0 400 520" role="img" aria-label="A bouquet of sunflowers tied with a pink bow">' +
-      '<defs><radialGradient id="sf-core" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#8a4a1a"/><stop offset=".6" stop-color="#4a2209"/><stop offset="1" stop-color="#2a1005"/></radialGradient>' + headDef() + '</defs>' +
+      '<defs><radialGradient id="sf-core" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#8a4a1a"/><stop offset=".6" stop-color="#4a2209"/><stop offset="1" stop-color="#2a1005"/></radialGradient>' + headDef() + roseDef() + daisyDef() + '</defs>' +
       '<g class="grass">' + grass + '</g>' +
       '<g class="stems">' + stems + '</g>' + '<g class="leaves">' + leaves + '</g>' +
       '<g class="heads">' + heads + '</g>' + bow + '</svg>';
@@ -87,17 +109,26 @@
 
   App.SceneManager.register('bouquet', {
     init(sec, ctx) {
-      sec.innerHTML = '<div class="bq-glow"></div><h1 class="bq-title fade-up"></h1><div class="bq-art">' + bouquetSVG() + '</div>';
-      const title = sec.querySelector('.bq-title');
-      title.textContent = C.text.bouquetTitle;
+      const T = C.text;
+      sec.innerHTML = '<div class="bq-glow"></div><div class="bq-art">' + bouquetSVG() + '</div>' +
+        '<div class="bq-cap" aria-live="polite"><p class="bq-cap-main"></p><p class="bq-cap-sub"></p></div>';
 
       const fx = FX.field(sec, { motes: 46, rgb: '255,222,150', size: 0.6 });
       ctx.add(fx.destroy);
 
-      (async function () {
-        await ctx.sleep(500);
-        title.classList.add('in');
-        await ctx.sleep(900);
+      const uses = Array.from(sec.querySelectorAll('.heads use'));
+      const cap = sec.querySelector('.bq-cap');
+      // the top caption names the flower that is growing, and fades to the next one with it
+      const caption = async function (i) {
+        cap.classList.remove('in');
+        await ctx.sleep(i ? 550 : 0);
+        cap.querySelector('.bq-cap-main').textContent = T.flowerCaps[i].main;
+        cap.querySelector('.bq-cap-sub').textContent = T.flowerCaps[i].sub;
+        cap.classList.add('in');
+      };
+      const TILT = [-14, 10, -6, 18, -20, 4, 14];
+
+      const grow = async function () {
         sec.classList.add('cluster');            // the flower heads pop up together in a little bunch …
         await ctx.sleep(1500);
         sec.classList.add('bloom');              // … then rise into a bouquet while the stems grow
@@ -106,8 +137,34 @@
         await ctx.sleep(900);
         sec.classList.add('tied');               // a pink bow ties them together
         await ctx.sleep(900);
+      };
+      // the flowers fold back down and the next kind grows in the same spot (backdrop, grass and bow stay)
+      const swapTo = async function (id) {
+        sec.classList.remove('tied', 'leafy', 'bloom', 'cluster');
+        await ctx.sleep(1100);
+        uses.forEach(function (el, i) {
+          el.setAttribute('href', '#' + id);
+          el.setAttribute('transform', 'rotate(' + TILT[i % 7] + ') scale(' + (i % 2 ? -1 : 1) + ' 1)');   // so no two look identical
+        });
+        await ctx.sleep(250);
+        await grow();
+      };
+
+      (async function () {
+        await ctx.sleep(700);
+        caption(0);
+        await grow();                            // 1. sunflowers
         sec.classList.add('grassy');             // and grass springs up at the sides
-        await ctx.sleep(App.reduced ? 2500 : 4200);
+        await ctx.sleep(App.reduced ? 1800 : 3200);
+        caption(1);
+        await swapTo('rose-head');               // 2. roses
+        await ctx.sleep(App.reduced ? 1500 : 2400);
+        caption(2);
+        await swapTo('daisy-head');              // 3. daisies
+        await ctx.sleep(App.reduced ? 1200 : 1800);
+        cap.classList.remove('in');
+        await ctx.sleep(900);
+        // no button: once the daisies have bloomed the story moves straight on (go() refuses while a transition runs, so keep trying)
         (function next() {
           App.SceneManager.go('photo', { mode: 'black', duration: 1200, hold: 200 }).then(function (ok) {
             if (!ok) ctx.later(next, 150);

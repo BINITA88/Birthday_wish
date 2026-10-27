@@ -173,6 +173,20 @@
   };
 
   /* ---------- Balloons ---------- */
+  const BALLOON_COLORS = ['#ff5c8a', '#ffb703', '#4cc9f0', '#ff7b54', '#b388ff', '#5bd68a', '#ff4d6d'];
+  let balloonId = 0;
+  /** A single glossy party balloon (inline SVG, 60 x 120 units) with a knot and a wavy string. */
+  FX.balloonSVG = function (color) {
+    const id = 'bln' + (balloonId++);
+    color = color || u.pick(BALLOON_COLORS);
+    return '<svg viewBox="0 0 60 122" width="100%" aria-hidden="true" focusable="false"><defs><radialGradient id="' + id + '" cx=".34" cy=".28" r=".85"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".3" stop-color="' + color + '"/><stop offset="1" stop-color="' + color + '" stop-opacity=".78"/></radialGradient></defs>' +
+      '<path d="M30 2C13 2 2 17 2 34C2 54 16 70 30 74C44 70 58 54 58 34C58 17 47 2 30 2Z" fill="url(#' + id + ')"/>' +
+      '<path d="M30 2C13 2 2 17 2 34C2 54 16 70 30 74C44 70 58 54 58 34C58 17 47 2 30 2Z" fill="' + color + '" opacity=".55"/>' +
+      '<ellipse cx="19" cy="22" rx="6" ry="10" fill="#fff" opacity=".4" transform="rotate(24 19 22)"/>' +
+      '<path d="M30 74L25 81H35Z" fill="' + color + '"/>' +
+      '<path d="M30 81C24 91 36 99 30 108C25 115 33 119 30 121" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2" stroke-linecap="round"/></svg>';
+  };
+
   /** FX.balloons(parent, {count, dim, prefill}) – heart-balloon bouquets that float up forever (CSS-driven). */
   FX.balloons = function (parent, o) {
     o = o || {};
@@ -184,14 +198,14 @@
     const fit = (o.dim ? 0.8 : 1) * (App.isSmall() ? 0.72 : 1);
     let html = '';
     for (let i = 0; i < n; i++) {
-      const w = u.rand(130, 205) * fit;
+      const w = o.party ? u.rand(48, 86) * fit : u.rand(130, 205) * fit;
       const dur = u.rand(15, 27);
       const delay = o.prefill ? -u.rand(0, dur) : u.rand(-dur * 0.5, 2);
       const x = (i + u.rand(0.1, 0.9)) / n * 100;
       html += '<div class="balloon" style="left:' + x.toFixed(1) + '%;width:' + w.toFixed(0) + 'px;bottom:-' + (w * 1.2).toFixed(0) +
         'px;--dur:' + dur.toFixed(1) + 's;--delay:' + delay.toFixed(1) + 's;--drift:' + u.rand(-6, 6).toFixed(1) + 'vw">' +
         '<div class="b-sway" style="--sw:' + u.rand(3, 6).toFixed(1) + 's;--sa:' + u.rand(2, 4).toFixed(1) + 'deg">' +
-        '<img src="' + src + '" alt="" draggable="false"></div></div>';
+        (o.party ? FX.balloonSVG() : '<img src="' + src + '" alt="" draggable="false">') + '</div></div>';
     }
     wrap.innerHTML = html;
     parent.appendChild(wrap);

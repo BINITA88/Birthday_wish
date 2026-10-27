@@ -1,8 +1,8 @@
-/* SCENE – "I programmed this heartbeat": love words drift through the dark in hot pink,
-   then gather, word by word, into a beating heart with a small caption underneath. */
+/* SCENE – birthday words drift through the dark in hot pink, then gather, word by word, into a beating heart around her photo,
+   with a short caption underneath. */
 (function (App) {
   const { CONFIG: C, u } = App;
-  const WORDS = ['I love you', 'Love', 'Always', 'Forever', 'Sweetheart', "Je t'aime", 'Me & you', 'You', 'Mi amor', 'Te amo', 'Ti amo', 'Habibi', 'Pratima', '♥'];
+  const WORDS = ['Happy Birthday', 'Pratima', 'Celebrate', 'Joy', 'Cheers', 'Smile', 'Sparkle', 'Wishes', 'Shine', 'Bloom', 'Blessings', 'Happy', 'Birthday', '♥'];
   const COLORS = ['255,42,122', '255,92,158', '224,32,106', '255,143,186', '198,24,98'];
 
   const SPIN = 0.07;        // laps of the heart per second: every word flows round the outline together
@@ -66,14 +66,13 @@
     init(sec, ctx) {
       const T = C.text;
       sec.innerHTML = '<canvas class="heart-canvas" aria-hidden="true"></canvas>' +
-        '<div class="heart-caption"><p class="heart-top"></p><p class="heart-script"></p></div>';
+        '<div class="heart-caption"><p class="hb-text"></p></div>';
       const canvas = sec.querySelector('.heart-canvas');
       const caption = sec.querySelector('.heart-caption');
-      sec.querySelector('.heart-top').textContent = T.heartTop;
-      sec.querySelector('.heart-script').textContent = T.heartScript;
+      sec.querySelector('.hb-text').textContent = T.birthdayLine;
       const g = canvas.getContext('2d');
       const cutout = new Image();                      // her cut-out photo, shown inside the heart
-      cutout.src = 'assets/images/pratima-cutout.png';
+      cutout.src = 'assets/images/pratima-selfie-cutout.png?v=2';
       const particles = makeParticles(App.isSmall() ? 220 : 340);
 
       let W = 0, H = 0, dpr = 1, hs = 10, cx = 0, cy = 0;
@@ -125,8 +124,8 @@
             const bg = g.createRadialGradient(cx, cy - 3 * hs, 0, cx, cy - 3 * hs, 17 * hs);
             bg.addColorStop(0, '#3a0c22'); bg.addColorStop(1, '#14030b');
             g.fillStyle = bg; g.fillRect(cx - 18 * hs, cy - 18 * hs, 36 * hs, 36 * hs);
-            const iw = 27 * hs * beat, ih = iw * cutout.naturalHeight / cutout.naturalWidth;
-            g.drawImage(cutout, cx - iw / 2, cy - 7.2 * hs * beat, iw, ih);
+            const iw = 14 * hs * beat, ih = iw * cutout.naturalHeight / cutout.naturalWidth;   // a close-up selfie: her face sits in the middle of the heart
+            g.drawImage(cutout, cx - iw / 2, cy - 9.4 * hs * beat, iw, ih);
             g.restore();
           }
         }

@@ -718,3 +718,9 @@ body .scene-cake .next { bottom: 3dvh; }
 .scene-cake .spatula, .scene-cake .bag { transform: translate(0, 0); }
 .scene-cake .bag { transition: transform .14s ease-in-out; }
 .pop.scl { transform-origin: 50% 0%; }
+
+/* smooth fold-back when the sunflowers give way to roses */
+.bq-svg .sf { transition: opacity .6s ease, transform .7s ease; }
+.bq-svg .stem { transition: stroke-dashoffset .9s ease; }
+.bq-svg .leaf { transition: transform .5s ease; }
+.bq-svg .bow { transition: transform .6s ease, opacity .5s ease; }
