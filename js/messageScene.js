@@ -43,7 +43,7 @@
         '<div class="msg-finale" aria-live="polite">' +
           '<div class="mf-scrim" aria-hidden="true"></div>' +
           '<div class="mf-copy"><p class="mf-text"></p>' +
-          '<button class="btn primary mf-replay fade-up" type="button">' + u.esc(T.replay) + '</button></div>' +
+          '<button class="btn primary mf-replay fade-up" type="button">' + u.esc(T.finalBtn) + '</button></div>' +
         '</div>';
 
       const env = sec.querySelector('.env');
@@ -184,6 +184,8 @@
         firstNext.classList.add('in');                // the reader turns the page when ready; the last page leads to the party
       }
 
+      let finaleFx = null;
+
       function party() {
         finale.querySelector('.mf-text').textContent = T.finalWish.replace(/,\s*/, ',\n');   // a line break after the comma
         sec.classList.add('party');
@@ -196,6 +198,7 @@
           FX.balloons(finale, { count: App.isSmall() ? 12 : 18, prefill: true, party: true });      // the party balloons rise over the photo
           const fx = FX.field(finale, { motes: 0, rgb: '255,205,120', rate: 26, max: 120, confetti: true });
           ctx.add(fx.destroy);
+          finaleFx = fx;
           const W = sec.clientWidth, H = sec.clientHeight;
           fx.burst(W / 2, H * 0.35, 80, true);
           ctx.later(function () { fx.burst(W * 0.22, H * 0.5, 50, true); }, 450);
@@ -205,12 +208,12 @@
         });
       }
 
+      // The last button no longer restarts the story: each tap sends another shower of confetti over her photo.
       ctx.on(replay, 'click', function () {
-        if (replay.disabled) return;
-        replay.disabled = true;
-        App.audio.stop('celebration');
-        App.audio.stop('music');
-        App.SceneManager.replay();
+        if (!finaleFx) return;
+        const W = sec.clientWidth, H = sec.clientHeight;
+        finaleFx.burst(W * u.rand(0.25, 0.75), H * u.rand(0.3, 0.6), 70, true);
+        ctx.later(function () { finaleFx.burst(W * u.rand(0.1, 0.9), H * u.rand(0.2, 0.7), 45, true); }, 250);
       });
     }
   });
