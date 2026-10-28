@@ -72,6 +72,46 @@
           sh.inert = i !== n;
         });
         ctx.later(function () { sheets[n].focus({ preventScroll: true }); }, 60);
+        if (n > 0 && !letter[n].started) ctx.later(function () { writePage(n); }, 950);   // once the page has finished turning, the letter writes itself
+      }
+
+      /* ---- pages 2 and 3 write themselves out letter by letter, like the first page ---- */
+      // Every line keeps its full text in place (the not-yet-written part is invisible), so the layout never jumps and the fitted font size stays right.
+      const letter = sheets.map(function (sh) {
+        const items = Array.from(sh.querySelectorAll('.mb-text > *')).map(function (el) {
+          const chars = Array.from(el.textContent);
+          el.innerHTML = '<span class="ty-a"></span><span class="ty-b"></span>';
+          el.lastChild.textContent = chars.join('');
+          return { el: el, a: el.firstChild, b: el.lastChild, chars: chars };
+        });
+        return { sh: sh, items: items, started: false, skip: false, num: sh.querySelector('.mb-num') };
+      });
+      letter.forEach(function (pg) {
+        if (!pg.items.length) return;
+        pg.numText = pg.num.textContent;
+        ctx.on(pg.sh, 'click', function (e) { if (!e.target.closest('.mb-btn')) pg.skip = true; });   // a tap writes the rest at once
+      });
+      async function writePage(n) {
+        const pg = letter[n];
+        pg.started = true;
+        pg.num.textContent = 'tap the page to read it all';
+        const step = App.reduced ? 2 : 11;
+        for (const it of pg.items) {
+          it.el.classList.add('typing');
+          for (let k = 0; k < it.chars.length; k++) {
+            if (pg.skip) break;
+            it.a.textContent = it.chars.slice(0, k + 1).join('');
+            it.b.textContent = it.chars.slice(k + 1).join('');
+            const ch = it.chars[k];
+            await ctx.sleep(/[.!?]/.test(ch) ? step * 7 : /[,;—]/.test(ch) ? step * 3 : step);
+          }
+          it.a.textContent = it.chars.join('');
+          it.b.textContent = '';
+          it.el.classList.remove('typing');
+          if (!pg.skip) await ctx.sleep(step * 12);
+        }
+        pg.num.textContent = pg.numText;
+        pg.sh.classList.add('typed');
       }
       sheets.forEach(function (sh, i) {
         sh.inert = i !== 0;
