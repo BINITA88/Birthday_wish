@@ -478,7 +478,7 @@ body.started #sound-btn { opacity: 1; }
 .scene-name { background: #030509 !important; }
 .scene-name .moon-stars {
   opacity: 1;
-  background: url('../assets/images/real-night-sky.png') center / cover no-repeat;
+  background: url('../assets/images/real-night-sky.jpg') center / cover no-repeat;
   animation: none;
 }
 .scene-name .moon-stars::before, .scene-name .moon-stars::after { content: ''; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; }
@@ -495,7 +495,7 @@ body.started #sound-btn { opacity: 1; }
 @keyframes flowerGatherFlash { 0% { opacity: 0; transform: scale(.45); } 18% { opacity: .95; } 58% { opacity: .34; transform: scale(1.35); } 100% { opacity: 0; transform: scale(1.7); } }
 
 /* Photographic flower-letter scene: no procedural flower drawings or gradient backdrop. */
-.scene-blossom { background: #02050a url('../assets/images/real-night-sky.png') center / cover no-repeat; }
+.scene-blossom { background: #02050a url('../assets/images/real-night-sky.jpg') center / cover no-repeat; }
 .scene-blossom::before { content: ''; position: absolute; inset: 0; background: rgba(0, 3, 9, .38); pointer-events: none; }
 .real-flower-name { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 .rf-letter { position: absolute; display: block; color: transparent; font-family: var(--sans); font-weight: 700; font-size: clamp(3.5rem, 15vw, 11.5rem); line-height: .78; letter-spacing: -.08em; transform: translate(-50%, -50%) scale(.72); opacity: 0; background: url('../assets/images/real-floral-texture.png') var(--photo-x) center / 520px auto; -webkit-background-clip: text; background-clip: text; -webkit-text-stroke: 1px rgba(255, 245, 229, .62); filter: drop-shadow(0 10px 12px rgba(0,0,0,.7)); transition: left 1.9s cubic-bezier(.2,.86,.2,1), top 1.9s cubic-bezier(.2,.86,.2,1), transform .8s cubic-bezier(.2,.86,.2,1), opacity .75s ease; }
@@ -549,7 +549,7 @@ body.started #sound-btn { opacity: 1; }
 .bag { transform: translate(110px, 132px); transition: transform .24s ease-in-out; }
 
 /* Wood-table letter: the generated tabletop supplies the candle and rose arrangement. */
-.scene-letter { background: #4f2814 url('../assets/images/vintage-letter-tabletop.png') center / cover no-repeat; }
+.scene-letter { background: #4f2814 url('../assets/images/vintage-letter-tabletop.jpg') center / cover no-repeat; }
 .scene-letter .letter-stars, .scene-letter .letter-glow, .scene-letter .letter-botanicals { display: none; }
 .letter-intro { top: 5%; color: #fff3db; font: 400 clamp(1.65rem, 5vw, 2.65rem) var(--script); text-shadow: 0 2px 5px rgba(37,16,8,.86), 0 0 16px rgba(38,15,5,.55); }
 .envelope { top: 50%; background: linear-gradient(145deg, #f6e5d2, #cfa88d); border-color: rgba(67,35,22,.5); box-shadow: 0 20px 34px rgba(31,14,7,.62), inset 0 0 0 1px rgba(255,250,238,.6); }

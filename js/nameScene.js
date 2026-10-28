@@ -6,7 +6,7 @@
     init(sec, ctx) {
       sec.innerHTML =
         '<div class="moon-stars" aria-hidden="true"></div><div class="moon-haze" aria-hidden="true"></div>' +
-        '<div class="photo-moon"><img class="moon-composite" src="assets/images/moon-pratima-composite.png" alt="Pratima in the moon"></div>' +
+        '<div class="photo-moon"><img class="moon-composite" src="assets/images/moon-pratima-composite.webp" alt="Pratima in the moon"></div>' +
         '<div class="sky-name" aria-label="PRATIMA"></div>' +
         '<p class="moon-greeting"></p>' +
         '<button class="moon-begin" type="button">' + u.esc(C.text.waitButton) + '</button>';

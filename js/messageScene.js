@@ -1,6 +1,6 @@
 /* SCENE – "Message for You". A sealed envelope lies on a wooden table with an OPEN button under it. Only after OPEN is pressed
    does the flap lift and the letter appear, writing itself out letter by letter. When it is written, the final birthday wish
-   arrives with balloons and confetti. (The older 'letter' scene is kept in letterScene.js but is no longer used.) */
+   arrives with balloons and confetti. Only the first page is typed out; the two long letter pages show their text at once. (The older 'letter' scene is kept in letterScene.js but is no longer used.) */
 (function (App) {
   const { CONFIG: C, u, FX } = App;
 
@@ -53,7 +53,6 @@
       const finale = sec.querySelector('.msg-finale');
       u.hint(openBtn);
 
-      const puzzle = App.puzzle(finale, ctx, C.posterImage);        // her photo, as a puzzle that gathers across the whole finale screen
       const fx0 = FX.field(sec, { motes: 14, rgb: '255,205,130', size: 0.6 });
       ctx.add(fx0.destroy);
 
@@ -69,59 +68,8 @@
           sh.inert = i !== n;
         });
         ctx.later(function () { sheets[n].focus({ preventScroll: true }); }, 60);
-        if (n > 0 && !letter[n].started) ctx.later(function () { writePage(n); }, 450);   // once the page has finished turning, the letter writes itself
       }
 
-      /* ---- pages 2 and 3 write themselves out letter by letter, like the first page ---- */
-      // Every line keeps its full text in place (the not-yet-written part is invisible), so the layout never jumps and the fitted font size stays right.
-      const letter = sheets.map(function (sh) {
-        const items = Array.from(sh.querySelectorAll('.mb-text > *')).map(function (el) {
-          const chars = Array.from(el.textContent);
-          el.innerHTML = '<span class="ty-a"></span><span class="ty-b"></span>';
-          el.lastChild.textContent = chars.join('');
-          return { el: el, a: el.firstChild, b: el.lastChild, chars: chars };
-        });
-        return { sh: sh, items: items, started: false, skip: false, num: sh.querySelector('.mb-num') };
-      });
-      letter.forEach(function (pg) {
-        if (!pg.items.length) return;
-        pg.numText = pg.num.textContent;
-        ctx.on(pg.sh, 'click', function (e) { if (!e.target.closest('.mb-btn')) pg.skip = true; });   // a tap writes the rest at once
-      });
-      async function writePage(n) {
-        const pg = letter[n];
-        pg.started = true;
-        pg.num.textContent = 'tap the page to read it all';
-        // Time-based, one screen update per frame: the whole page takes about 14 s whatever the device (a slow phone just shows fewer steps).
-        const total = pg.items.reduce(function (sum, it) { return sum + it.chars.length; }, 0);
-        const cps = App.reduced ? 1000 : Math.max(60, total / 14);
-        const show = function (it, k) {
-          it.a.textContent = it.chars.slice(0, k).join('');
-          it.b.textContent = it.chars.slice(k).join('');
-        };
-        try {
-          for (const it of pg.items) {
-            it.el.classList.add('typing');
-            const len = it.chars.length;
-            await new Promise(function (done) {
-              const t0 = performance.now();
-              let shown = -1;
-              (function frame(now) {
-                if (ctx.dead) return;
-                const k = pg.skip ? len : Math.min(len, Math.floor((now - t0) / 1000 * cps) + 1);
-                if (k !== shown) { shown = k; show(it, k); }
-                if (k >= len) done(); else requestAnimationFrame(frame);
-              })(t0);
-            });
-            it.el.classList.remove('typing');
-            if (!pg.skip) await ctx.sleep(160);
-          }
-        } finally {                                   // however it ends, the whole page is on screen and the buttons are there
-          pg.items.forEach(function (it) { show(it, it.chars.length); it.el.classList.remove('typing'); });
-          pg.num.textContent = pg.numText;
-          pg.sh.classList.add('typed');
-        }
-      }
       sheets.forEach(function (sh, i) {
         sh.inert = i !== 0;
         const next = sh.querySelector('.mb-next'), back = sh.querySelector('.mb-back');
@@ -157,17 +105,21 @@
       });
       ctx.on(paper, 'click', function () { skip = true; });          // a tap on the paper writes the rest at once
 
-      /** Types `text` into `el` with a blinking caret; resolves when done (or at once if the reader tapped to skip). */
-      async function type(el, text, step) {
+      /** Types `text` into `el` with a blinking caret, by the clock: `step` ms per letter on a fast device, never stalling on a slow one.
+          Resolves when done (or at once if the reader tapped to skip). */
+      function type(el, text, step) {
+        const chars = Array.from(text), len = chars.length;
         el.classList.add('typing');
-        let out = '';
-        for (const ch of Array.from(text)) {
-          out += ch;
-          el.textContent = out;
-          paper.scrollTop = paper.scrollHeight;
-          if (!skip) await ctx.sleep(/[.,!?]/.test(ch) ? step * 5 : step);
-        }
-        el.classList.remove('typing');
+        return new Promise(function (done) {
+          const t0 = performance.now();
+          let shown = -1;
+          (function frame(now) {
+            if (ctx.dead) return;
+            const k = skip ? len : Math.min(len, Math.floor((now - t0) / step) + 1);
+            if (k !== shown) { shown = k; el.textContent = chars.slice(0, k).join(''); paper.scrollTop = paper.scrollHeight; }
+            if (k >= len) { el.classList.remove('typing'); done(); } else requestAnimationFrame(frame);
+          })(t0);
+        });
       }
 
       async function run() {
@@ -181,21 +133,23 @@
         await ctx.sleep(350);
 
         const step = App.reduced ? 12 : 42;
-        await type(sec.querySelector('.mp-h'), T.msgGreeting, step * 1.6);
-        if (!skip) await ctx.sleep(350);
-        await type(sec.querySelector('.mp-p1'), T.msgP1, step);
-        if (!skip) await ctx.sleep(350);
-        await type(sec.querySelector('.mp-p2'), T.msgP2, step);
-        if (!skip) await ctx.sleep(350);
-        await type(sec.querySelector('.mp-sign'), T.msgSign, step * 1.5);
-
-        await ctx.sleep(900);
-        firstNext.classList.add('in');                // the reader turns the page when ready; the last page leads to the party
+        const lines = [['.mp-h', T.msgGreeting, step * 1.6], ['.mp-p1', T.msgP1, step], ['.mp-p2', T.msgP2, step], ['.mp-sign', T.msgSign, step * 1.5]];
+        try {
+          for (const ln of lines) {
+            await type(sec.querySelector(ln[0]), ln[1], ln[2]);
+            if (!skip) await ctx.sleep(350);
+          }
+          await ctx.sleep(900);
+        } finally {                                   // however it ends, all of page 1 is on screen and the way on is open
+          lines.forEach(function (ln) { const el = sec.querySelector(ln[0]); el.textContent = ln[1]; el.classList.remove('typing'); });
+          firstNext.classList.add('in');              // the reader turns the page when ready; the last page leads to the party
+        }
       }
 
       function party() {
         finale.querySelector('.mf-text').textContent = T.finalWish.replace(/,\s*/, ',\n');   // a line break after the comma
         sec.classList.add('party');
+        const puzzle = App.puzzle(finale, ctx, C.posterImage);   // her photo as a puzzle across the whole screen; built only now, so it costs the letter no graphics memory
         App.audio.fadeOut('calm', 1200);                  // the music gives way to the Happy Birthday tune
         App.audio.fadeOut('love', 1200);
         App.audio.play('music');
