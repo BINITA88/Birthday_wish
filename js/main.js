@@ -24,6 +24,10 @@
     });
 
     App.SceneManager.go('name', { mode: 'none' });
+
+    // once the opening screen's images have arrived, the first piece of music downloads quietly while she watches the letters gather
+    const warmDream = function () { setTimeout(function () { App.audio.warm('dream', true); }, 600); };
+    if (document.readyState === 'complete') warmDream(); else window.addEventListener('load', warmDream);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);

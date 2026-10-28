@@ -20,7 +20,7 @@
           const a = new Audio();
           a.preload = 'metadata';   // music is big: nothing is downloaded up front, a track streams when it is first played
           a.loop = t.loop;
-          a.addEventListener('error', function () { t.ok = false; });
+          a.addEventListener('error', function () { t.ok = false; t.failed = true; });
           a.src = cfg.src;
           a.volume = eff(t);
           a.muted = muted;
@@ -53,8 +53,17 @@
 
     has(id) { const t = tracks[id]; return !!(t && t.ok); },
 
+    /** Starts downloading a track in the background (call it when the network is quiet), so it is ready when it is first played. */
+    warm(id, reload) {
+      const t = tracks[id];
+      if (!t || !t.ok || !t.el.paused) return;
+      t.el.preload = 'auto';
+      if (reload) { try { t.el.load(); } catch (e) {} }
+    },
+
     play(id) {
       const t = tracks[id];
+      if (t && !t.ok && t.failed && !t.retried) { t.retried = true; t.ok = true; try { t.el.load(); } catch (e) {} }   // one more try after a failed download
       if (!t || !t.ok) return null;
       const a = t.el;
       clearInterval(t.fade);
