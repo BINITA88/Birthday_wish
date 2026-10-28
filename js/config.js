@@ -149,8 +149,7 @@
 
       finalLine1: 'Happy Birthday once again, Pratima. 🌻🌹',
       finalLine2: 'May your days bloom as beautifully as this little garden.',
-      replay: 'Relive the Magic ✨',
-      finalBtn: 'Send Love ❤️'
+      replay: 'Relive the Magic ✨'
     },
 
     /* ---- Invitation card placeholders (deliberately NOT hard-coded) ---- */

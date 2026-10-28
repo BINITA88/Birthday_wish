@@ -206,7 +206,6 @@ html body .btn.cta:focus-visible, .bq-wish:hover .bq-wish-cta, .bq-wish:focus-vi
 }
 .titled .mf-text { animation: mfPop 1.5s cubic-bezier(.2, 1.35, .4, 1) .3s forwards; }
 @keyframes mfPop { from { opacity: 0; transform: scale(.7) translateY(24px); } to { opacity: 1; transform: none; } }
-.mf-replay { pointer-events: auto; }
 @media (min-aspect-ratio: 11/10) {
   .mf-scrim { background: linear-gradient(90deg, rgba(60, 10, 45, .66) 0, rgba(60, 10, 45, .32) 34%, rgba(60, 10, 45, 0) 54%), linear-gradient(180deg, rgba(0, 0, 0, 0) 70%, rgba(20, 8, 20, .45) 100%); }
   .mf-copy { align-items: flex-start; justify-content: center; gap: 7dvh; padding: 4dvh 4vw 4dvh 5vw; text-align: left; }
