@@ -31,6 +31,7 @@
     photoObjectPosition: 'center 22%',             // keeps faces in frame when the photo is cropped
 
     /* ---- Floating balloons (celebration + cake scenes) ---- */
+    posterImage: 'assets/images/lastposterimage.png',                  // the last scene's puzzle poster
     balloonImage: 'assets/images/heart-balloon-bouquet-small.png',    // 372 px, shadow baked in (the big original is kept alongside)
 
     /* ---- The garden (scenes 4 + 5) ----
@@ -107,6 +108,34 @@
       msgP1: 'May every new day bring you soft reasons to smile, warm people to hold close, and beautiful little moments that feel like magic.',
       msgP2: 'You deserve a world that blooms gently around you. Happy Birthday, Pratima. ❤️',
       msgSign: 'With all my love,',
+      msgTurn: 'Turn the page',
+      msgBack: 'Back',
+      msgContinue: 'Make a wish ✨',
+      /* The full letter, shown on two turning pages after the first page. */
+      msgLetter: {
+        title: 'A little letter, from my heart 🤍',
+        sub: 'Not bought, but created with love, just for you. 🌻',
+        dear: 'Dear Pratima, 🤍',
+        page1: [
+          "Sometimes, I wonder if people realize how beautiful an impact they leave on someone else's life, simply by being themselves.",
+          'Pratima, timilai sayad thaha chhaina, tara timi mero life ma aayepachhi kehi kura haru ali farak bhaye. Kehi sano-sano moments, kehi simple conversations, ani timro presence le mero man ma euta naya feeling jagayo. Life ma agadi badhne, thula sapana dekhne, ra aafno future lai ajhai ramro banaune motivation paayeko jasto lagyo.',
+          'Timi le jaanijaani kehi garnu pareko thiyena. Kahile kahi, manche ko presence nai enough hunchha. Ani timro presence mero lagi tyastai kehi beautiful kura madhye euta bhayo. 🌻',
+          "I may not always find the perfect words to explain it, but I'm genuinely grateful that our paths crossed. There are moments that might seem ordinary to one person, yet quietly become precious memories to another. Some of those little moments will always have a special place in my heart.",
+          'Aaja timro birthday ma, ma timro lagi wish garna chahanchhu — timile aafno man ma dekheko future ek din aafnai aankha agadi reality banera aaos. Timile mehenat garera pugna khojeko harek position samma pugna sakos. Timro talent ko kadar hos, timro efforts le ramro result paos, ani timile aafno success herera ekdin garva garna sakos ki timile kati ramro journey tay gareu.',
+          'Jindagi ma kahile sajilo din aaulan, kahile garho pani aaulan. Tara jasto situation aaye pani, timile aafumathi biswas garna kahile nachhodnu. Timile socheko bhanda pani dherai ramro kura timro future ma huna sakchhan. May life surprise you with opportunities you never expected, happiness you never had to ask for, and people who appreciate you for exactly who you are.'
+        ],
+        page2: [
+          "Ani Pratima, timro tyo sweet smile sadhai rahirahos. Timi khusi huda man dekhi hasna sakos, aafno dreams ko lagi confidently agadi badhna sakos, ani kahile kahi thakda pani aafule kati ramro kura achieve garna sakchhu bhanne kura birsina naparos. You deserve to feel proud of yourself, not just when you achieve something big, but also for every small step you take towards becoming the person you want to be.",
+          "I don't know what the future holds for us. Hami jindagi ko kun mod ma pugchhau, hamro bato sangai agadi badhchha ki aafnai direction ma jancha — tyo ahile kasailai thaha chhaina. Tara harek beautiful feeling lai future ko promise banaunu parchha bhanne pani ta chhaina ni.",
+          'Some people become special because of the place they hold in our lives. Some become special because of the way they inspire us to see life differently. And sometimes, we can simply be thankful that we got to know them.',
+          'For me, you will always be someone I genuinely wish beautiful things for. Not just today, because it\'s your birthday, but because I truly hope life is kind to you. I hope you find reasons to smile even on ordinary days, strength when things feel difficult, and the courage to keep chasing every dream that makes your eyes light up.',
+          'So today, I hope you make a wish that feels a little too big, dream a little more fearlessly, and look forward to all the beautiful chapters that are still waiting for you.',
+          'Happy Birthday, Pratima. ❤️',
+          "May everything you've been dreaming of slowly find its way into your life. May your journey be filled with love, peace, success, and genuine happiness. And may you always remember that somewhere in this world, there is someone sincerely wishing to see you shine."
+        ],
+        close: 'With warm wishes,',
+        from: 'Someone who is genuinely happy our paths crossed. 🤍🌻'
+      },
       finalWish: 'MANY MANY HAPPY RETURNS OF THE DAY, MY DEAR BOSS ❤️🌹',
 
       dinner1: 'One last little surprise...',
@@ -140,6 +169,9 @@
       tracks: {
         countdown:   { src: 'assets/audio/freesound_community-3min-bell-sound-count-61773.mp3', volume: 0.7 },   // only its first bell is used: tik · tik · tok
         sparkler:    { src: 'assets/audio/freesound_community-firework-candle-76282.mp3', volume: 0.8 },   // the cake's sparkler: only its first seconds are played
+        twinkle:     { src: 'assets/audio/white_records-twinkle-twinkle-little-star-bells-background-xmas-music-for-video-262281.mp3', volume: 0.6, loop: true },   // opening scene only: starts when the letters gather into PRATIMA, fades out at Begin
+        love:        { src: 'assets/audio/pardeeppatel-vol-1-endless-love-story-281663.mp3', volume: 0.5, loop: true },   // the heart, the cake and the letter; fades out when the birthday tune arrives
+        dream:       { src: 'assets/audio/sounovamusic-romantic-dream-400789.mp3', volume: 0.5 },   // from the opening's Begin through the flowers; its closing seconds play in the heart scene, then it ends
         calm:        { src: 'assets/audio/freesound_community-calm_game_music_1-49209.mp3', volume: 0.45, loop: true },   // everywhere except the countdown and the birthday tune
         music:       { src: 'assets/audio/satokin-happy-birthday-ukulele-600716.mp3', volume: 0.55, loop: true },   // plays from the birthday scene until a flower is chosen
         celebration: { src: 'assets/audio/celebration.mp3',              volume: 0.6 },

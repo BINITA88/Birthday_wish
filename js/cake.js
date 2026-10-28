@@ -295,7 +295,7 @@
       ctx.on(nextBtn, 'click', function () {
         if (nextBtn.disabled) return;
         nextBtn.disabled = true;
-        ['celebration', 'voice', 'blow', 'sparkler'].forEach(App.audio.stop);   // the calm music carries on into the letter
+        ['celebration', 'voice', 'blow', 'sparkler'].forEach(App.audio.stop);   // the love song carries on into the letter
         App.SceneManager.go('message', { mode: 'black', duration: 1600, hold: 500 });
       });
 

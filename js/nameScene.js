@@ -10,6 +10,7 @@
         '<div class="sky-name" aria-label="PRATIMA"></div>' +
         '<p class="moon-greeting"></p>' +
         '<button class="moon-begin" type="button">' + u.esc(C.text.waitButton) + '</button>';
+      App.audio.playWhenAllowed('twinkle', { ignore: '.moon-begin' });   // the twinkle bells play as soon as the website starts (on the first tap if the browser blocks autoplay)
       const fx = FX.field(sec, { motes: 36, rgb: '255,233,185', size: 0.75 });
       ctx.add(fx.destroy);
       const skyName = sec.querySelector('.sky-name');
@@ -61,7 +62,8 @@
         App.audio.unlock();
         App.state.started = true;
         document.body.classList.add('started');
-        App.audio.fadeIn('calm', 1200);
+        App.audio.fadeOut('twinkle', 900);   // the twinkle belongs to this opening scene only
+        App.audio.fadeIn('dream', 1500);     // the romantic dream track takes over from the twinkle
         // The flower-letter 'blossom' screen is switched off (its scene stays below): go straight to the bouquet (sunflowers, then roses in the same scene).
         // App.SceneManager.go('blossom', { mode: 'black', duration: 900, hold: 200 });
         App.SceneManager.go('bouquet', { mode: 'black', duration: 900, hold: 200 });
