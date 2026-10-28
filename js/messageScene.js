@@ -69,7 +69,7 @@
           sh.inert = i !== n;
         });
         ctx.later(function () { sheets[n].focus({ preventScroll: true }); }, 60);
-        if (n > 0 && !letter[n].started) ctx.later(function () { writePage(n); }, 950);   // once the page has finished turning, the letter writes itself
+        if (n > 0 && !letter[n].started) ctx.later(function () { writePage(n); }, 450);   // once the page has finished turning, the letter writes itself
       }
 
       /* ---- pages 2 and 3 write themselves out letter by letter, like the first page ---- */
@@ -92,23 +92,35 @@
         const pg = letter[n];
         pg.started = true;
         pg.num.textContent = 'tap the page to read it all';
-        const step = App.reduced ? 2 : 11;
-        for (const it of pg.items) {
-          it.el.classList.add('typing');
-          for (let k = 0; k < it.chars.length; k++) {
-            if (pg.skip) break;
-            it.a.textContent = it.chars.slice(0, k + 1).join('');
-            it.b.textContent = it.chars.slice(k + 1).join('');
-            const ch = it.chars[k];
-            await ctx.sleep(/[.!?]/.test(ch) ? step * 7 : /[,;—]/.test(ch) ? step * 3 : step);
+        // Time-based, one screen update per frame: the whole page takes about 14 s whatever the device (a slow phone just shows fewer steps).
+        const total = pg.items.reduce(function (sum, it) { return sum + it.chars.length; }, 0);
+        const cps = App.reduced ? 1000 : Math.max(60, total / 14);
+        const show = function (it, k) {
+          it.a.textContent = it.chars.slice(0, k).join('');
+          it.b.textContent = it.chars.slice(k).join('');
+        };
+        try {
+          for (const it of pg.items) {
+            it.el.classList.add('typing');
+            const len = it.chars.length;
+            await new Promise(function (done) {
+              const t0 = performance.now();
+              let shown = -1;
+              (function frame(now) {
+                if (ctx.dead) return;
+                const k = pg.skip ? len : Math.min(len, Math.floor((now - t0) / 1000 * cps) + 1);
+                if (k !== shown) { shown = k; show(it, k); }
+                if (k >= len) done(); else requestAnimationFrame(frame);
+              })(t0);
+            });
+            it.el.classList.remove('typing');
+            if (!pg.skip) await ctx.sleep(160);
           }
-          it.a.textContent = it.chars.join('');
-          it.b.textContent = '';
-          it.el.classList.remove('typing');
-          if (!pg.skip) await ctx.sleep(step * 12);
+        } finally {                                   // however it ends, the whole page is on screen and the buttons are there
+          pg.items.forEach(function (it) { show(it, it.chars.length); it.el.classList.remove('typing'); });
+          pg.num.textContent = pg.numText;
+          pg.sh.classList.add('typed');
         }
-        pg.num.textContent = pg.numText;
-        pg.sh.classList.add('typed');
       }
       sheets.forEach(function (sh, i) {
         sh.inert = i !== 0;
@@ -166,7 +178,7 @@
         sec.classList.add('written');                 // the envelope sinks away, the paper takes the stage
         fit();
         paper.focus({ preventScroll: true });
-        await ctx.sleep(700);
+        await ctx.sleep(350);
 
         const step = App.reduced ? 12 : 42;
         await type(sec.querySelector('.mp-h'), T.msgGreeting, step * 1.6);

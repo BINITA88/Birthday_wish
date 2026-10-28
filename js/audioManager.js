@@ -18,7 +18,7 @@
         const t = { id: id, volume: cfg.volume == null ? 1 : cfg.volume, loop: !!cfg.loop, ok: true, el: null, played: false, fade: null, want: false };
         try {
           const a = new Audio();
-          a.preload = (id === 'calm' || id === 'sparkler' || id === 'love' || id === 'dream') ? 'auto' : 'metadata';   // only the opening music is fetched up front; the rest loads when it is first needed
+          a.preload = 'metadata';   // music is big: nothing is downloaded up front, a track streams when it is first played
           a.loop = t.loop;
           a.addEventListener('error', function () { t.ok = false; });
           a.src = cfg.src;
