@@ -139,9 +139,12 @@
         await ctx.sleep(900);
       };
       // the flowers fold back down and the next kind grows in the same spot (backdrop, grass and bow stay)
+      // the rose photo is fetched now, while the sunflowers grow, and the roses wait for it (up to 6 s) instead of growing as bare stems
+      const roseReady = new Promise(function (res) { const im = new Image(); im.onload = im.onerror = function () { res(); }; im.src = 'assets/images/rose-head.png'; });
       const swapTo = async function (id) {
         sec.classList.remove('tied', 'leafy', 'bloom', 'cluster');
         await ctx.sleep(1100);
+        if (id === 'rose-head') await Promise.race([roseReady, ctx.sleep(6000)]);
         uses.forEach(function (el, i) {
           el.setAttribute('href', '#' + id);
           el.setAttribute('transform', 'rotate(' + TILT[i % 7] + ') scale(' + (i % 2 ? -1 : 1) + ' 1)');   // so no two look identical
