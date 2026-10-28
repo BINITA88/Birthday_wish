@@ -170,7 +170,6 @@
       tracks: {
         countdown:   { src: 'assets/audio/freesound_community-3min-bell-sound-count-61773.mp3', volume: 0.7 },   // only its first bell is used: tik · tik · tok
         sparkler:    { src: 'assets/audio/freesound_community-firework-candle-76282.mp3', volume: 0.8 },   // the cake's sparkler: only its first seconds are played
-        twinkle:     { src: 'assets/audio/white_records-twinkle-twinkle-little-star-bells-background-xmas-music-for-video-262281.mp3', volume: 0.6, loop: true },   // opening scene only: starts when the letters gather into PRATIMA, fades out at Begin
         love:        { src: 'assets/audio/pardeeppatel-vol-1-endless-love-story-281663.mp3', volume: 0.5, loop: true },   // the heart, the cake and the letter; fades out when the birthday tune arrives
         dream:       { src: 'assets/audio/sounovamusic-romantic-dream-400789.mp3', volume: 0.5 },   // from the opening's Begin through the flowers; its closing seconds play in the heart scene, then it ends
         calm:        { src: 'assets/audio/freesound_community-calm_game_music_1-49209.mp3', volume: 0.45, loop: true },   // everywhere except the countdown and the birthday tune

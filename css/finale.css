@@ -239,13 +239,6 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 }
 .msg-vignette { z-index: 0; }
 
-/* ---------- 6. Start gate: the first tap unlocks the browser's sound so the opening twinkle can play ---------- */
-.gate { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(1.4rem, 5dvh, 2.4rem); padding: 0 8vw; text-align: center;
-  background: radial-gradient(ellipse at 50% 55%, #1b1626 0, #08090D 68%); transition: opacity .9s ease; }
-.gate.leaving { opacity: 0; pointer-events: none; }
-.gate-text { margin: 0; font: 400 clamp(1.9rem, 6.5vw, 3.4rem)/1.2 var(--script); color: #fff3db; text-shadow: 0 0 24px rgba(255, 200, 140, .45); }
-.gate-btn { position: relative; }
-
 /* Letter pages write themselves: the unwritten rest of each line stays in place but invisible; the buttons appear once the page is written. */
 .ty-b { visibility: hidden; }
 .mb-text .typing .ty-a::after { content: ''; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -.12em; background: #7a4a34; animation: caret .8s steps(1) infinite; }
