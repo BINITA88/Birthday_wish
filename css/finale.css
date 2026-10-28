@@ -238,3 +238,10 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
   -webkit-mask-image: radial-gradient(ellipse at 66% 60%, #000 46%, transparent 76%); mask-image: radial-gradient(ellipse at 66% 60%, #000 46%, transparent 76%);
 }
 .msg-vignette { z-index: 0; }
+
+/* ---------- 6. Start gate: the first tap unlocks the browser's sound so the opening twinkle can play ---------- */
+.gate { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(1.4rem, 5dvh, 2.4rem); padding: 0 8vw; text-align: center;
+  background: radial-gradient(ellipse at 50% 55%, #1b1626 0, #08090D 68%); transition: opacity .9s ease; }
+.gate.leaving { opacity: 0; pointer-events: none; }
+.gate-text { margin: 0; font: 400 clamp(1.9rem, 6.5vw, 3.4rem)/1.2 var(--script); color: #fff3db; text-shadow: 0 0 24px rgba(255, 200, 140, .45); }
+.gate-btn { position: relative; }
