@@ -104,10 +104,20 @@
       wishCta: 'Click for Magic ✨',
 
       msgOpen: 'OPEN',
-      msgGreeting: 'Dearest Pratima,',
-      msgP1: 'May every new day bring you soft reasons to smile, warm people to hold close, and beautiful little moments that feel like magic.',
-      msgP2: 'You deserve a world that blooms gently around you. Happy Birthday, Pratima. ❤️',
-      msgSign: 'With all my love,',
+      /* The first page: it starts typing the moment OPEN is pressed. */
+      msgWelcome: {
+        title: 'Happy Birthday, Pratima! ❤️🎂',
+        paras: [
+          'May this beautiful new chapter of your life bring you endless happiness, genuine love, peaceful moments, and countless reasons to smile. May every dream you carry in your heart slowly turn into reality, and may your hard work lead you to all the success you truly deserve.',
+          'I hope life brings you more beautiful moments than you expect, more reasons to smile than to worry, and people who appreciate you for who you truly are. I hope you always remember how much potential you have and never stop believing in yourself, even when life gets difficult.',
+          'May you always find the courage to follow your dreams, the strength to overcome every challenge, and the confidence to keep moving forward. No matter how much life changes, I hope you never lose that sweet smile of yours.',
+          "Some people make ordinary moments feel a little more special just by being themselves, and I'm genuinely glad I got the chance to know you. Today, I simply wish to see you happy, smiling, and getting closer to everything your heart wishes for.",
+          "I hope your birthday is filled with love, laughter, lovely surprises, and little moments you'll remember with a smile.",
+          'Have the most beautiful birthday, Pratima! ❤️🌻',
+          'Keep smiling, keep growing, and keep being you. May life always give you reasons to smile, and may your smile shine as brightly as the sunshine.'
+        ],
+        sign: 'Happy Birthday, my good luck P. 🤍🌻'
+      },
       msgTurn: 'Turn the page',
       msgBack: 'Back',
       msgContinue: 'Make a wish ✨',

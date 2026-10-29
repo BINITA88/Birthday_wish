@@ -237,3 +237,11 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
   -webkit-mask-image: radial-gradient(ellipse at 66% 60%, #000 46%, transparent 76%); mask-image: radial-gradient(ellipse at 66% 60%, #000 46%, transparent 76%);
 }
 .msg-vignette { z-index: 0; }
+
+/* First page: the opening message types itself; the unwritten rest of each line stays in place but invisible. */
+.mb-welcome .mp-h { margin: 0 0 .35em; font: 400 2.2em/1.1 var(--script); text-align: left; color: #3a281e; }
+.mb-welcome p.mp-sign { margin: .9em 0 0; text-align: right; font: 400 1.5em/1.2 var(--script); color: #5a3a28; }
+.ty-b { visibility: hidden; }
+.mb-text .typing .ty-a::after, .mb-welcome .typing .ty-a::after { content: ''; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -.12em; background: #7a4a34; animation: caret .8s steps(1) infinite; }
+.mb-welcome p { margin: 0 0 .62em; font: italic 400 1em/1.44 var(--serif); color: #33241b; }
+.mb-welcome p.mp-sign { margin: .8em 0 0; font: 400 1.5em/1.2 var(--script); color: #5a3a28; }

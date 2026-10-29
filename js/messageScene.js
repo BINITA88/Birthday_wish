@@ -6,7 +6,7 @@
 
   App.SceneManager.register('message', {
     init(sec, ctx) {
-      const T = C.text, L = T.msgLetter;
+      const T = C.text, L = T.msgLetter, W = T.msgWelcome;
       sec.innerHTML =
         '<div class="msg-vignette" aria-hidden="true"></div>' +
         '<div class="msg-stage">' +
@@ -22,7 +22,9 @@
         '</div>' +
         '<div class="msg-book">' +
           '<article class="mb-sheet msg-paper cur" tabindex="-1" aria-live="off">' +
-            '<h1 class="mp-h"></h1><p class="mp-p1"></p><p class="mp-p2"></p><p class="mp-sign"></p>' +
+            '<div class="mb-text mb-welcome"><h1 class="mp-h">' + u.esc(W.title) + '</h1>' +
+              W.paras.map(function (t) { return '<p>' + u.esc(t) + '</p>'; }).join('') +
+              '<p class="mp-sign">' + u.esc(W.sign) + '</p></div>' +
             '<nav class="mb-nav mb-nav-first"><button class="mb-btn mb-next" type="button">' + u.esc(T.msgTurn) + ' <i aria-hidden="true">›</i></button></nav>' +
           '</article>' +
           '<article class="mb-sheet mb-letter" tabindex="-1" aria-label="The letter, page 1 of 2">' +
@@ -105,43 +107,53 @@
       });
       ctx.on(paper, 'click', function () { skip = true; });          // a tap on the paper writes the rest at once
 
-      /** Types `text` into `el` with a blinking caret, by the clock: `step` ms per letter on a fast device, never stalling on a slow one.
-          Resolves when done (or at once if the reader tapped to skip). */
-      function type(el, text, step) {
-        const chars = Array.from(text), len = chars.length;
-        el.classList.add('typing');
+      /* ---- page 1 types itself out the moment OPEN is pressed ---- */
+      // Every line keeps its full text in place (the not-yet-typed part is invisible), so the layout never jumps and the fitted font size stays right.
+      const welcome = Array.from(paper.querySelectorAll('.mb-welcome > *')).map(function (el) {
+        const chars = Array.from(el.textContent);
+        el.innerHTML = '<span class="ty-a"></span><span class="ty-b"></span>';
+        el.lastChild.textContent = chars.join('');
+        return { el: el, a: el.firstChild, b: el.lastChild, chars: chars };
+      });
+      const showTyped = function (it, k) {
+        it.a.textContent = it.chars.slice(0, k).join('');
+        it.b.textContent = it.chars.slice(k).join('');
+      };
+      /** Types one line by the clock (one screen update per frame, so a slow phone just shows fewer steps); resolves when done or tapped. */
+      function typeLine(it, cps) {
+        it.el.classList.add('typing');
         return new Promise(function (done) {
-          const t0 = performance.now();
+          const len = it.chars.length, t0 = performance.now();
           let shown = -1;
           (function frame(now) {
             if (ctx.dead) return;
-            const k = skip ? len : Math.min(len, Math.floor((now - t0) / step) + 1);
-            if (k !== shown) { shown = k; el.textContent = chars.slice(0, k).join(''); paper.scrollTop = paper.scrollHeight; }
-            if (k >= len) { el.classList.remove('typing'); done(); } else requestAnimationFrame(frame);
+            const k = skip ? len : Math.min(len, Math.floor((now - t0) / 1000 * cps) + 1);
+            if (k !== shown) { shown = k; showTyped(it, k); }
+            if (k >= len) { it.el.classList.remove('typing'); done(); } else requestAnimationFrame(frame);
           })(t0);
         });
       }
 
       async function run() {
         sec.classList.add('opening');                 // the seal breaks and the flap lifts …
-        await ctx.sleep(1300);
+        await ctx.sleep(700);
         sec.classList.add('rising');                  // … the letter slides out and opens up on the table
-        await ctx.sleep(1100);
+        await ctx.sleep(700);
         sec.classList.add('written');                 // the envelope sinks away, the paper takes the stage
         fit();
         paper.focus({ preventScroll: true });
-        await ctx.sleep(350);
+        await ctx.sleep(100);
 
-        const step = App.reduced ? 12 : 42;
-        const lines = [['.mp-h', T.msgGreeting, step * 1.6], ['.mp-p1', T.msgP1, step], ['.mp-p2', T.msgP2, step], ['.mp-sign', T.msgSign, step * 1.5]];
+        const total = welcome.reduce(function (sum, it) { return sum + it.chars.length; }, 0);
+        const cps = App.reduced ? 1000 : Math.max(45, total / 24);       // the whole page takes about 24 s
         try {
-          for (const ln of lines) {
-            await type(sec.querySelector(ln[0]), ln[1], ln[2]);
-            if (!skip) await ctx.sleep(350);
+          for (const it of welcome) {
+            await typeLine(it, it.el.classList.contains('mp-h') ? cps * 0.5 : cps);
+            if (!skip) await ctx.sleep(it.el.classList.contains('mp-h') ? 500 : 220);
           }
-          await ctx.sleep(900);
+          await ctx.sleep(600);
         } finally {                                   // however it ends, all of page 1 is on screen and the way on is open
-          lines.forEach(function (ln) { const el = sec.querySelector(ln[0]); el.textContent = ln[1]; el.classList.remove('typing'); });
+          welcome.forEach(function (it) { showTyped(it, it.chars.length); it.el.classList.remove('typing'); });
           firstNext.classList.add('in');              // the reader turns the page when ready; the last page leads to the party
         }
       }
