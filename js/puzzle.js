@@ -3,7 +3,7 @@
    into the photo, covering the whole screen (cropped, never stretched). */
 (function (App) {
   const u = App.u;
-  const IMG_W = 828, IMG_H = 1004;          // size of assets/images/lastposterimage.png
+  const IMG_W = 828, IMG_H = 1004;          // size of assets/images/lastposterimage.jpg
   const FOCUS_X = 0.68, FOCUS_Y = 0.5;      // which part of the photo stays in view when the screen crops it (she sits right of centre)
   const SPREAD = 2.6, FLIGHT = 1.7;         // seconds: pieces leave one after another over SPREAD, each flies for FLIGHT
 
@@ -25,6 +25,8 @@
     el.innerHTML = '<div class="pz-bg" style="background-image:url(&quot;' + img + '&quot;)"></div><div class="pz-tiles">' + tiles + '</div>';
     parent.insertBefore(el, parent.firstChild);
 
+    // the photo is fetched now; the pieces only start to fly once it has arrived (or after 12 s), so they never gather around an empty picture
+    const photoReady = new Promise(function (res) { const im = new Image(); im.onload = im.onerror = function () { res(); }; im.src = imageUrl; });
     const bg = el.querySelector('.pz-bg');
     const tileEls = Array.from(el.querySelectorAll('.pz-tile'));
 
@@ -59,11 +61,15 @@
     return {
       el: el,
       start(onJoined) {
-        layout();
-        ctx.later(function () { el.classList.add('gather'); }, 150);                               // the pieces fly in …
-        const settled = 150 + (SPREAD + FLIGHT) * 1000 * fly;
-        ctx.later(function () { el.classList.add('joined'); if (onJoined) onJoined(); }, settled + 150);   // … click together, seams fade
+        Promise.race([photoReady, new Promise(function (res) { ctx.later(res, 12000); })]).then(function () { if (!ctx.dead) go(onJoined); });
       }
     };
+
+    function go(onJoined) {
+      layout();
+      ctx.later(function () { el.classList.add('gather'); }, 150);                               // the pieces fly in …
+      const settled = 150 + (SPREAD + FLIGHT) * 1000 * fly;
+      ctx.later(function () { el.classList.add('joined'); if (onJoined) onJoined(); }, settled + 150);   // … click together, seams fade
+    }
   };
 })(window.App = window.App || {});

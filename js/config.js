@@ -31,7 +31,7 @@
     photoObjectPosition: 'center 22%',             // keeps faces in frame when the photo is cropped
 
     /* ---- Floating balloons (celebration + cake scenes) ---- */
-    posterImage: 'assets/images/lastposterimage.png',                  // the last scene's puzzle poster
+    posterImage: 'assets/images/lastposterimage.jpg',                  // the last scene's puzzle poster
     balloonImage: 'assets/images/heart-balloon-bouquet-small.png',    // 372 px, shadow baked in (the big original is kept alongside)
 
     /* ---- The garden (scenes 4 + 5) ----

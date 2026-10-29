@@ -67,7 +67,7 @@
       const T = C.text;
       App.audio.fadeOut('dream', 1500);      // the romantic-dream track ends as the heart arrives …
       App.audio.fadeIn('love', 2000);        // … and one love song then carries the heart, the cake and the letter
-      ['assets/images/vintage-letter-tabletop.jpg', 'assets/images/lastposterimage.png'].forEach(function (src) { new Image().src = src; });   // fetched now, so the letter and the finale never wait for them
+      ['assets/images/vintage-letter-tabletop.jpg', 'assets/images/lastposterimage.jpg'].forEach(function (src) { new Image().src = src; });   // fetched now, so the letter and the finale never wait for them
       sec.innerHTML = '<canvas class="heart-canvas" aria-hidden="true"></canvas>' +
         '<div class="heart-caption"><p class="hb-text"></p></div>';
       const canvas = sec.querySelector('.heart-canvas');

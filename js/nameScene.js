@@ -61,6 +61,7 @@
         App.audio.unlock();
         App.state.started = true;
         document.body.classList.add('started');
+        new Image().src = C.posterImage;     // her last photo is fetched now, ahead of the music
         App.audio.fadeIn('dream', 1500);     // the romantic dream track starts when the story begins
         // The flower-letter 'blossom' screen is switched off (its scene stays below): go straight to the bouquet (sunflowers, then roses in the same scene).
         // App.SceneManager.go('blossom', { mode: 'black', duration: 900, hold: 200 });
