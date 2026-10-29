@@ -140,7 +140,6 @@
       };
       // the flowers fold back down and the next kind grows in the same spot (backdrop, grass and bow stay)
       // the rose photo is fetched now, while the sunflowers grow, and the roses wait for it (up to 6 s) instead of growing as bare stems
-      App.audio.warm('love');                    // the love song for the heart scene downloads quietly while the flowers grow
       const roseReady = new Promise(function (res) { const im = new Image(); im.onload = im.onerror = function () { res(); }; im.src = 'assets/images/rose-head.png'; });
       const swapTo = async function (id) {
         sec.classList.remove('tied', 'leafy', 'bloom', 'cluster');

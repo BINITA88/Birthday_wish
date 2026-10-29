@@ -55,6 +55,8 @@
       const finale = sec.querySelector('.msg-finale');
       u.hint(openBtn);
 
+      App.audio.fadeOut('suraj', 1500);                             // 'Suraj Hua Madham' ends with the cake; 'Alfaz' takes the letter
+      App.audio.fadeIn('alfaz', 2000);
       App.audio.warm('music');                                      // the Happy Birthday tune downloads quietly while she reads
       const fx0 = FX.field(sec, { motes: 14, rgb: '255,205,130', size: 0.6 });
       ctx.add(fx0.destroy);
@@ -166,7 +168,7 @@
         // first the puzzle gathers into her photo; only then do the words and all the decoration arrive
         puzzle.start(function () {
           sec.classList.add('titled');
-          App.audio.fadeOut('love', 1500);                // the love song, which carried the puzzle, gives way to the Happy Birthday tune …
+          App.audio.fadeOut('alfaz', 1500);               // 'Alfaz', which carried the letter and the puzzle, gives way to the Happy Birthday tune …
           App.audio.fadeIn('music', 900);                 // … as the wish, the balloons and the confetti arrive
           FX.balloons(finale, { count: App.isSmall() ? 12 : 18, prefill: true, party: true });      // the party balloons rise over the photo
           const fx = FX.field(finale, { motes: 0, rgb: '255,205,120', rate: 26, max: 120, confetti: true });

@@ -179,8 +179,8 @@
       tracks: {
         countdown:   { src: 'assets/audio/freesound_community-3min-bell-sound-count-61773.mp3', volume: 0.7 },   // only its first bell is used: tik · tik · tok
         sparkler:    { src: 'assets/audio/freesound_community-firework-candle-76282.mp3', volume: 0.8 },   // the cake's sparkler: only its first seconds are played
-        love:        { src: 'assets/audio/pardeeppatel-vol-1-endless-love-story-281663.mp3', volume: 0.5, loop: true },   // the heart, the cake and the letter; fades out when the birthday tune arrives
-        dream:       { src: 'assets/audio/sounovamusic-romantic-dream-400789.mp3', volume: 0.5 },   // from the opening's Begin through the flowers; its closing seconds play in the heart scene, then it ends
+        suraj:       { src: 'assets/audio/suraj-hua-madham.mp4', volume: 0.55, loop: true },   // from Begin until the cake (a 15 s guitar loop)
+        alfaz:       { src: 'assets/audio/alfaz.mp4', volume: 0.5, loop: true },   // from the letter on; fades out when the Happy Birthday tune arrives
         calm:        { src: 'assets/audio/freesound_community-calm_game_music_1-49209.mp3', volume: 0.45, loop: true },   // everywhere except the countdown and the birthday tune
         music:       { src: 'assets/audio/satokin-happy-birthday-ukulele-600716.mp3', volume: 0.55, loop: true },   // plays from the birthday scene until a flower is chosen
         celebration: { src: 'assets/audio/celebration.mp3',              volume: 0.6 },
