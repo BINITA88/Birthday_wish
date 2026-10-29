@@ -1,12 +1,13 @@
 /* SCENE – "Message for You". A sealed envelope lies on a wooden table with an OPEN button under it. Only after OPEN is pressed
-   does the flap lift and the letter appear, writing itself out letter by letter. When it is written, the final birthday wish
-   arrives with balloons and confetti. Only the first page is typed out; the two long letter pages show their text at once. (The older 'letter' scene is kept in letterScene.js but is no longer used.) */
+   does the flap lift and the letter appear, typing itself out letter by letter. The letter is the one birthday message
+   (config.js, text.msgWelcome) and nothing else; when it is written, "Make a wish" starts the final birthday finale
+   with balloons and confetti. (The older 'letter' scene is kept in letterScene.js but is no longer used.) */
 (function (App) {
   const { CONFIG: C, u, FX } = App;
 
   App.SceneManager.register('message', {
     init(sec, ctx) {
-      const T = C.text, L = T.msgLetter, W = T.msgWelcome;
+      const T = C.text, W = T.msgWelcome;
       sec.innerHTML =
         '<div class="msg-vignette" aria-hidden="true"></div>' +
         '<div class="msg-stage">' +
@@ -25,21 +26,7 @@
             '<div class="mb-text mb-welcome"><h1 class="mp-h">' + u.esc(W.title) + '</h1>' +
               W.paras.map(function (t) { return '<p>' + u.esc(t) + '</p>'; }).join('') +
               '<p class="mp-sign">' + u.esc(W.sign) + '</p></div>' +
-            '<nav class="mb-nav mb-nav-first"><button class="mb-btn mb-next" type="button">' + u.esc(T.msgTurn) + ' <i aria-hidden="true">›</i></button></nav>' +
-          '</article>' +
-          '<article class="mb-sheet mb-letter" tabindex="-1" aria-label="The letter, page 1 of 2">' +
-            '<div class="mb-text">' +
-              '<p class="lt-kicker">' + u.esc(L.title) + '</p><p class="lt-sub">' + u.esc(L.sub) + '</p><h2 class="lt-dear">' + u.esc(L.dear) + '</h2>' +
-              L.page1.map(function (t) { return '<p>' + u.esc(t) + '</p>'; }).join('') +
-            '</div>' +
-            '<nav class="mb-nav"><button class="mb-btn mb-back" type="button"><i aria-hidden="true">‹</i> ' + u.esc(T.msgBack) + '</button><span class="mb-num">1 / 2</span><button class="mb-btn mb-next" type="button">' + u.esc(T.msgTurn) + ' <i aria-hidden="true">›</i></button></nav>' +
-          '</article>' +
-          '<article class="mb-sheet mb-letter" tabindex="-1" aria-label="The letter, page 2 of 2">' +
-            '<div class="mb-text">' +
-              L.page2.map(function (t, i) { return '<p' + (i === 5 ? ' class="lt-hb"' : '') + '>' + u.esc(t) + '</p>'; }).join('') +
-              '<p class="lt-close">' + u.esc(L.close) + '</p><p class="lt-from">' + u.esc(L.from) + '</p>' +
-            '</div>' +
-            '<nav class="mb-nav"><button class="mb-btn mb-back" type="button"><i aria-hidden="true">‹</i> ' + u.esc(T.msgBack) + '</button><span class="mb-num">2 / 2</span><button class="mb-btn mb-wish" type="button">' + u.esc(T.msgContinue) + '</button></nav>' +
+            '<nav class="mb-nav mb-nav-first"><button class="mb-btn mb-wish" type="button">' + u.esc(T.msgContinue) + '</button></nav>' +
           '</article>' +
         '</div>' +
         '<div class="msg-finale" aria-live="polite">' +
@@ -49,9 +36,8 @@
 
       const env = sec.querySelector('.env');
       const openBtn = sec.querySelector('.msg-open');
-      const paper = sec.querySelector('.msg-paper');                 // page 1 (the one that writes itself)
-      const sheets = Array.from(sec.querySelectorAll('.mb-sheet'));
-      const firstNext = paper.querySelector('.mb-next');
+      const paper = sec.querySelector('.msg-paper');                 // the letter, which writes itself
+      const wishBtn = sec.querySelector('.mb-wish');
       const finale = sec.querySelector('.msg-finale');
       u.hint(openBtn);
 
@@ -65,28 +51,12 @@
       ctx.later(function () { sec.classList.add('settled'); }, 150);
       ctx.show(openBtn, 1500);
 
-      /* ---- the letter: page 1 turns over to reveal the two pages of text ---- */
-      function showPage(n) {
-        sheets.forEach(function (sh, i) {
-          sh.classList.toggle('turned', i < n);
-          sh.classList.toggle('cur', i === n);
-          sh.inert = i !== n;
-        });
-        ctx.later(function () { sheets[n].focus({ preventScroll: true }); }, 60);
-      }
-
-      sheets.forEach(function (sh, i) {
-        sh.inert = i !== 0;
-        const next = sh.querySelector('.mb-next'), back = sh.querySelector('.mb-back');
-        if (next) ctx.on(next, 'click', function () { showPage(i + 1); });
-        if (back) ctx.on(back, 'click', function () { showPage(i - 1); });
-      });
-      ctx.on(sec.querySelector('.mb-wish'), 'click', function (e) {
-        e.currentTarget.disabled = true;
+      ctx.on(wishBtn, 'click', function () {
+        wishBtn.disabled = true;
         party();
       });
 
-      /** Shrinks each letter page's text until all of it sits on the page (it scrolls only on a really tiny screen). */
+      /** Shrinks the letter's text until all of it sits on the paper (it scrolls only on a really tiny screen). */
       function fit() {
         sec.querySelectorAll('.mb-text').forEach(function (t) {
           let fs = Math.max(14, Math.min(22, t.clientWidth / 25));
@@ -157,7 +127,7 @@
           await ctx.sleep(600);
         } finally {                                   // however it ends, all of page 1 is on screen and the way on is open
           welcome.forEach(function (it) { showTyped(it, it.chars.length); it.el.classList.remove('typing'); });
-          firstNext.classList.add('in');              // the reader turns the page when ready; the last page leads to the party
+          wishBtn.classList.add('in');               // once the letter is written, "Make a wish" leads to the finale
         }
       }
 
