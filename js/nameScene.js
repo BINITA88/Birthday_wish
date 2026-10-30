@@ -58,11 +58,11 @@
       ctx.on(btn, 'click', function () {
         if (btn.disabled) return;
         btn.disabled = true;
-        App.audio.unlock(['suraj']);          // every track is primed for this browser except the opening song, which simply starts below
+        App.audio.unlock(['evergreen']);          // every track is primed for this browser except the opening song, which simply starts below
         App.state.started = true;
         document.body.classList.add('started');
         new Image().src = C.posterImage;     // her last photo is fetched now, ahead of the music
-        App.audio.fadeIn('suraj', 1500);     // 'Suraj Hua Madham' starts when the story begins and plays through the flower section
+        App.audio.fadeIn('evergreen', 1500);  // the Evergreen medley starts when the story begins and plays until the Happy Birthday tune
         // The flower-letter 'blossom' screen is switched off (its scene stays below): go straight to the bouquet (sunflowers, then roses in the same scene).
         // App.SceneManager.go('blossom', { mode: 'black', duration: 900, hold: 200 });
         App.SceneManager.go('bouquet', { mode: 'black', duration: 900, hold: 200 });

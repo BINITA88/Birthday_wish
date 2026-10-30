@@ -26,7 +26,7 @@
     App.SceneManager.go('name', { mode: 'none' });
 
     // once the opening screen's images have arrived, the first song downloads quietly while she watches the letters gather
-    const warmSong = function () { setTimeout(function () { App.audio.warm('suraj', true); }, 600); };
+    const warmSong = function () { setTimeout(function () { App.audio.warm('evergreen', true); }, 600); };
     if (document.readyState === 'complete') warmSong(); else window.addEventListener('load', warmSong);
   }
 

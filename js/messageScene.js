@@ -136,7 +136,7 @@
         // first the puzzle gathers into her photo; only then do the words and all the decoration arrive
         puzzle.start(function () {
           sec.classList.add('titled');
-          App.audio.fadeOut('evergreen', 1500);           // the medley, which carried the cake, the letter and the puzzle, gives way to the Happy Birthday tune …
+          App.audio.fadeOut('evergreen', 1500);           // the medley, which has carried the whole story, gives way to the Happy Birthday tune …
           App.audio.fadeIn('music', 900);                 // … as the wish, the balloons and the confetti arrive
           FX.balloons(finale, { count: App.isSmall() ? 12 : 18, prefill: true, party: true });      // the party balloons rise over the photo
           const fx = FX.field(finale, { motes: 0, rgb: '255,205,120', rate: 26, max: 120, confetti: true });
