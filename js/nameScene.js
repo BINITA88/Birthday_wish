@@ -62,7 +62,7 @@
         App.state.started = true;
         document.body.classList.add('started');
         new Image().src = C.posterImage;     // her last photo is fetched now, ahead of the music
-        App.audio.fadeIn('suraj', 1500);     // 'Suraj Hua Madham' starts when the story begins and plays until the cake
+        App.audio.fadeIn('suraj', 1500);     // 'Suraj Hua Madham' starts when the story begins and plays through the flower section
         // The flower-letter 'blossom' screen is switched off (its scene stays below): go straight to the bouquet (sunflowers, then roses in the same scene).
         // App.SceneManager.go('blossom', { mode: 'black', duration: 900, hold: 200 });
         App.SceneManager.go('bouquet', { mode: 'black', duration: 900, hold: 200 });

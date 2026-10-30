@@ -41,7 +41,7 @@
       const finale = sec.querySelector('.msg-finale');
       u.hint(openBtn);
 
-      App.audio.fadeOut('suraj', 1500);                             // 'Suraj Hua Madham' ends with the cake; 'Alfaz' takes the letter
+      App.audio.fadeOut('calm', 1500);                              // the calm music ends with the cake; 'Alfaz' takes the letter
       App.audio.fadeIn('alfaz', 2000);
       App.audio.warm('music');                                      // the Happy Birthday tune downloads quietly while she reads
       const fx0 = FX.field(sec, { motes: 14, rgb: '255,205,130', size: 0.6 });

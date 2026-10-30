@@ -52,6 +52,8 @@
   App.SceneManager.register('photo', {
     init(sec, ctx) {
       const T = C.text;
+      App.audio.fadeOut('suraj', 1500);       // 'Suraj Hua Madham' belongs to the flower section only …
+      App.audio.fadeIn('calm', 2000);         // … the calm game music then carries the photo, the heart and the cake
       // The old sunflower-garden backdrop is switched off (Garden stays in garden.js): the photo now sits on vintage floral stationery.
       // const g = Garden.build(sec, { flower: App.state.flower || 'sunflower', animate: false, seed: App.state.gardenSeed });
       sec.insertAdjacentHTML('afterbegin', '<div class="photo-floral" aria-hidden="true"></div>');
