@@ -153,7 +153,6 @@
           fx.burst(W / 2, H * 0.35, 80, true);
           ctx.later(function () { fx.burst(W * 0.22, H * 0.5, 50, true); }, 450);
           ctx.later(function () { fx.burst(W * 0.78, H * 0.5, 50, true); }, 800);
-          if (App.audio.has('celebration')) App.audio.play('celebration');
         });
       }
     }

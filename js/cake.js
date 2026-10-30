@@ -239,7 +239,7 @@
 
       /* --- a small candle can be blown out on its own --- */
       smalls.forEach(function (c) {
-        function blow(e) { e.preventDefault(); if (!ready || blowing) return; App.audio.play('blow'); snuff(c); }
+        function blow(e) { e.preventDefault(); if (!ready || blowing) return; snuff(c); }
         ctx.on(c, 'click', blow);
         ctx.on(c, 'keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') blow(e); });
       });
@@ -260,7 +260,7 @@
         main.classList.remove('fizz', 'dying');
         snuff(main);                                        // … the light closes …
         S.candlesOut = 1;
-        smalls.forEach(function (c, i) { ctx.later(function () { App.audio.play('blow'); snuff(c); }, 120 + i * 100); });   // … and the small candles blow out
+        smalls.forEach(function (c, i) { ctx.later(function () { snuff(c); }, 120 + i * 100); });   // … and the small candles blow out
         ctx.later(finale, 120 + smalls.length * 100 + 900);
       }
       ctx.on(main, 'click', function (e) { e.preventDefault(); lightSparkler(); });
@@ -272,8 +272,6 @@
         if (done || S.candlesOut < S.candlesTotal) return;
         done = true;
         sec.classList.add('finale');
-        App.audio.play('celebration');
-        if (App.audio.has('voice')) ctx.later(function () { App.audio.play('voice'); }, 700);
 
         const r = svg.getBoundingClientRect(), W = sec.clientWidth;
         fx.burst(W / 2, r.top + r.height * 0.3, 70, true);
@@ -295,7 +293,7 @@
       ctx.on(nextBtn, 'click', function () {
         if (nextBtn.disabled) return;
         nextBtn.disabled = true;
-        ['celebration', 'voice', 'blow', 'sparkler'].forEach(App.audio.stop);   // the love song carries on into the letter
+        App.audio.stop('sparkler');   // the evergreen song carries on into the letter
         App.SceneManager.go('message', { mode: 'black', duration: 1600, hold: 500 });
       });
 

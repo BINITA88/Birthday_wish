@@ -36,7 +36,6 @@
         App.audio.unlock();
         App.state.started = true;
         document.body.classList.add('started');
-        App.audio.fadeOut('calm', 700);      // silence for the countdown
 
         box.classList.add('leave');
         sec.classList.add('dark');
@@ -44,12 +43,10 @@
 
         for (const n of [3, 2, 1]) {
           cd.innerHTML = '<span class="num"><b>' + n + '</b><i></i></span>';
-          App.audio.tick('countdown', n === 1 ? 0.74 : 1, 1000);   // tik … tik … tok
           await ctx.sleep(1150);
         }
         cd.innerHTML = '';
         await ctx.sleep(250);
-        App.audio.stop('countdown');
         App.SceneManager.go('celebration', { mode: 'black', duration: 900, hold: 250 });
       });
     }
