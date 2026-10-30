@@ -31,7 +31,8 @@
         '</div>' +
         '<div class="msg-finale" aria-live="polite">' +
           '<div class="mf-scrim" aria-hidden="true"></div>' +
-          '<div class="mf-copy"><p class="mf-text"></p></div>' +
+          '<div class="mf-copy"><p class="mf-text"></p>' +
+            '<button class="btn primary mf-balloons fade-up" type="button">' + u.esc(T.finalBalloons) + '</button></div>' +
         '</div>';
 
       const env = sec.querySelector('.env');
@@ -39,7 +40,9 @@
       const paper = sec.querySelector('.msg-paper');                 // the letter, which writes itself
       const wishBtn = sec.querySelector('.mb-wish');
       const finale = sec.querySelector('.msg-finale');
+      const balloonBtn = sec.querySelector('.mf-balloons');
       u.hint(openBtn);
+      u.hint(balloonBtn);
 
       App.audio.warm('music');                                      // the Happy Birthday tune downloads quietly while she reads
       const fx0 = FX.field(sec, { motes: 14, rgb: '255,205,130', size: 0.6 });
@@ -48,6 +51,9 @@
       // the sealed envelope settles on the table, then the OPEN button appears below it
       ctx.later(function () { sec.classList.add('settled'); }, 150);
       ctx.show(openBtn, 1500);
+
+      // The last button goes nowhere: each tap sends a few of the heart-balloon bouquets floating up from the bottom of the photo.
+      ctx.on(balloonBtn, 'click', function () { FX.release(finale, { count: 3 }); });
 
       ctx.on(wishBtn, 'click', function () {
         wishBtn.disabled = true;
@@ -137,6 +143,7 @@
         puzzle.start(function () {
           sec.classList.add('titled');
           App.audio.fadeOut('evergreen', 1500);           // the medley, which has carried the whole story, gives way to the Happy Birthday tune …
+          ctx.later(function () { balloonBtn.classList.add('in'); }, 2500);          // then a button that sends a few more balloons floating up
           App.audio.fadeIn('music', 900);                 // … as the wish, the balloons and the confetti arrive
           FX.balloons(finale, { count: App.isSmall() ? 12 : 18, prefill: true, party: true });      // the party balloons rise over the photo
           const fx = FX.field(finale, { motes: 0, rgb: '255,205,120', rate: 26, max: 120, confetti: true });

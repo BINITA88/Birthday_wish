@@ -119,6 +119,7 @@
         sign: 'Happy Birthday, my good luck P. 🤍🌻'
       },
       msgContinue: 'Make a wish ✨',
+      finalBalloons: 'Send Balloons 🎈',
       /* The full letter, shown on two turning pages after the first page. */
       finalWish: 'MANY MANY HAPPY RETURNS OF THE DAY, MY DEAR BOSS ❤️🌹',
 

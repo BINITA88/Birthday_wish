@@ -212,5 +212,31 @@
     return wrap;
   };
 
+  /** FX.release(parent, {count}) – a few of the heart-balloon bouquets float up from the bottom once, then are gone. */
+  FX.release = function (parent, o) {
+    o = o || {};
+    const wrap = document.createElement('div');
+    wrap.className = 'balloons release';
+    wrap.setAttribute('aria-hidden', 'true');
+    const n = o.count || 3;
+    const src = u.esc(App.CONFIG.balloonImage);
+    const fit = App.isSmall() ? 0.72 : 1;
+    let html = '', end = 0;
+    for (let i = 0; i < n; i++) {
+      const w = u.rand(150, 215) * fit;
+      const dur = u.rand(7, 10), delay = i * 0.45 + u.rand(0, 0.3);
+      const x = (i + u.rand(0.15, 0.85)) / n * 100;
+      end = Math.max(end, dur + delay);
+      html += '<div class="balloon one" style="left:' + x.toFixed(1) + '%;width:' + w.toFixed(0) + 'px;bottom:-' + (w * 1.2).toFixed(0) +
+        'px;--dur:' + dur.toFixed(1) + 's;--delay:' + delay.toFixed(2) + 's;--drift:' + u.rand(-5, 5).toFixed(1) + 'vw">' +
+        '<div class="b-sway" style="--sw:' + u.rand(3, 6).toFixed(1) + 's;--sa:' + u.rand(2, 4).toFixed(1) + 'deg">' +
+        '<img src="' + src + '" alt="" draggable="false"></div></div>';
+    }
+    wrap.innerHTML = html;
+    parent.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, end * 1000 + 400);       // once the last one has floated out of sight
+    return wrap;
+  };
+
   App.FX = FX;
 })(window.App = window.App || {});

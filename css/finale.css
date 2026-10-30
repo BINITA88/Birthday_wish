@@ -235,3 +235,8 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 .mb-text .typing .ty-a::after, .mb-welcome .typing .ty-a::after { content: ''; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -.12em; background: #7a4a34; animation: caret .8s steps(1) infinite; }
 .mb-welcome p { margin: 0 0 .62em; font: italic 400 1em/1.44 var(--serif); color: #33241b; }
 .mb-welcome p.mp-sign { margin: .8em 0 0; font: 400 1.5em/1.2 var(--script); color: #5a3a28; }
+
+/* "Send Balloons": heart-balloon bouquets that float up once and are gone (the button itself goes nowhere). */
+.mf-balloons { pointer-events: auto; }
+.balloon.one { animation: rise var(--dur) cubic-bezier(.3, .15, .55, 1) var(--delay) 1 both; }
+@media (prefers-reduced-motion: reduce) { .balloon.one { animation: rise var(--dur) linear var(--delay) 1 both; } }
