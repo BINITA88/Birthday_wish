@@ -153,7 +153,7 @@
       master: 0.7,
       tracks: {
         sparkler:    { src: 'assets/audio/freesound_community-firework-candle-76282.mp3', volume: 0.8 },   // the candle sound: the cake's sparkler, only its first seconds are played
-        evergreen:   { src: 'assets/audio/evergreen.m4a', volume: 0.5, loop: true },   // the one song of the whole story: from Begin (the flowers) to the Happy Birthday tune (the first 7 min of a guitar medley)
+        evergreen:   { src: 'assets/audio/evergreen.m4a?v=9m13', volume: 0.5, loop: true },   // the one song of the whole story: from Begin (the flowers) to the Happy Birthday tune (the first 7 min of a guitar medley)
         music:       { src: 'assets/audio/satokin-happy-birthday-ukulele-600716.mp3', volume: 0.55, loop: true }   // the last tune: arrives with the wish, balloons and confetti
       }
     },
