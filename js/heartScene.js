@@ -65,7 +65,6 @@
   App.SceneManager.register('heart', {
     init(sec, ctx) {
       const T = C.text;
-      App.audio.warm('alfaz');               // the letter's song downloads quietly while the heart and the cake play
       ['assets/images/vintage-letter-tabletop.jpg', 'assets/images/lastposterimage.jpg'].forEach(function (src) { new Image().src = src; });   // fetched now, so the letter and the finale never wait for them
       sec.innerHTML = '<canvas class="heart-canvas" aria-hidden="true"></canvas>' +
         '<div class="heart-caption"><p class="hb-text"></p></div>';

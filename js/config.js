@@ -154,8 +154,7 @@
         countdown:   { src: 'assets/audio/freesound_community-3min-bell-sound-count-61773.mp3', volume: 0.7 },   // only its first bell is used: tik · tik · tok
         sparkler:    { src: 'assets/audio/freesound_community-firework-candle-76282.mp3', volume: 0.8 },   // the cake's sparkler: only its first seconds are played
         suraj:       { src: 'assets/audio/suraj-hua-madham.mp4', volume: 0.55, loop: true },   // from Begin through the flower section only (a 15 s guitar loop)
-        alfaz:       { src: 'assets/audio/alfaz.mp4', volume: 0.5, loop: true },   // from the letter on; fades out when the Happy Birthday tune arrives
-        evergreen:   { src: 'assets/audio/evergreen.m4a', volume: 0.5, loop: true },   // after the flower section: the photo, the heart and the cake (the first 4 min of a guitar medley)
+        evergreen:   { src: 'assets/audio/evergreen.m4a', volume: 0.5, loop: true },   // after the flower section, all the way to the Happy Birthday tune: the photo, the heart, the cake, the letter and the puzzle (the first 7 min of a guitar medley)
         music:       { src: 'assets/audio/satokin-happy-birthday-ukulele-600716.mp3', volume: 0.55, loop: true },   // plays from the birthday scene until a flower is chosen
         celebration: { src: 'assets/audio/celebration.mp3',              volume: 0.6 },
         blow:        { src: 'assets/audio/candle-blow.mp3',              volume: 0.6 },
