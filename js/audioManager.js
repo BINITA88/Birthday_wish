@@ -11,6 +11,9 @@
 
   const eff = t => Math.max(0, Math.min(1, t.volume * master));
 
+  /** The long songs are fetched whole and played from memory, so a slow connection cannot make them stutter. */
+  const MEMORY_TRACKS = ['evergreen', 'music'];
+
   /** Back to the start, but only if it is not already there: a needless seek makes a phone stall and re-buffer. */
   function rewind(a) { try { if (a.currentTime > 0.05) a.currentTime = 0; } catch (e) {} }
   /** iPhones keep volume at 100% whatever the page says, so a song cannot be faded there. */
@@ -51,7 +54,7 @@
     init() {
       Object.keys(C.tracks).forEach(function (id) {
         const cfg = C.tracks[id];
-        const t = { id: id, volume: cfg.volume == null ? 1 : cfg.volume, loop: !!cfg.loop, ok: true, el: null, played: false, fade: null, want: false };
+        const t = { id: id, src: cfg.src, volume: cfg.volume == null ? 1 : cfg.volume, loop: !!cfg.loop, ok: true, el: null, played: false, fade: null, want: false };
         try {
           const a = new Audio();
           a.preload = 'metadata';   // music is big: nothing is downloaded up front, a track streams when it is first played
@@ -87,12 +90,25 @@
       });
     },
 
+    /** false on an iPhone/iPad: its browser ignores volume, so nothing can be faded and sound must start inside a tap. */
+    canFade: volumeWorks,
+
     has(id) { const t = tracks[id]; return !!(t && t.ok); },
 
     /** Starts downloading a track in the background (call it when the network is quiet), so it is ready when it is first played. */
     warm(id, reload) {
       const t = tracks[id];
       if (!t || !t.ok || !t.el.paused) return;
+      if (MEMORY_TRACKS.indexOf(id) > -1 && window.fetch && window.URL && window.URL.createObjectURL) {
+        if (t.fetching) return;
+        t.fetching = true;
+        fetch(t.src).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.blob(); }).then(function (blob) {
+          if (t.played || !t.el.paused || !blob.size) return;        // already started by streaming: leave it alone
+          t.el.src = URL.createObjectURL(blob);                      // from now on it plays from memory
+          t.inMemory = true;
+        }).catch(function () { t.fetching = false; t.el.preload = 'auto'; });   // fall back to ordinary streaming
+        return;
+      }
       t.el.preload = 'auto';
       if (reload) { try { t.el.load(); } catch (e) {} }
     },
@@ -185,8 +201,11 @@
       if (f && f.ok && !f.el.paused) {
         if (volumeWorks) A.fadeOut(fromId, 700); else A.stop(fromId);
       }
-      clearTimeout(t && t.cut);
-      if (t && t.ok) t.cut = setTimeout(function () { A.fadeIn(toId, volumeWorks ? 700 : 300); }, volumeWorks ? 650 : 0);
+      if (!t) return;
+      clearTimeout(t.cut);
+      if (!t.ok) return;
+      if (!volumeWorks) { A.fadeIn(toId, 0); return; }              // iPhone: straight away, still inside the tap that called us
+      t.cut = setTimeout(function () { A.fadeIn(toId, 700); }, 760);      // after the song's 700 ms fade has finished
     },
 
     /** Starts a track silently, right now (call it inside a tap). fadeIn() then brings it up later, whenever the story reaches it. */
