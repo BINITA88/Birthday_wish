@@ -14,6 +14,7 @@
     btn.addEventListener('click', function () {
       App.audio.unlock();               // harmless if already unlocked
       App.audio.toggleMute();
+      App.audio.retry();                // a tap on the speaker also starts any song the phone had refused
       paint();
     });
     paint();

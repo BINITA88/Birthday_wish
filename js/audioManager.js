@@ -11,6 +11,37 @@
 
   const eff = t => Math.max(0, Math.min(1, t.volume * master));
 
+  /* Phones (and in-app browsers such as WhatsApp's) sometimes refuse a play() that is not directly inside a tap. A refused
+     track is not forgotten: the next tap anywhere on the page, or on the speaker button, starts everything that should be playing. */
+  const TAP_EVENTS = ['pointerdown', 'touchend', 'click', 'keydown'];
+  let retryArmed = false;
+  function onTap() {
+    TAP_EVENTS.forEach(function (ev) { document.removeEventListener(ev, onTap, true); });
+    retryArmed = false;
+    A.retry();
+  }
+  function armRetry() {
+    if (retryArmed) return;
+    retryArmed = true;
+    TAP_EVENTS.forEach(function (ev) { document.addEventListener(ev, onTap, true); });
+  }
+  /** play() that never fails silently: if the browser says no, the track waits for the next tap. */
+  function startEl(t) {
+    const p = t.el.play();
+    if (p && p.catch) p.catch(armRetry);
+    return p;
+  }
+  /** Brings a playing track from silence up to its volume over ms. */
+  function ramp(t, ms) {
+    const a = t.el, v1 = eff(t), t0 = performance.now();
+    clearInterval(t.fade);
+    a.volume = 0;
+    t.fade = setInterval(function () {
+      const k = (performance.now() - t0) / (ms || 1500);
+      if (k >= 1) { a.volume = v1; clearInterval(t.fade); } else a.volume = v1 * k;
+    }, 50);
+  }
+
   const A = {
     init() {
       Object.keys(C.tracks).forEach(function (id) {
@@ -72,8 +103,8 @@
       t.played = true;
       a.volume = eff(t);
       a.muted = muted;
-      const p = a.play();
-      if (p && p.catch) p.catch(function () {});
+      t.want = true;
+      startEl(t);
       return a;
     },
 
@@ -140,26 +171,49 @@
       t.cut = setTimeout(function () { A.fadeOut(id, fadeMs); }, Math.max(0, ms - fadeMs));
     },
 
+    /** Starts a track silently, right now (call it inside a tap). fadeIn() then brings it up later, whenever the story reaches it. */
+    arm(id) {
+      const t = tracks[id];
+      if (!t || !t.ok || !t.el.paused) return;
+      clearInterval(t.fade);
+      try { t.el.currentTime = 0; } catch (e) {}
+      t.el.muted = true;                 // muted rather than volume 0: some phones ignore volume
+      t.el.volume = 0;
+      t.armed = true; t.played = true; t.want = true;
+      startEl(t);
+    },
+
+    /** Starts every track that should be playing but is not (after a refused play, or a return to the page). */
+    retry() {
+      Object.keys(tracks).forEach(function (id) {
+        const t = tracks[id];
+        if (!t.ok || !t.want || !t.el.paused) return;
+        t.el.muted = t.armed ? true : muted;
+        startEl(t);
+      });
+    },
+
     /** Starts a track silently and brings it up to full volume over ms. */
     fadeIn(id, ms) {
       const t = tracks[id];
-      if (!t || !t.ok || (t.loop && !t.el.paused)) return;
+      if (!t || !t.ok) return;
+      if (t.armed && !t.el.paused) {       // already running silently (started inside a tap): bring it up
+        t.armed = false;
+        t.el.muted = muted;
+        ramp(t, ms);
+        return;
+      }
+      if (t.loop && !t.el.paused) return;
       const a = A.play(id);
       if (!a) return;
       t.want = true;
-      const v1 = eff(t), t0 = performance.now();
-      ms = ms || 1500;
-      a.volume = 0;
-      t.fade = setInterval(function () {
-        const k = (performance.now() - t0) / ms;
-        if (k >= 1) { a.volume = v1; clearInterval(t.fade); } else a.volume = v1 * k;
-      }, 50);
+      ramp(t, ms);
     },
 
     stop(id) {
       const t = tracks[id];
       if (!t || !t.ok) return;
-      t.want = false;
+      t.want = false; t.armed = false;
       clearInterval(t.fade); clearTimeout(t.cut);
       t.el.pause();
       try { t.el.currentTime = 0; } catch (e) {}
@@ -184,7 +238,7 @@
     setMuted(m) {
       muted = !!m;
       App.state.muted = muted;
-      Object.keys(tracks).forEach(function (id) { if (tracks[id].el) tracks[id].el.muted = muted; });
+      Object.keys(tracks).forEach(function (id) { if (tracks[id].el) tracks[id].el.muted = muted || !!tracks[id].armed; });
       try { localStorage.setItem('pratima-muted', muted ? '1' : '0'); } catch (e) {}
     },
     toggleMute() { A.setMuted(!muted); return muted; },
@@ -207,10 +261,7 @@
       });
     },
     resume() {
-      wasPlaying.splice(0).forEach(function (id) {
-        const p = tracks[id].el.play();
-        if (p && p.catch) p.catch(function () {});
-      });
+      wasPlaying.splice(0).forEach(function (id) { startEl(tracks[id]); });
     }
   };
 

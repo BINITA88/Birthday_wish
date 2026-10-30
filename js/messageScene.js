@@ -57,6 +57,7 @@
 
       ctx.on(wishBtn, 'click', function () {
         wishBtn.disabled = true;
+        App.audio.arm('music');               // the Happy Birthday tune starts silently inside this tap (phones allow that) and is brought up with the wish
         party();
       });
 
