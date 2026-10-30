@@ -2,6 +2,7 @@
 (function (App) {
   function start() {
     App.audio.init();
+    App.audio.debugInfo();
 
     // Sound control
     const btn = document.getElementById('sound-btn');

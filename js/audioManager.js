@@ -11,6 +11,25 @@
 
   const eff = t => Math.max(0, Math.min(1, t.volume * master));
 
+  /* Sound log for finding a problem on a real phone: open the site with ?audiodebug=1 and it prints, in a corner of the screen,
+     every sound that starts or stops. Nothing is shown to anyone else. */
+  const DEBUG = /[?&]audiodebug/.test(window.location.search);
+  const T0 = Date.now();
+  const dbgLines = [];
+  let dbgBox = null;
+  function dbg(msg) {
+    if (!DEBUG) return;
+    const sc = document.querySelector('#stage > section');
+    dbgLines.push(((Date.now() - T0) / 1000).toFixed(1) + 's ' + (sc ? sc.id.replace('scene-', '') : '-') + ' · ' + msg);
+    if (dbgLines.length > 16) dbgLines.shift();
+    if (!dbgBox) {
+      dbgBox = document.createElement('pre');
+      dbgBox.style.cssText = 'position:fixed;left:4px;bottom:4px;z-index:99999;margin:0;padding:6px 8px;max-width:96vw;background:rgba(0,0,0,.72);color:#9f9;font:11px/1.35 monospace;pointer-events:none;white-space:pre-wrap;border-radius:6px';
+      document.body.appendChild(dbgBox);
+    }
+    dbgBox.textContent = dbgLines.join('\n');
+  }
+
   /** The long songs are fetched whole and played from memory, so a slow connection cannot make them stutter. */
   const MEMORY_TRACKS = ['evergreen', 'music'];
 
@@ -35,8 +54,9 @@
   }
   /** play() that never fails silently: if the browser says no, the track waits for the next tap. */
   function startEl(t) {
+    dbg(t.id + ' play requested' + (t.el.muted ? ' (muted)' : ''));
     const p = t.el.play();
-    if (p && p.catch) p.catch(armRetry);
+    if (p && p.catch) p.catch(function (e) { dbg(t.id + ' REFUSED by the phone: ' + (e && e.name)); armRetry(); });
     return p;
   }
   /** Brings a playing track from silence up to its volume over ms. */
@@ -59,7 +79,8 @@
           const a = new Audio();
           a.preload = 'metadata';   // music is big: nothing is downloaded up front, a track streams when it is first played
           a.loop = t.loop;
-          a.addEventListener('error', function () { t.ok = false; t.failed = true; });
+          a.addEventListener('error', function () { t.ok = false; t.failed = true; dbg(id + ' ERROR loading'); });
+          if (DEBUG) ['playing', 'pause', 'ended', 'waiting', 'stalled'].forEach(function (ev) { a.addEventListener(ev, function () { dbg(id + ' ' + ev + (a.muted ? ' (muted)' : '')); }); });
           a.src = cfg.src;
           a.volume = eff(t);
           a.muted = muted;
@@ -92,6 +113,7 @@
 
     /** false on an iPhone/iPad: its browser ignores volume, so nothing can be faded and sound must start inside a tap. */
     canFade: volumeWorks,
+    debugInfo() { dbg('this device ' + (volumeWorks ? 'can' : 'CANNOT') + ' change volume'); },
 
     has(id) { const t = tracks[id]; return !!(t && t.ok); },
 

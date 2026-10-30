@@ -150,11 +150,11 @@
        `master` is the overall volume (0 – 1); each track has its own relative `volume`.
        Keep values moderate – the listener's device volume is always respected. */
     audio: {
-      master: 0.7,
+      master: 1,              // loudness is baked into the sound files themselves (an iPhone ignores any volume set by the page)
       tracks: {
-        sparkler:    { src: 'assets/audio/freesound_community-firework-candle-76282.mp3', volume: 0.8 },   // the candle sound: the cake's sparkler, only its first seconds are played
-        evergreen:   { src: 'assets/audio/evergreen.m4a?v=9m13', volume: 0.5, loop: true },   // the one song of the whole story: from Begin (the flowers) to the Happy Birthday tune (the first 7 min of a guitar medley)
-        music:       { src: 'assets/audio/satokin-happy-birthday-ukulele-600716.mp3', volume: 0.55, loop: true }   // the last tune: arrives with the wish, balloons and confetti
+        sparkler:    { src: 'assets/audio/candle.m4a', volume: 1 },   // the candle sound: the cake's sparkler (6.5 s, fade-out baked in)
+        evergreen:   { src: 'assets/audio/evergreen.m4a?v=baked', volume: 1, loop: true },   // the one song of the whole story: from Begin (the flowers) to the Happy Birthday tune (7 min of a guitar medley, from 9:13)
+        music:       { src: 'assets/audio/happy-birthday.m4a', volume: 1, loop: true }   // the last tune: arrives with the wish, balloons and confetti
       }
     },
 
