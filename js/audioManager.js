@@ -11,6 +11,11 @@
 
   const eff = t => Math.max(0, Math.min(1, t.volume * master));
 
+  /** Back to the start, but only if it is not already there: a needless seek makes a phone stall and re-buffer. */
+  function rewind(a) { try { if (a.currentTime > 0.05) a.currentTime = 0; } catch (e) {} }
+  /** iPhones keep volume at 100% whatever the page says, so a song cannot be faded there. */
+  const volumeWorks = (function () { try { const a = new Audio(); a.volume = 0.5; return a.volume === 0.5; } catch (e) { return true; } })();
+
   /* Phones (and in-app browsers such as WhatsApp's) sometimes refuse a play() that is not directly inside a tap. A refused
      track is not forgotten: the next tap anywhere on the page, or on the speaker button, starts everything that should be playing. */
   const TAP_EVENTS = ['pointerdown', 'touchend', 'click', 'keydown'];
@@ -75,7 +80,7 @@
         const p = a.play();
         if (p && p.then) {
           p.then(function () {
-            if (!t.played) { a.pause(); try { a.currentTime = 0; } catch (e) {} }
+            if (!t.played) { a.pause(); rewind(a); }
             a.muted = muted;
           }).catch(function () { a.muted = muted; });
         }
@@ -99,7 +104,7 @@
       const a = t.el;
       clearInterval(t.fade);
       if (t.loop && !a.paused) { a.volume = eff(t); return a; }   // never restart background music
-      try { a.currentTime = 0; } catch (e) {}
+      rewind(a);
       t.played = true;
       a.volume = eff(t);
       a.muted = muted;
@@ -119,7 +124,7 @@
       const a = t.el;
       if (!a.paused) return;
       clearInterval(t.fade);
-      try { a.currentTime = 0; } catch (e) {}
+      rewind(a);
       a.volume = eff(t);
       a.muted = muted;
       const events = ['pointerdown', 'pointerup', 'keydown', 'touchend'];
@@ -148,7 +153,7 @@
       if (!t || !t.ok) return;
       const a = t.el;
       clearInterval(t.fade); clearTimeout(t.cut);
-      try { a.pause(); a.currentTime = 0; } catch (e) {}
+      a.pause(); rewind(a);
       a.preservesPitch = false; a.mozPreservesPitch = false; a.webkitPreservesPitch = false;   // slower = lower, like a deeper "tok"
       a.playbackRate = rate || 1;
       a.volume = eff(t);
@@ -171,12 +176,25 @@
       t.cut = setTimeout(function () { A.fadeOut(id, fadeMs); }, Math.max(0, ms - fadeMs));
     },
 
+    /**
+     * Hands over from one track to another without the two playing together: the first fades out (or, on a phone that cannot
+     * fade, stops at once) and the second comes in as it ends.
+     */
+    swap(fromId, toId) {
+      const f = tracks[fromId], t = tracks[toId];
+      if (f && f.ok && !f.el.paused) {
+        if (volumeWorks) A.fadeOut(fromId, 700); else A.stop(fromId);
+      }
+      clearTimeout(t && t.cut);
+      if (t && t.ok) t.cut = setTimeout(function () { A.fadeIn(toId, volumeWorks ? 700 : 300); }, volumeWorks ? 650 : 0);
+    },
+
     /** Starts a track silently, right now (call it inside a tap). fadeIn() then brings it up later, whenever the story reaches it. */
     arm(id) {
       const t = tracks[id];
       if (!t || !t.ok || !t.el.paused) return;
       clearInterval(t.fade);
-      try { t.el.currentTime = 0; } catch (e) {}
+      rewind(t.el);
       t.el.muted = true;                 // muted rather than volume 0: some phones ignore volume
       t.el.volume = 0;
       t.armed = true; t.played = true; t.want = true;
@@ -216,7 +234,7 @@
       t.want = false; t.armed = false;
       clearInterval(t.fade); clearTimeout(t.cut);
       t.el.pause();
-      try { t.el.currentTime = 0; } catch (e) {}
+      rewind(t.el);
       t.el.volume = eff(t);
     },
 

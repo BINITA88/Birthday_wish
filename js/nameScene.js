@@ -58,7 +58,7 @@
       ctx.on(btn, 'click', function () {
         if (btn.disabled) return;
         btn.disabled = true;
-        App.audio.unlock(['evergreen']);          // every track is primed for this browser except the opening song, which simply starts below
+        App.audio.unlock(['evergreen', 'music']);          // every track is primed for this browser except the opening song, which simply starts below
         App.state.started = true;
         document.body.classList.add('started');
         new Image().src = C.posterImage;     // her last photo is fetched now, ahead of the music

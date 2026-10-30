@@ -52,6 +52,7 @@
   App.SceneManager.register('photo', {
     init(sec, ctx) {
       const T = C.text;
+      App.audio.warm('music');                // the final tune downloads quietly, well before it is needed
       // The old sunflower-garden backdrop is switched off (Garden stays in garden.js): the photo now sits on vintage floral stationery.
       // const g = Garden.build(sec, { flower: App.state.flower || 'sunflower', animate: false, seed: App.state.gardenSeed });
       sec.insertAdjacentHTML('afterbegin', '<div class="photo-floral" aria-hidden="true"></div>');
