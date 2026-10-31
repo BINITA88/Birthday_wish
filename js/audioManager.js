@@ -223,25 +223,38 @@
       if (!t || !t.ok) return;
       clearTimeout(t.cut);
       const fromPlaying = !!(f && f.ok && !f.el.paused);
-      if (!volumeWorks) {                                    // iPhone: it cannot fade, so cut straight over, inside the tap that called us
-        if (fromPlaying) A.stop(fromId);
+      const ta = t.el;
+      /* The old song is only touched once the new tune is REALLY sounding (a phone can take a moment to start a sound): the worst case
+         is a tiny overlap, never a gap. `go` runs at that moment (or after a short safety wait). */
+      function whenSounding(go) {
+        if (!ta.paused && ta.readyState >= 3 && ta.currentTime > 0.05) { go(); return; }
+        let done = false;
+        const once = function () { if (done) return; done = true; ta.removeEventListener('playing', once); go(); };
+        ta.addEventListener('playing', once);
+        t.cut = setTimeout(once, 700);
+      }
+      if (!volumeWorks) {                                    // iPhone: it cannot fade, so cut over, starting inside the tap that called us
         A.fadeIn(toId, 0);
+        if (fromPlaying) whenSounding(function () { A.stop(fromId); });
         return;
       }
       if (!fromPlaying) { A.fadeIn(toId, 900); return; }
       // a true crossfade: the song fades out while the tune fades in at the same moment (equal power, so the level stays steady: no dip, no gap)
       clearInterval(f.fade); clearInterval(t.fade);
-      const fa = f.el, ta = t.el, vf = fa.volume, vt = eff(t), t0 = performance.now(), ms = 1300;
+      const fa = f.el, vf = fa.volume, vt = eff(t), ms = 1300;
       if (t.armed && !ta.paused) { t.armed = false; ta.muted = muted; } else { A.play(toId); }
       ta.volume = 0;
       t.want = true;
-      const timer = setInterval(function () {
-        const k = Math.min(1, (performance.now() - t0) / ms);
-        fa.volume = vf * Math.cos(k * Math.PI / 2);
-        ta.volume = vt * Math.sin(k * Math.PI / 2);
-        if (k >= 1) { clearInterval(timer); A.stop(fromId); ta.volume = vt; }
-      }, 30);
-      f.fade = timer; t.fade = timer;
+      whenSounding(function () {
+        const t0 = performance.now();
+        const timer = setInterval(function () {
+          const k = Math.min(1, (performance.now() - t0) / ms);
+          fa.volume = vf * Math.cos(k * Math.PI / 2);
+          ta.volume = vt * Math.sin(k * Math.PI / 2);
+          if (k >= 1) { clearInterval(timer); A.stop(fromId); ta.volume = vt; }
+        }, 30);
+        f.fade = timer; t.fade = timer;
+      });
     },
 
     /** Starts a track silently, right now (call it inside a tap). fadeIn() then brings it up later, whenever the story reaches it. */

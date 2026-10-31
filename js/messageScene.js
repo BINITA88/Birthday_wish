@@ -79,8 +79,7 @@
 
       ctx.on(wishBtn, 'click', function () {
         wishBtn.disabled = true;
-        if (App.audio.canFade) App.audio.arm('music');          // the Happy Birthday tune starts silently inside this tap (phones allow that) and is brought up with the wish
-        else App.audio.swap('evergreen', 'music');              // an iPhone only allows sound that starts inside a tap: the tune starts right here
+        App.audio.swap('evergreen', 'music');   // the moment the puzzle starts, the song crossfades straight into the Happy Birthday tune (no gap, never a pause)
         party();
       });
 
@@ -166,7 +165,6 @@
         // first the puzzle gathers into her photo; only then do the words and all the decoration arrive
         puzzle.start(function () {
           sec.classList.add('titled');
-          if (App.audio.canFade) App.audio.swap('evergreen', 'music');   // the medley, which has carried the whole story, ends and the Happy Birthday tune comes in (never both at once)
           ctx.later(function () { balloonBtn.classList.add('in'); }, 2500);          // then a button that sends a few more balloons floating up
           FX.balloons(finale, { count: App.isSmall() ? 12 : 18, prefill: true, party: true });      // the party balloons rise over the photo
           const fx = FX.field(finale, { motes: 0, rgb: '255,205,120', rate: 26, max: 120, confetti: true });
