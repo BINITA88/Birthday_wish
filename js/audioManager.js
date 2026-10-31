@@ -220,14 +220,28 @@
      */
     swap(fromId, toId) {
       const f = tracks[fromId], t = tracks[toId];
-      if (f && f.ok && !f.el.paused) {
-        if (volumeWorks) A.fadeOut(fromId, 700); else A.stop(fromId);
-      }
-      if (!t) return;
+      if (!t || !t.ok) return;
       clearTimeout(t.cut);
-      if (!t.ok) return;
-      if (!volumeWorks) { A.fadeIn(toId, 0); return; }              // iPhone: straight away, still inside the tap that called us
-      t.cut = setTimeout(function () { A.fadeIn(toId, 700); }, 760);      // after the song's 700 ms fade has finished
+      const fromPlaying = !!(f && f.ok && !f.el.paused);
+      if (!volumeWorks) {                                    // iPhone: it cannot fade, so cut straight over, inside the tap that called us
+        if (fromPlaying) A.stop(fromId);
+        A.fadeIn(toId, 0);
+        return;
+      }
+      if (!fromPlaying) { A.fadeIn(toId, 900); return; }
+      // a true crossfade: the song fades out while the tune fades in at the same moment (equal power, so the level stays steady: no dip, no gap)
+      clearInterval(f.fade); clearInterval(t.fade);
+      const fa = f.el, ta = t.el, vf = fa.volume, vt = eff(t), t0 = performance.now(), ms = 1300;
+      if (t.armed && !ta.paused) { t.armed = false; ta.muted = muted; } else { A.play(toId); }
+      ta.volume = 0;
+      t.want = true;
+      const timer = setInterval(function () {
+        const k = Math.min(1, (performance.now() - t0) / ms);
+        fa.volume = vf * Math.cos(k * Math.PI / 2);
+        ta.volume = vt * Math.sin(k * Math.PI / 2);
+        if (k >= 1) { clearInterval(timer); A.stop(fromId); ta.volume = vt; }
+      }, 30);
+      f.fade = timer; t.fade = timer;
     },
 
     /** Starts a track silently, right now (call it inside a tap). fadeIn() then brings it up later, whenever the story reaches it. */

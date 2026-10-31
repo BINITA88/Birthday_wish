@@ -1,13 +1,13 @@
 /* SCENE – "Message for You". A sealed envelope lies on a wooden table with an OPEN button under it. Only after OPEN is pressed
    does the flap lift and the letter appear, typing itself out letter by letter. The letter is the one birthday message
-   (config.js, text.msgWelcome) and nothing else; when it is written, "Make a wish" starts the final birthday finale
+   (config.js, text.msgPages) on three pages that turn; on the last one "Make a wish" starts the final birthday finale
    with balloons and confetti. (The older 'letter' scene is kept in letterScene.js but is no longer used.) */
 (function (App) {
   const { CONFIG: C, u, FX } = App;
 
   App.SceneManager.register('message', {
     init(sec, ctx) {
-      const T = C.text, W = T.msgWelcome;
+      const T = C.text, PAGES = T.msgPages, NP = PAGES.length;
       sec.innerHTML =
         '<div class="msg-vignette" aria-hidden="true"></div>' +
         '<div class="msg-stage">' +
@@ -22,12 +22,16 @@
           '<button class="btn primary msg-open fade-up" type="button">' + u.esc(T.msgOpen) + '</button>' +
         '</div>' +
         '<div class="msg-book">' +
-          '<article class="mb-sheet msg-paper cur" tabindex="-1" aria-live="off">' +
-            '<div class="mb-text mb-welcome"><h1 class="mp-h">' + u.esc(W.title) + '</h1>' +
-              W.paras.map(function (t) { return '<p>' + u.esc(t) + '</p>'; }).join('') +
-              '<p class="mp-sign">' + u.esc(W.sign) + '</p></div>' +
-            '<nav class="mb-nav mb-nav-first"><button class="mb-btn mb-wish" type="button">' + u.esc(T.msgContinue) + '</button></nav>' +
-          '</article>' +
+          PAGES.map(function (items, i) {
+            const last = i === NP - 1;
+            const nav = i === 0
+              ? '<nav class="mb-nav mb-nav-first"><button class="mb-btn mb-next" type="button">' + u.esc(T.msgTurn) + ' <i aria-hidden="true">›</i></button></nav>'
+              : '<nav class="mb-nav"><button class="mb-btn mb-back" type="button"><i aria-hidden="true">‹</i> ' + u.esc(T.msgBack) + '</button><span class="mb-num">' + (i + 1) + ' / ' + NP + '</span>' +
+                (last ? '<button class="mb-btn mb-wish" type="button">' + u.esc(T.msgContinue) + '</button>' : '<button class="mb-btn mb-next" type="button">' + u.esc(T.msgTurn) + ' <i aria-hidden="true">›</i></button>') + '</nav>';
+            return '<article class="mb-sheet ' + (i === 0 ? 'msg-paper cur' : 'mb-letter') + '" tabindex="-1" aria-label="The letter, page ' + (i + 1) + ' of ' + NP + '">' +
+              '<div class="mb-text' + (i === 0 ? ' mb-welcome' : '') + '">' +
+              items.map(function (it) { return '<p class="lt-' + it[0] + '">' + u.esc(it[1]) + '</p>'; }).join('') + '</div>' + nav + '</article>';
+          }).join('') +
         '</div>' +
         '<div class="msg-finale" aria-live="polite">' +
           '<div class="mf-scrim" aria-hidden="true"></div>' +
@@ -39,6 +43,8 @@
       const openBtn = sec.querySelector('.msg-open');
       const paper = sec.querySelector('.msg-paper');                 // the letter, which writes itself
       const wishBtn = sec.querySelector('.mb-wish');
+      const sheets = Array.from(sec.querySelectorAll('.mb-sheet'));
+      const firstNext = paper.querySelector('.mb-next');
       const finale = sec.querySelector('.msg-finale');
       const balloonBtn = sec.querySelector('.mf-balloons');
       u.hint(openBtn);
@@ -54,6 +60,22 @@
 
       // The last button goes nowhere: each tap sends a few of the heart-balloon bouquets floating up from the bottom of the photo.
       ctx.on(balloonBtn, 'click', function () { FX.release(finale, { count: 3 }); });
+
+      /* ---- the pages turn over, one after another ---- */
+      function showPage(n) {
+        sheets.forEach(function (sh, i) {
+          sh.classList.toggle('turned', i < n);
+          sh.classList.toggle('cur', i === n);
+          sh.inert = i !== n;
+        });
+        ctx.later(function () { sheets[n].focus({ preventScroll: true }); }, 60);
+      }
+      sheets.forEach(function (sh, i) {
+        sh.inert = i !== 0;
+        const next = sh.querySelector('.mb-next'), back = sh.querySelector('.mb-back');
+        if (next) ctx.on(next, 'click', function () { showPage(i + 1); });
+        if (back) ctx.on(back, 'click', function () { showPage(i - 1); });
+      });
 
       ctx.on(wishBtn, 'click', function () {
         wishBtn.disabled = true;
@@ -127,13 +149,13 @@
         const cps = App.reduced ? 1000 : Math.max(45, total / 24);       // the whole page takes about 24 s
         try {
           for (const it of welcome) {
-            await typeLine(it, it.el.classList.contains('mp-h') ? cps * 0.5 : cps);
-            if (!skip) await ctx.sleep(it.el.classList.contains('mp-h') ? 500 : 220);
+            await typeLine(it, /lt-(kicker|dear)/.test(it.el.className) ? cps * 0.5 : cps);
+            if (!skip) await ctx.sleep(/lt-(kicker|dear)/.test(it.el.className) ? 400 : 220);
           }
           await ctx.sleep(600);
         } finally {                                   // however it ends, all of page 1 is on screen and the way on is open
           welcome.forEach(function (it) { showTyped(it, it.chars.length); it.el.classList.remove('typing'); });
-          wishBtn.classList.add('in');               // once the letter is written, "Make a wish" leads to the finale
+          firstNext.classList.add('in');              // once page 1 is written, the reader turns the page when ready; the last page leads to the finale
         }
       }
 

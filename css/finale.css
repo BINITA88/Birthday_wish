@@ -119,7 +119,7 @@ html body .btn.cta:focus-visible, .bq-wish:hover .bq-wish-cta, .bq-wish:focus-vi
 
 /* The letter is a little book: three sheets stacked on one spot; each turns over about its left edge to show the next. */
 .msg-book {
-  position: absolute; z-index: 4; left: 50%; top: 50%; width: min(92vw, 880px); height: min(86dvh, 720px);
+  position: absolute; z-index: 4; left: 50%; top: 50%; width: min(80vw, 840px); height: min(86dvh, 720px);
   perspective: 2200px; opacity: 0; pointer-events: none; transform: translate(-50%, -26%) scale(.55) rotate(-3deg);
   transition: opacity .7s ease, transform 1s var(--ease);
 }
@@ -160,11 +160,6 @@ html body .btn.cta:focus-visible, .bq-wish:hover .bq-wish-cta, .bq-wish:focus-vi
 .msg-paper > * { margin: 0; }
 .msg-paper { padding-bottom: clamp(.9rem, 2.6vw, 1.6rem); }
 .mb-nav-first { margin-top: auto; }
-.msg-paper h1 { font: 400 clamp(2.3rem, 7.4vw, 3.8rem)/1.1 var(--script); color: #3a281e; margin-bottom: .35em; text-align: left; text-shadow: none; }
-.msg-paper p { font: italic 400 clamp(1.02rem, 2.8vw, 1.32rem)/1.65 var(--serif); margin-bottom: .8em; color: #33241b; }
-.msg-paper p:empty, .msg-paper h1:empty { display: none; }
-.msg-paper .mp-sign { margin-top: 1.1em; text-align: right; font: 400 clamp(1.7rem, 5.4vw, 2.5rem)/1.2 var(--script); color: #5a3a28; }
-.msg-paper .typing::after { content: ''; display: inline-block; width: 2px; height: 1.05em; margin-left: 3px; vertical-align: -.15em; background: #7a4a34; animation: caret .8s steps(1) infinite; }
 @keyframes caret { 50% { opacity: 0; } }
 
 /* The finale: first her photo puzzle gathers across the whole screen, then the wish, balloons and confetti arrive on top of it. */
@@ -229,14 +224,28 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 .msg-vignette { z-index: 0; }
 
 /* First page: the opening message types itself; the unwritten rest of each line stays in place but invisible. */
-.mb-welcome .mp-h { margin: 0 0 .35em; font: 400 2.2em/1.1 var(--script); text-align: left; color: #3a281e; }
-.mb-welcome p.mp-sign { margin: .9em 0 0; text-align: right; font: 400 1.5em/1.2 var(--script); color: #5a3a28; }
 .ty-b { visibility: hidden; }
 .mb-text .typing .ty-a::after, .mb-welcome .typing .ty-a::after { content: ''; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -.12em; background: #7a4a34; animation: caret .8s steps(1) infinite; }
-.mb-welcome p { margin: 0 0 .62em; font: italic 400 1em/1.44 var(--serif); color: #33241b; }
-.mb-welcome p.mp-sign { margin: .8em 0 0; font: 400 1.5em/1.2 var(--script); color: #5a3a28; }
 
 /* "Send Balloons": heart-balloon bouquets that float up once and are gone (the button itself goes nowhere). */
 .mf-balloons { pointer-events: auto; }
 .balloon.one { animation: rise var(--dur) cubic-bezier(.3, .15, .55, 1) var(--delay) 1 both; }
 @media (prefers-reduced-motion: reduce) { .balloon.one { animation: rise var(--dur) linear var(--delay) 1 both; } }
+
+/* The letter's pages: each turns over about its left edge to show the next; a turned page fades out as it passes edge-on. */
+.mb-sheet:nth-child(2) { z-index: 2; }
+.mb-sheet:nth-child(3) { z-index: 1; }
+.mb-sheet.turned { transform: rotateY(-104deg); opacity: 0; pointer-events: none; box-shadow: 0 10px 30px rgba(0, 0, 0, .3); }
+.mb-num { font: italic 400 .95rem var(--serif); color: #8a6a55; letter-spacing: .1em; }
+
+/* Each kind of line (sizes are in em: js/messageScene.js picks the font size that makes a whole page fit) */
+.mb-sheet .mb-text p { margin: 0 0 .62em; font: italic 400 1em/1.44 var(--serif); color: #33241b; }
+.mb-sheet .mb-text p.lt-kicker { margin: 0; font: 400 .72em/1.3 var(--sans); letter-spacing: .2em; text-transform: uppercase; text-align: center; color: #8b6651; }
+.mb-sheet .mb-text p.lt-dear { margin: .35em 0 .45em; font: 400 2em/1.1 var(--script); color: #3a281e; }
+.mb-sheet .mb-text p.lt-sign { margin: .1em 0; text-align: right; font: italic 400 1.05em/1.4 var(--serif); color: #5a3a28; }
+.mb-sheet .mb-text p.lt-hb { margin: .9em 0 .1em; text-align: center; font: 400 1.9em/1.15 var(--script); color: #7a2e3f; }
+.mb-sheet .mb-text p.lt-bloom { margin: 0; text-align: center; font: 400 1.4em/1.2 var(--script); color: #5a3a28; }
+.mb-sheet .mb-text p.lt-p + p.lt-sign { margin-top: .7em; }
+
+/* On a phone the sheet leaves room above and below, so the candle and the roses are not cut off */
+@media (max-width: 700px) { .msg-book { width: 88vw; height: min(76dvh, 700px); } }

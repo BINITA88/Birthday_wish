@@ -104,20 +104,37 @@
       wishCta: 'Click for Magic ✨',
 
       msgOpen: 'OPEN',
-      /* THE letter: this message and nothing else. It starts typing the moment OPEN is pressed. */
-      msgWelcome: {
-        title: 'Happy Birthday, Pratima! ❤️🎂',
-        paras: [
-          'May this beautiful new chapter of your life bring you endless happiness, genuine love, peaceful moments, and countless reasons to smile. May every dream you carry in your heart slowly turn into reality, and may your hard work lead you to all the success you truly deserve.',
-          'I hope life brings you more beautiful moments than you expect, more reasons to smile than to worry, and people who appreciate you for who you truly are. I hope you always remember how much potential you have and never stop believing in yourself, even when life gets difficult.',
-          'May you always find the courage to follow your dreams, the strength to overcome every challenge, and the confidence to keep moving forward. No matter how much life changes, I hope you never lose that sweet smile of yours.',
-          "Some people make ordinary moments feel a little more special just by being themselves, and I'm genuinely glad I got the chance to know you. Today, I simply wish to see you happy, smiling, and getting closer to everything your heart wishes for.",
-          "I hope your birthday is filled with love, laughter, lovely surprises, and little moments you'll remember with a smile.",
-          'Have the most beautiful birthday, Pratima! ❤️🌻',
-          'Keep smiling, keep growing, and keep being you. May life always give you reasons to smile, and may your smile shine as brightly as the sunshine.'
+      /* THE letter: three pages that turn. Page 1 types itself the moment OPEN is pressed; pages 2 and 3 show their text at once.
+         Each line is [style, text]: kicker (small heading), dear (script), p (paragraph), sign (right-aligned), hb (big script), bloom (script). */
+      msgTurn: 'Turn the page',
+      msgBack: 'Back',
+      msgPages: [
+        [
+          ['kicker', '🌻 A LETTER, FROM MY HEART 🤍'],
+          ['dear', 'Dear Pratima, 🌷'],
+          ['p', 'First of all, wishing you a very Happy Birthday! ❤️🎂'],
+          ['p', 'On your special day, I just want to wish you more than happiness. I wish you a beautiful life filled with peace, love, good health, success, and countless reasons to smile. 🌸✨'],
+          ['p', 'May your career reach heights you have always dreamed of. May every effort you make bring you closer to your goals, every challenge make you stronger, and every new opportunity open doors to something even better. I hope you achieve everything you have been working so hard for. 🌻🌹'],
+          ['p', 'May your family always remain happy, healthy, and blessed. May your home be filled with love, laughter, togetherness, and peace. May you always have the strength and support of the people who genuinely care about you. 🏡❤️']
         ],
-        sign: 'Happy Birthday, my good luck P. 🤍🌻'
-      },
+        [
+          ['p', 'Most importantly, take care of your health, both physical and mental. Never forget to give yourself time, appreciate your little achievements, and enjoy the beautiful moments along the way. 🌼🦋'],
+          ['p', 'I hope life brings you genuine people, meaningful relationships, beautiful experiences, and the kind of love and happiness that your heart truly deserves. May the dreams you silently carry in your heart slowly become your reality. 💫🌷'],
+          ['p', 'And Pratima, never stop believing in yourself. You are capable of achieving so much more than you sometimes imagine. Keep growing, keep smiling, and keep being the person you are. 🌸'],
+          ['p', "I don't know what the future holds or how life will unfold, but I genuinely hope it brings you countless beautiful moments. 🤍"],
+          ['p', "Some people come into our lives and leave behind little moments that become special memories. I'm grateful for those little moments. 🌹"]
+        ],
+        [
+          ['p', 'May this new chapter be kinder, brighter, and more beautiful than the last one. ✨🌻'],
+          ['p', 'Once again, Happy Birthday, Pratima! 🎂💐'],
+          ['p', 'Keep smiling, keep shining, and always take care of yourself. 🦋❤️'],
+          ['sign', 'With lots of good wishes,'],
+          ['sign', 'A little prayer for your happiness,'],
+          ['sign', 'and a heart full of respect. 🤍'],
+          ['hb', '🌻 Happy Birthday, My Good Luck P! 🌻'],
+          ['bloom', 'Keep Blooming, Keep Smiling! 🌷❤️✨']
+        ]
+      ],
       msgContinue: 'Make a wish ✨',
       finalBalloons: 'Send Balloons 🎈',
       /* The full letter, shown on two turning pages after the first page. */
