@@ -248,4 +248,5 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 .mb-sheet .mb-text p.lt-p + p.lt-sign { margin-top: .7em; }
 
 /* On a phone the sheet leaves room above and below, so the candle and the roses are not cut off */
-@media (max-width: 700px) { .msg-book { width: 88vw; height: min(76dvh, 700px); } }
+@media (max-width: 700px) { .msg-book { width: 88vw; height: min(60dvh, 540px); } }
+@media (max-width: 700px) and (max-height: 600px) { .msg-book { height: 72dvh; } }   /* very small, old phones need a little more room */
