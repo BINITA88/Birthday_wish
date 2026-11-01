@@ -252,7 +252,7 @@
     const pr = parent.getBoundingClientRect();
     const r = o.rect ? { left: o.rect.left - pr.left, top: o.rect.top - pr.top, width: o.rect.width, height: o.rect.height }
                      : { left: 0, top: pr.height * 0.4, width: pr.width, height: pr.height * 0.5 };
-    const n = o.count || (App.isSmall() ? 6 : 9);
+    const n = o.count || (App.isSmall() ? 10 : 14);
     const wrap = document.createElement('div');
     wrap.className = 'flutter';
     wrap.setAttribute('aria-hidden', 'true');
@@ -270,6 +270,39 @@
     wrap.innerHTML = html;
     parent.appendChild(wrap);
     setTimeout(function () { wrap.remove(); }, end * 1000 + 400);    // once the last one has flown out of sight
+    return wrap;
+  };
+
+  /** FX.petals(parent, {rect, count}) – rose petals burst out of the given rectangle (a page), tumble outwards and fall away off the screen. */
+  const PETAL_COLORS = [['#a50f24', '#e8334a'], ['#d62839', '#ff6b81'], ['#ff5d73', '#ffa3b3'], ['#ff8fa3', '#ffd0d9'], ['#8f0b1f', '#d8344a'], ['#f4acb7', '#ffe5ec']];
+  FX.petals = function (parent, o) {
+    o = o || {};
+    if (App.reduced) return null;
+    const pr = parent.getBoundingClientRect();
+    const r = o.rect ? { left: o.rect.left - pr.left, top: o.rect.top - pr.top, width: o.rect.width, height: o.rect.height }
+                     : { left: 0, top: pr.height * 0.3, width: pr.width, height: pr.height * 0.5 };
+    const n = o.count || (App.isSmall() ? 12 : 18);
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const wrap = document.createElement('div');
+    wrap.className = 'petals';
+    wrap.setAttribute('aria-hidden', 'true');
+    let html = '', end = 0;
+    for (let i = 0; i < n; i++) {
+      const ang = u.rand(0, Math.PI * 2);
+      const sx = cx + Math.cos(ang) * r.width * u.rand(0.25, 0.48), sy = cy + Math.sin(ang) * r.height * u.rand(0.25, 0.48);     // from near the page's edge …
+      const out = u.rand(80, 210);
+      const mx = Math.cos(ang) * out, my = Math.sin(ang) * out - u.rand(10, 70);                                                // … first thrown outwards …
+      const dx = mx * u.rand(1.3, 2) + u.rand(-70, 70), dy = (pr.height - sy) + u.rand(40, 120);                              // … then drifting down and away, off the screen
+      const size = u.rand(13, 22), dur = u.rand(3.6, 5.8), delay = u.rand(0, 0.7);
+      const col = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
+      end = Math.max(end, dur + delay);
+      html += '<span class="petal" style="left:' + sx.toFixed(0) + 'px;top:' + sy.toFixed(0) + 'px;width:' + size.toFixed(0) + 'px;height:' + (size * 1.25).toFixed(0) + 'px;' +
+        'background:radial-gradient(ellipse at 30% 25%,' + col[1] + ',' + col[0] + ');--mx:' + mx.toFixed(0) + 'px;--my:' + my.toFixed(0) + 'px;--dx:' + dx.toFixed(0) + 'px;--dy:' + dy.toFixed(0) + 'px;' +
+        '--rot:' + u.rand(-540, 540).toFixed(0) + 'deg;--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's"></span>';
+    }
+    wrap.innerHTML = html;
+    parent.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, end * 1000 + 400);
     return wrap;
   };
 

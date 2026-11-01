@@ -8,8 +8,11 @@
   App.SceneManager.register('message', {
     init(sec, ctx) {
       const T = C.text, PAGES = T.msgPages, NP = PAGES.length;
+      const CURL = '<svg viewBox="0 0 44 44" aria-hidden="true"><path d="M3 41 C3 20 20 3 41 3" fill="none" stroke="#b9873f" stroke-width="1.4" stroke-linecap="round"/><path d="M3 41 C11 34 13 29 12.5 21" fill="none" stroke="#b9873f" stroke-width="1.1" stroke-linecap="round"/><circle cx="41" cy="3" r="2.3" fill="#b9873f"/><circle cx="3" cy="41" r="1.8" fill="#b9873f"/><path d="M14 14 q3 -6 8 -2 q-3 6 -8 2z" fill="#d9a85b" opacity=".8"/></svg>';
+      const ORN = '<span class="orn orn-l" aria-hidden="true">' + CURL + '</span><span class="orn orn-r" aria-hidden="true">' + CURL + '</span>';
       sec.innerHTML =
         '<div class="msg-vignette" aria-hidden="true"></div>' +
+        '<div class="msg-candle" aria-hidden="true"><i class="cf-glow"></i><i class="cf-bend"><i class="cf-flame"><i class="cf-core"></i></i></i></div>' +
         '<div class="msg-stage">' +
           '<div class="env" role="img" aria-label="A sealed envelope">' +
             '<div class="env-back"></div>' +
@@ -28,10 +31,11 @@
               ? '<nav class="mb-nav mb-nav-first"><button class="mb-btn mb-next" type="button">' + u.esc(T.msgTurn) + ' <i aria-hidden="true">›</i></button></nav>'
               : '<nav class="mb-nav"><button class="mb-btn mb-back" type="button"><i aria-hidden="true">‹</i> ' + u.esc(T.msgBack) + '</button><span class="mb-num">' + (i + 1) + ' / ' + NP + '</span>' +
                 (last ? '<button class="mb-btn mb-wish" type="button">' + u.esc(T.msgContinue) + '</button>' : '<button class="mb-btn mb-next" type="button">' + u.esc(T.msgTurn) + ' <i aria-hidden="true">›</i></button>') + '</nav>';
-            return '<article class="mb-sheet ' + (i === 0 ? 'msg-paper cur' : 'mb-letter') + '" tabindex="-1" aria-label="The letter, page ' + (i + 1) + ' of ' + NP + '">' +
+            return '<article class="mb-sheet ' + (i === 0 ? 'msg-paper cur' : 'mb-letter') + '" tabindex="-1" aria-label="The letter, page ' + (i + 1) + ' of ' + NP + '">' + ORN +
               '<div class="mb-text' + (i === 0 ? ' mb-welcome' : '') + '">' +
-              items.map(function (it) { return '<p class="lt-' + it[0] + '">' + u.esc(it[1]) + '</p>'; }).join('') + '</div>' + nav + '</article>';
+              items.map(function (it, k) { return '<p class="lt-' + it[0] + '" style="--i:' + k + '">' + u.esc(it[1]) + '</p>'; }).join('') + '</div>' + nav + '</article>';
           }).join('') +
+          ['tw1', 'tw2', 'tw3', 'tw4', 'tw5', 'tw6'].map(function (c) { return '<i class="tw ' + c + '" aria-hidden="true">✦</i>'; }).join('') +
         '</div>' +
         '<div class="msg-finale" aria-live="polite">' +
           '<div class="mf-scrim" aria-hidden="true"></div>' +
@@ -62,8 +66,14 @@
       ctx.on(balloonBtn, 'click', function () { FX.release(finale, { count: 3 }); });
 
       /* ---- the pages turn over, one after another ---- */
+      const candle = sec.querySelector('.msg-candle');
+      /** A breath of air: the candle flame bends away and its light dips, then it steadies. */
+      function gust() { candle.classList.remove('gust'); void candle.offsetWidth; candle.classList.add('gust'); }
       function showPage(n) {
-        FX.flutter(sec, { rect: sec.querySelector('.msg-book').getBoundingClientRect() });   // small butterflies fly up out of the letter as the page turns
+        gust();
+        const bookRect = sec.querySelector('.msg-book').getBoundingClientRect();
+        FX.flutter(sec, { rect: bookRect });      // butterflies fly up out of the letter as the page turns …
+        FX.petals(sec, { rect: bookRect });       // … and rose petals burst out of it and drift away
         sheets.forEach(function (sh, i) {
           sh.classList.toggle('turned', i < n);
           sh.classList.toggle('cur', i === n);
@@ -141,6 +151,7 @@
         sec.classList.add('rising');                  // … the letter slides out and opens up on the table
         await ctx.sleep(700);
         sec.classList.add('written');                 // the envelope sinks away, the paper takes the stage
+        gust();
         fit();
         paper.focus({ preventScroll: true });
         await ctx.sleep(100);
