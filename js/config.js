@@ -93,6 +93,7 @@
 
       cakeNext: 'Message for You ✉️',
       birthdayLine: 'Every little detail,\nI created just for you. 💗',
+      heartNext: 'Continue 💗',
 
       flowerCaps: [
         { main: 'Sunflowers for Your Sunshine', sub: 'Because you light up every room ☀️' },

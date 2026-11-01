@@ -265,3 +265,8 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
   88%  { opacity: 1; }
   100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(calc(var(--r0) * -1)) scale(.8); }
 }
+
+/* Heart scene: the caption and the "Continue" button sit together under the heart. */
+.heart-foot { position: absolute; left: 0; right: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: .8rem; pointer-events: none; }
+.heart-foot .heart-caption { position: static; }
+.heart-next { pointer-events: auto; }
