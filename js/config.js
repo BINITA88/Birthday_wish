@@ -172,7 +172,7 @@
       tracks: {
         sparkler:    { src: 'assets/audio/candle.m4a', volume: 1 },   // the candle sound: the cake's sparkler (6.5 s, fade-out baked in)
         evergreen:   { src: 'assets/audio/evergreen.m4a?v=baked', volume: 1, loop: true },   // the one song of the whole story: from Begin (the flowers) to the Happy Birthday tune (7 min of a guitar medley, from 9:13)
-        music:       { src: 'assets/audio/happy-birthday.m4a', volume: 1, loop: true }   // the last tune: arrives with the wish, balloons and confetti
+        music:       { src: 'assets/audio/happy-birthday.m4a?v=loop', volume: 1, loop: true }   // the last tune: arrives with the wish, balloons and confetti
       }
     },
 
