@@ -63,6 +63,7 @@
 
       /* ---- the pages turn over, one after another ---- */
       function showPage(n) {
+        FX.flutter(sec, { rect: sec.querySelector('.msg-book').getBoundingClientRect() });   // small butterflies fly up out of the letter as the page turns
         sheets.forEach(function (sh, i) {
           sh.classList.toggle('turned', i < n);
           sh.classList.toggle('cur', i === n);

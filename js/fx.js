@@ -238,5 +238,40 @@
     return wrap;
   };
 
+  /** FX.flutter(parent, {rect, count}) – small butterflies leave the given rectangle (a page), flapping, and drift up and off the screen. */
+  const BFLY_COLORS = [['#ff7aa8', '#ffc2d6'], ['#ffb347', '#ffe0a3'], ['#6fc3ff', '#bfe4ff'], ['#c79bff', '#e6d3ff'], ['#ffd966', '#fff0b3'], ['#7fe0a8', '#c9f3dc']];
+  function butterflySVG(c1, c2) {
+    const wing = '<g class="bw"><path d="M22 18 C15 3 2 3 3 14 C4 22 13 24 22 19Z" fill="' + c1 + '"/><path d="M22 19 C13 22 6 30 11 33.5 C16 36 21 28 22 21Z" fill="' + c2 + '"/>' +
+      '<circle cx="10" cy="12" r="2.2" fill="rgba(255,255,255,.55)"/></g>';
+    return '<svg viewBox="0 0 44 38" aria-hidden="true">' + wing + '<g transform="translate(44 0) scale(-1 1)">' + wing + '</g>' +
+      '<ellipse cx="22" cy="19" rx="1.5" ry="7.5" fill="#4a2c1a"/><path d="M21.2 11.5 Q18 5 15.5 4.5 M22.8 11.5 Q26 5 28.5 4.5" stroke="#4a2c1a" stroke-width=".9" fill="none" stroke-linecap="round"/></svg>';
+  }
+  FX.flutter = function (parent, o) {
+    o = o || {};
+    if (App.reduced) return null;                                  // no flying about for people who asked for less motion
+    const pr = parent.getBoundingClientRect();
+    const r = o.rect ? { left: o.rect.left - pr.left, top: o.rect.top - pr.top, width: o.rect.width, height: o.rect.height }
+                     : { left: 0, top: pr.height * 0.4, width: pr.width, height: pr.height * 0.5 };
+    const n = o.count || (App.isSmall() ? 6 : 9);
+    const wrap = document.createElement('div');
+    wrap.className = 'flutter';
+    wrap.setAttribute('aria-hidden', 'true');
+    let html = '', end = 0;
+    for (let i = 0; i < n; i++) {
+      const size = u.rand(20, 30);
+      const x0 = r.left + r.width * u.rand(0.1, 0.9), y0 = r.top + r.height * u.rand(0.25, 0.92);
+      const dur = u.rand(3.4, 5.2), delay = i * 0.13 + u.rand(0, 0.5);
+      const col = BFLY_COLORS[Math.floor(Math.random() * BFLY_COLORS.length)];
+      end = Math.max(end, dur + delay);
+      html += '<span class="bfly" style="left:' + x0.toFixed(0) + 'px;top:' + y0.toFixed(0) + 'px;width:' + size.toFixed(0) + 'px;' +
+        '--dy:' + (-(y0 + size + 50)).toFixed(0) + 'px;--dx:' + u.rand(-80, 80).toFixed(0) + 'px;--w1:' + u.rand(-50, 50).toFixed(0) + 'px;--w2:' + u.rand(-50, 50).toFixed(0) + 'px;' +
+        '--r0:' + u.rand(6, 18).toFixed(0) + 'deg;--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's;--fl:' + u.rand(0.16, 0.26).toFixed(2) + 's">' + butterflySVG(col[0], col[1]) + '</span>';
+    }
+    wrap.innerHTML = html;
+    parent.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, end * 1000 + 400);    // once the last one has flown out of sight
+    return wrap;
+  };
+
   App.FX = FX;
 })(window.App = window.App || {});

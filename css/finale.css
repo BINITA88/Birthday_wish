@@ -250,3 +250,18 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 /* On a phone the sheet leaves room above and below, so the candle and the roses are not cut off */
 @media (max-width: 700px) { .msg-book { width: 88vw; height: min(60dvh, 540px); } }
 @media (max-width: 700px) and (max-height: 600px) { .msg-book { height: 72dvh; } }   /* very small, old phones need a little more room */
+
+/* Butterflies that fly up out of the letter when a page turns. */
+.flutter { position: absolute; inset: 0; z-index: 6; overflow: hidden; pointer-events: none; }
+.bfly { position: absolute; display: block; margin: -.5em 0 0 -.5em; opacity: 0; will-change: transform, opacity; animation: bflyFly var(--dur) cubic-bezier(.35, .1, .5, 1) var(--delay) 1 both; filter: drop-shadow(0 2px 3px rgba(40, 15, 5, .35)); }
+.bfly svg { display: block; width: 100%; height: auto; overflow: visible; }
+.bfly .bw { transform-box: view-box; transform-origin: 22px 18px; animation: bflap var(--fl, .2s) ease-in-out infinite alternate; }
+@keyframes bflap { from { transform: scaleX(1); } to { transform: scaleX(.22); } }
+@keyframes bflyFly {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(var(--r0)) scale(.3); }
+  8%   { opacity: 1; transform: translate(calc(var(--w1) * .2), calc(var(--dy) * .05)) rotate(var(--r0)) scale(1); }
+  35%  { opacity: 1; transform: translate(var(--w1), calc(var(--dy) * .38)) rotate(calc(var(--r0) * -1)) scale(1); }
+  68%  { opacity: 1; transform: translate(var(--w2), calc(var(--dy) * .72)) rotate(var(--r0)) scale(.95); }
+  88%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(calc(var(--r0) * -1)) scale(.8); }
+}
