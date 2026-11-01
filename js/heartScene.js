@@ -1,13 +1,11 @@
-/* SCENE – birthday words drift through the dark in hot pink (some big, some small, all readable), then gather into two tidy rows
-   round the outline of a beating heart that frames her photo, with a short caption and a button to go on. Every word has its own fixed
-   place on the outline, chosen so that it fits on the screen and never overlaps another word. */
+/* SCENE – birthday words drift through the dark in hot pink, then gather, word by word, into a beating heart around her photo,
+   with a short caption underneath and a button to go on. The words are fine and delicate (a few a little bigger), bright enough to read. */
 (function (App) {
   const { CONFIG: C, u } = App;
   const WORDS = ['Happy Birthday', 'Pratima', 'Celebrate', 'Joy', 'Cheers', 'Smile', 'Sparkle', 'Wishes', 'Shine', 'Bloom', 'Blessings', 'Happy', 'Birthday', '♥'];
-  const COLORS = ['255,70,140', '255,105,168', '255,143,186', '255,185,212', '255,226,238'];   // bright pinks: they stay readable on black
-  const FONT = 'Jost, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif';
-  const RINGS = [1.0, 1.14];                          // the two rows of words, as scaled copies of the heart outline
+  const COLORS = ['255,42,122', '255,92,158', '255,120,172', '255,143,186', '255,176,208', '255,208,228'];   // the same hot pinks, with the dark one swapped for lighter ones so every word reads on black
 
+  const SPIN = 0.07;        // laps of the heart per second: every word flows round the outline together
   const T_FORM = 4200;      // words drift for this long before they start to gather (the first moment is under the fade)
   const T_SPREAD = 1000;    // the words leave one after another over this time …
   const T_MOVE = 1800;      // … and each takes this long to reach its place in the heart
@@ -15,7 +13,6 @@
   const clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
   const ease = function (k) { return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; };
   const lerp = function (a, b, k) { return a + (b - a) * k; };
-  const shuffle = function (list) { const a = list.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
 
   /** A point of the heart curve in "heart units" (x −16…16, y −14…14, y pointing down). */
   function heartPoint(t) {
@@ -40,20 +37,22 @@
     return { x: PATH.pts[lo].x + (PATH.pts[hi].x - PATH.pts[lo].x) * k, y: PATH.pts[lo].y + (PATH.pts[hi].y - PATH.pts[lo].y) * k };
   }
 
-  /** The drifting words: plenty of them, in a real mix of small and big, every one clearly visible. */
   function makeParticles(n) {
     const list = [];
     for (let i = 0; i < n; i++) {
       const depth = Math.random();
       const dir = Math.random() < 0.5 ? -1 : 1;
+      const r = 0.97 + Math.random() * 0.2;                         // every word rides a thin band along the heart outline; the inside stays empty for the photo
       list.push({
         word: WORDS[i % WORDS.length],
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
         nx: Math.random(), ny: Math.random(),
         vx: dir * (0.012 + depth * 0.05), vy: (Math.random() - 0.5) * 0.012,
-        depth: depth, alpha: 0.6 + depth * 0.4,
-        size0: 12 + depth * depth * 34,                         // mostly small and medium, a few big ones
-        slot: null,                                              // the place in the heart it flies to (the rest fade away as the heart forms)
+        depth: depth, alpha: 0.4 + depth * 0.55,
+        // every word travels round the heart along its own ring (a scaled copy of the outline), so the whole heart keeps circling
+        s0: Math.random(), r: r,
+        jx: (Math.random() - 0.5) * 0.55, jy: (Math.random() - 0.5) * 0.55,
+        tsize: 0.5 + Math.random() * 0.5, talpha: 0.72 + Math.random() * 0.28,
         delay: Math.random() * T_SPREAD,
         tw: Math.random() * TAU,
         sx: null, sy: null
@@ -67,10 +66,9 @@
       const T = C.text;
       ['assets/images/vintage-letter-tabletop.jpg', 'assets/images/lastposterimage.jpg'].forEach(function (src) { new Image().src = src; });   // fetched now, so the letter and the finale never wait for them
       sec.innerHTML = '<canvas class="heart-canvas" aria-hidden="true"></canvas>' +
-        '<div class="heart-foot"><div class="heart-caption"><p class="hb-text"></p></div>' +
-        '<button class="btn primary heart-next fade-up" type="button">' + u.esc(T.heartNext) + '</button></div>';
+        '<div class="heart-caption"><p class="hb-text"></p></div>' +
+        '<button class="btn primary heart-next fade-up" type="button">' + u.esc(T.heartNext) + '</button>';
       const canvas = sec.querySelector('.heart-canvas');
-      const foot = sec.querySelector('.heart-foot');
       const caption = sec.querySelector('.heart-caption');
       const nextBtn = sec.querySelector('.heart-next');
       u.hint(nextBtn);
@@ -78,60 +76,19 @@
       const g = canvas.getContext('2d');
       const cutout = new Image();                      // her cut-out photo, shown inside the heart
       cutout.src = 'assets/images/pratima-selfie-cutout.png?v=2';
-      const particles = makeParticles(App.isSmall() ? 90 : 150);
+      const particles = makeParticles(App.isSmall() ? 150 : 250);
 
       let W = 0, H = 0, dpr = 1, hs = 10, cx = 0, cy = 0;
-      const OUTER = RINGS[RINGS.length - 1];
-
-      /** Gives every word on the outline its own fixed place: two rows of words, big and small, each one on the screen and clear of every other. */
-      function layoutSlots() {
-        const slots = [], boxes = [];
-        const SIZES = [1.1, 1.3, 1.6, 2.0, 2.4];                                            // × hs: a real mix of small and big
-        const BEAT = 1.05;                                                                   // the heart swells this much when it beats
-        RINGS.forEach(function (ringR, ri) {
-          const lenPx = PATH.len * hs * ringR;
-          const pool = shuffle(WORDS);
-          let pos = 0, pick = ri * 2, n = 0;
-          while (pos < lenPx && n < 400) {
-            n++;
-            const hp = pointAt(pos / lenPx), hx = hp.x * ringR, hy = hp.y * ringR;           // this spot, in heart units
-            const px = hx * hs, py = hy * hs;                                                // … and in pixels from the centre
-            let placed = false, size = Math.max(11, hs * SIZES[(pick * 3 + 1) % SIZES.length]);
-            for (let attempt = 0; attempt < 8 && !placed; attempt++) {
-              const word = pool[(pick + attempt) % pool.length];
-              const sz = Math.max(11, size * (word === '♥' ? 1.2 : 1) * Math.pow(0.88, attempt >> 1));       // a word that does not fit is tried a little smaller
-              g.font = '600 ' + sz.toFixed(1) + 'px ' + FONT;
-              const w = g.measureText(word).width + 4, h = sz * 1.08;
-              const ax = cx + px * BEAT, ay = cy + py * BEAT;
-              if (ax - w / 2 < 6 || ax + w / 2 > W - 6 || ay - h / 2 < 4 || ay + h / 2 > H - 4) continue;   // would be cut off by the screen
-              if (boxes.some(function (q) { return Math.abs(q.x - px) < (q.w + w) / 2 + 3 && Math.abs(q.y - py) < (q.h + h) / 2 + 2; })) continue;   // would touch another word
-              boxes.push({ x: px, y: py, w: w, h: h });
-              slots.push({ word: word, size: sz, hx: hx, hy: hy, color: COLORS[(slots.length + ri * 2) % COLORS.length] });
-              placed = true; pick += attempt + 1;
-              pos += Math.max(h, w * 0.5);
-            }
-            if (!placed) { pos += Math.max(4, hs * 0.6); pick++; }
-          }
-        });
-        const order = shuffle(particles.map(function (_, i) { return i; }));
-        particles.forEach(function (p) { p.slot = null; });
-        slots.forEach(function (sl, i) {
-          const p = particles[order[i % particles.length]];
-          p.slot = sl; p.word = sl.word; p.color = sl.color;
-        });
-      }
-
       function resize() {
         dpr = Math.min(2, window.devicePixelRatio || 1);
         W = sec.clientWidth; H = sec.clientHeight;
         canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
         g.setTransform(dpr, 0, 0, dpr, 0, 0);
-        // the heart (with its two rows of words), the caption and the button share the height; hs = pixels per heart unit (the heart is about 33 units tall)
-        const capH = Math.max(70, Math.min(104, H * 0.16)), footH = capH + 100;
-        hs = Math.min(W * 0.47 / (16 * OUTER), (H - footH - 20) / (33 * OUTER));
-        cx = W / 2; cy = (H - (33 * hs * OUTER + footH)) / 2 + 16.4 * hs * OUTER;
-        foot.style.top = (cy + hs * 16.6 * OUTER + Math.max(6, H * 0.012)) + 'px';
-        layoutSlots();
+        // the heart and its two-line caption share the height; hs = pixels per heart unit (the heart is about 33 units tall)
+        const capH = Math.max(70, Math.min(104, H * 0.16));
+        hs = Math.min(W * 0.42 / 16, H * 0.37 / 16, (H - capH - 20 - 60) / 33);          // 60 px at the bottom are kept for the button
+        cx = W / 2; cy = (H - 60 - (33 * hs + capH)) / 2 + 16.4 * hs;
+        caption.style.top = (cy + hs * 16.4 + Math.max(6, H * 0.012)) + 'px';
       }
       resize();
       ctx.on(window, 'resize', resize);
@@ -157,13 +114,13 @@
           g.fillStyle = glow; g.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
         }
 
-        // her photo fills the hollow of the heart (clipped to a slightly smaller heart so the rows of words frame it)
+        // her photo fills the hollow of the heart (clipped to a slightly smaller heart so the words frame it)
         if (cutout.complete && cutout.naturalWidth) {
           const pa = clamp01((t - formedAt + 400) / 1400);
           if (pa > 0) {
             g.save(); g.beginPath();
             for (let a = 0; a <= 90; a++) {
-              const q = heartPoint(a / 90 * TAU), px = cx + q.x * 0.9 * hs * beat, py = cy + q.y * 0.9 * hs * beat;
+              const q = heartPoint(a / 90 * TAU), px = cx + q.x * 0.92 * hs * beat, py = cy + q.y * 0.92 * hs * beat;
               if (a) g.lineTo(px, py); else g.moveTo(px, py);
             }
             g.closePath(); g.clip(); g.globalAlpha = pa;
@@ -175,43 +132,46 @@
             g.restore();
           }
         }
-        g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+        g.textAlign = 'center'; g.textBaseline = 'middle';
         const sc = Math.max(0.75, Math.min(W, H) / 760);
         const fade = clamp01(t / 900);
 
         for (let i = 0; i < particles.length; i++) {
           const p = particles[i];
           const start = T_FORM + p.delay;
-          let x, y, size, alpha;
+          let x, y, size, alpha, streak;
           if (t < start) {
             x = (((p.nx + p.vx * t / 1000) % 1) + 1) % 1 * W;
             y = (((p.ny + p.vy * t / 1000) % 1) + 1) % 1 * H;
-            size = p.size0 * sc; alpha = p.alpha * fade;
+            size = (8 + Math.pow(p.depth, 1.6) * 14) * sc; alpha = p.alpha * fade; streak = 1;
           } else {
             if (p.sx === null) {
               p.sx = (((p.nx + p.vx * start / 1000) % 1) + 1) % 1 * W;
               p.sy = (((p.ny + p.vy * start / 1000) % 1) + 1) % 1 * H;
             }
             const k = ease(clamp01((t - start) / T_MOVE));
-            if (p.slot) {                                    // this word takes its place in one of the two rows
-              x = lerp(p.sx, cx + p.slot.hx * hs * beat, k);
-              y = lerp(p.sy, cy + p.slot.hy * hs * beat, k);
-              size = lerp(p.size0 * sc, p.slot.size, k);
-              alpha = lerp(p.alpha, 0.97, k);
-            } else {                                         // the spare words drift on and fade away as the heart forms
-              x = (((p.nx + p.vx * Math.min(t, start + T_MOVE) / 1000) % 1) + 1) % 1 * W;
-              y = (((p.ny + p.vy * Math.min(t, start + T_MOVE) / 1000) % 1) + 1) % 1 * H;
-              size = p.size0 * sc; alpha = p.alpha * (1 - k);
+            const hp = pointAt(p.s0 + SPIN * Math.max(0, t - T_FORM) / 1000);      // this word's place on its ring right now
+            x = lerp(p.sx, cx + (hp.x * p.r + p.jx) * hs * beat, k);
+            y = lerp(p.sy, cy + (hp.y * p.r + p.jy) * hs * beat, k);
+            size = lerp((8 + Math.pow(p.depth, 1.6) * 14) * sc, Math.max(9, p.tsize * hs), k);
+            alpha = lerp(p.alpha, p.talpha, k) * (k > 0.98 ? 0.8 + 0.2 * Math.sin(t / 420 + p.tw) : 1);
+            streak = 1 - k;
+          }
+          g.font = (p.depth > 0.6 || p.word === '♥' ? '600 ' : (streak > 0.05 ? '400 ' : '500 ')) + size.toFixed(1) + 'px Jost, "Segoe UI", system-ui, sans-serif';
+          const wd = g.measureText(p.word).width;
+          x = Math.min(W - wd / 2 - 3, Math.max(wd / 2 + 3, x));                   // a word is never cut off by the edge of the screen
+          if (streak > 0.05) {                                // a faint horizontal smear while a word is still travelling
+            const len = (6 + p.depth * 26) * streak * Math.sign(p.vx);
+            for (let s = 2; s >= 1; s--) {
+              g.fillStyle = 'rgba(' + p.color + ',' + (alpha * 0.09 * streak).toFixed(3) + ')';
+              g.fillText(p.word, x - len * s * 0.55, y);
             }
           }
-          if (alpha < 0.02) continue;
-          size = Math.max(11, size);
-          g.font = '600 ' + size.toFixed(1) + 'px ' + FONT;
-          g.lineWidth = Math.max(2, size * 0.2);             // a dark edge keeps every word crisp, even over the photo or another word
-          g.strokeStyle = 'rgba(18,0,10,' + (alpha * 0.8).toFixed(3) + ')';
-          g.shadowBlur = 0;
-          g.strokeText(p.word, x, y);
-          g.shadowColor = 'rgba(255,50,130,.8)'; g.shadowBlur = 6;
+          if (streak <= 0.05) {                                // a faint dark edge keeps a word crisp where words cross or the photo is behind
+            g.lineJoin = 'round'; g.lineWidth = Math.max(1.2, size * 0.11); g.strokeStyle = 'rgba(18,0,10,' + (alpha * 0.4).toFixed(3) + ')';
+            g.shadowBlur = 0; g.strokeText(p.word, x, y);
+          }
+          g.shadowColor = 'rgba(255,40,120,.85)'; g.shadowBlur = streak > 0.05 ? 0 : 7;
           g.fillStyle = 'rgba(' + p.color + ',' + alpha.toFixed(3) + ')';
           g.fillText(p.word, x, y);
         }
@@ -220,11 +180,11 @@
       raf = requestAnimationFrame(frame);
       ctx.add(function () { cancelAnimationFrame(raf); });
 
-      // the caption fades in as the heart completes, then the button to go on
+      // caption fades in as the heart completes
       ctx.later(function () { caption.classList.add('in'); }, formedAt - 200);
-      ctx.show(nextBtn, formedAt + 1500);
 
-      // on to the cake when she presses the button (go() refuses while a transition is still running, so keep trying)
+      // the button appears once the heart is formed; on to the cake when she presses it (go() refuses while a transition is still running, so keep trying)
+      ctx.show(nextBtn, formedAt + 1500);
       ctx.on(nextBtn, 'click', function () {
         if (leaving || nextBtn.disabled) return;
         nextBtn.disabled = true;
