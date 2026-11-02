@@ -306,5 +306,29 @@
     return wrap;
   };
 
+  /** FX.shower(parent, {count}) – a shower of red rose petals (and a few roses) falls steadily from the top of the screen, swaying gently, and is gone once the last one has left. */
+  const ROSE_PETALS = [['#7d0a1c', '#c4182f'], ['#9b0f24', '#e23a52'], ['#b3122b', '#f0566c'], ['#8c0c20', '#d12a43'], ['#c21a35', '#ff7088']];
+  FX.shower = function (parent, o) {
+    o = o || {};
+    const n = o.count || (App.isSmall() ? 26 : 40);
+    const wrap = document.createElement('div');
+    wrap.className = 'shower';
+    wrap.setAttribute('aria-hidden', 'true');
+    let html = '', end = 0;
+    for (let i = 0; i < n; i++) {
+      const dur = u.rand(6, 10), delay = u.rand(0, 2.2), rose = Math.random() < 0.1;
+      const size = rose ? u.rand(22, 30) : u.rand(12, 22);
+      end = Math.max(end, dur + delay);
+      const col = ROSE_PETALS[Math.floor(Math.random() * ROSE_PETALS.length)];
+      const inner = rose ? '<i class="fp fp-rose">🌹</i>'
+        : '<i class="fp" style="width:' + size.toFixed(0) + 'px;height:' + (size * 1.3).toFixed(0) + 'px;background:radial-gradient(ellipse at 30% 25%,' + col[1] + ',' + col[0] + ')"></i>';
+      html += '<span class="fl" style="left:' + u.rand(1, 97).toFixed(1) + '%;font-size:' + size.toFixed(0) + 'px;--sx:' + u.rand(-50, 50).toFixed(0) + 'px;--sw:' + u.rand(16, 46).toFixed(0) + 'px;--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's;--sd:' + u.rand(1.7, 3.1).toFixed(2) + 's;--sr:' + u.rand(18, 55).toFixed(0) + 'deg">' + inner + '</span>';
+    }
+    wrap.innerHTML = html;
+    parent.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, end * 1000 + 400);
+    return wrap;
+  };
+
   App.FX = FX;
 })(window.App = window.App || {});

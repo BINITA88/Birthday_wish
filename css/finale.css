@@ -267,7 +267,9 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 }
 
 /* Heart scene: the "Continue" button sits at the bottom of the screen, under the caption. */
-.heart-next { position: absolute; z-index: 3; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); margin-left: 0; translate: -50% 0; }
+.heart-next, .heart-flowers { position: absolute; z-index: 3; bottom: max(14px, env(safe-area-inset-bottom)); }
+.heart-next { left: max(12px, 4vw); }                     /* bottom-left */
+.heart-flowers { right: max(12px, 4vw); }                /* bottom-right */
 
 /* ===== The candle: a real, living flame on top of the candle in the table photo (same box as the photo's candle) ===== */
 .msg-candle { position: absolute; z-index: 2; left: -2vw; top: -2vw; width: min(40vw, 340px); aspect-ratio: 1; pointer-events: none; }
@@ -328,3 +330,31 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 .orn { top: 9px; width: clamp(24px, 5.5vw, 40px); }
 .orn-l { left: 9px; } .orn-r { right: 9px; }
 .mb-sheet { padding-top: max(2.2rem, clamp(1.2rem, 4.4vw, 2.8rem)); }
+
+/* A shower of red rose petals: the outer element falls at a steady speed (linear, so it never speeds up or stops), the inner one sways. */
+.shower { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
+.fl { position: absolute; top: 0; display: block; line-height: 1; opacity: 0; will-change: transform, opacity; animation: flFall var(--dur) linear var(--delay) 1 both; }
+.fp { display: block; font-style: normal; transform-origin: 50% 40%; will-change: transform; border-radius: 80% 0 80% 0; box-shadow: inset -2px -3px 5px rgba(60, 0, 10, .35); filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .4)); animation: flSway var(--sd) ease-in-out infinite alternate; }
+.fp-rose { border-radius: 0; box-shadow: none; }
+@keyframes flFall {
+  0%   { opacity: 0; transform: translate3d(0, -9vh, 0); }
+  5%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--sx), 112dvh, 0); }
+}
+@keyframes flSway {
+  from { transform: translateX(calc(var(--sw) * -1)) rotate(calc(var(--sr) * -1)); }
+  to   { transform: translateX(var(--sw)) rotate(var(--sr)); }
+}
+@media (prefers-reduced-motion: reduce) { .fl, .fp { animation-duration: 3s; } }
+
+/* the heart caption is written out as if by hand: each line is drawn in from left to right, the second after the first */
+.heart-caption { transition: opacity .3s ease; }
+.hb-text .hw-line { display: block; clip-path: inset(-25% 101% -25% -2%); }
+.heart-caption.in .hw-line { animation: hwWrite 2.3s cubic-bezier(.5, .05, .35, 1) var(--d, 0s) both; }
+@keyframes hwWrite {
+  0%   { clip-path: inset(-25% 101% -25% -2%); opacity: .35; }
+  6%   { opacity: 1; }
+  100% { clip-path: inset(-25% -4% -25% -2%); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .hb-text .hw-line { clip-path: none; } .heart-caption.in .hw-line { animation: none; } }
