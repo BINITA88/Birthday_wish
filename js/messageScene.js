@@ -146,11 +146,18 @@
       }
 
       async function run() {
+        const envRect = env.getBoundingClientRect();
         sec.classList.add('opening');                 // the seal breaks and the flap lifts …
+        FX.glitter(sec, { rect: envRect, count: App.isSmall() ? 10 : 16 });          // … a first sprinkle of sparkles escapes from the envelope
         await ctx.sleep(700);
         sec.classList.add('rising');                  // … the letter slides out and opens up on the table
+        FX.flutter(sec, { rect: envRect, count: App.isSmall() ? 9 : 13 });           // butterflies and sparkles fly up with the letter
+        FX.glitter(sec, { rect: envRect, count: App.isSmall() ? 18 : 28 });
         await ctx.sleep(700);
         sec.classList.add('written');                 // the envelope sinks away, the paper takes the stage
+        const bookRect = sec.querySelector('.msg-book').getBoundingClientRect();
+        FX.flutter(sec, { rect: bookRect, count: App.isSmall() ? 6 : 9 });           // a last wave rises from the letter itself
+        FX.glitter(sec, { rect: bookRect, count: App.isSmall() ? 14 : 22 });
         gust();
         fit();
         paper.focus({ preventScroll: true });
