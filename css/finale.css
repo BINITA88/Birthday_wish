@@ -378,3 +378,7 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 .env-front { z-index: 3; }
 .env-flap { z-index: 4; transition: transform .95s var(--ease) .25s, z-index 0s linear .75s; }
 .opening .env-flap { z-index: 1; }
+
+/* The letter slides slowly up out of the envelope and ends above it (butterflies and sparkles rise with it, see messageScene.js). */
+.env-sheet { transition: transform 2.6s cubic-bezier(.3, .08, .25, 1) .15s; }
+.rising .env-sheet { transform: translateY(-72%); }

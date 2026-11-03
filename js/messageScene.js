@@ -149,11 +149,17 @@
         const envRect = env.getBoundingClientRect();
         sec.classList.add('opening');                 // the seal breaks and the flap lifts …
         FX.glitter(sec, { rect: envRect, count: App.isSmall() ? 10 : 16 });          // … a first sprinkle of sparkles escapes from the envelope
-        await ctx.sleep(700);
-        sec.classList.add('rising');                  // … the letter slides out and opens up on the table
-        FX.flutter(sec, { rect: envRect, count: App.isSmall() ? 9 : 13 });           // butterflies and sparkles fly up with the letter
-        FX.glitter(sec, { rect: envRect, count: App.isSmall() ? 18 : 28 });
-        await ctx.sleep(700);
+        await ctx.sleep(1000);
+        sec.classList.add('rising');                  // … and the letter slowly slides up out of the envelope, above it
+        // while it rises, butterflies and sparkles keep drifting up with it
+        const rise = [0, 500, 1000, 1500, 2000];
+        rise.forEach(function (ms, i) {
+          ctx.later(function () {
+            FX.glitter(sec, { rect: envRect, count: App.isSmall() ? 12 : 18 });
+            if (i % 2 === 0) FX.flutter(sec, { rect: envRect, count: App.isSmall() ? 5 : 7 });
+          }, ms);
+        });
+        await ctx.sleep(2900);
         sec.classList.add('written');                 // the envelope sinks away, the paper takes the stage
         const bookRect = sec.querySelector('.msg-book').getBoundingClientRect();
         FX.flutter(sec, { rect: bookRect, count: App.isSmall() ? 6 : 9 });           // a last wave rises from the letter itself
