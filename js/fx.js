@@ -345,5 +345,31 @@
     return wrap;
   };
 
+  /** FX.glitter(parent, {rect, count}) – small golden and pink sparkles rise from the given rectangle (a letter, an envelope), twinkling, and drift up off the screen. */
+  const GLITTER = ['#ffd978', '#ffe9a8', '#ffb3cf', '#ffc9de', '#fff3cf', '#ffcf6b'];
+  FX.glitter = function (parent, o) {
+    o = o || {};
+    if (App.reduced) return null;
+    const pr = parent.getBoundingClientRect();
+    const r = o.rect ? { left: o.rect.left - pr.left, top: o.rect.top - pr.top, width: o.rect.width, height: o.rect.height }
+                     : { left: 0, top: pr.height * 0.4, width: pr.width, height: pr.height * 0.5 };
+    const n = o.count || (App.isSmall() ? 16 : 24);
+    const wrap = document.createElement('div');
+    wrap.className = 'glitter';
+    wrap.setAttribute('aria-hidden', 'true');
+    let html = '', end = 0;
+    for (let i = 0; i < n; i++) {
+      const x0 = r.left + r.width * u.rand(0.05, 0.95), y0 = r.top + r.height * u.rand(0.2, 0.95);
+      const size = u.rand(9, 20), dur = u.rand(2.6, 4.6), delay = i * 0.07 + u.rand(0, 0.5);
+      end = Math.max(end, dur + delay);
+      html += '<span class="gl" style="left:' + x0.toFixed(0) + 'px;top:' + y0.toFixed(0) + 'px;font-size:' + size.toFixed(0) + 'px;color:' + GLITTER[Math.floor(Math.random() * GLITTER.length)] + ';' +
+        '--dy:' + (-(y0 + size + 40)).toFixed(0) + 'px;--dx:' + u.rand(-40, 40).toFixed(0) + 'px;--sw:' + u.rand(6, 22).toFixed(0) + 'px;--tw:' + u.rand(0.5, 1.1).toFixed(2) + 's;--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's"><i>✦</i></span>';
+    }
+    wrap.innerHTML = html;
+    parent.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, end * 1000 + 400);
+    return wrap;
+  };
+
   App.FX = FX;
 })(window.App = window.App || {});
