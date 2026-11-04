@@ -81,7 +81,7 @@
       // each letter is a glowing star with the letter inside it; the 7 stars are spread over the sky, up and down, left to right,
       // sized from the screen and kept clear of the moon, the sound button, the greeting and each other
       const SW0 = sec.clientWidth || window.innerWidth, SH0 = sec.clientHeight || window.innerHeight;
-      const STAR = Math.round(Math.max(64, Math.min(118, SW0 * 0.2, SH0 * 0.21)));          // the size of each star in pixels
+      const STAR = Math.round(Math.max(44, Math.min(64, SW0 * 0.13, SH0 * 0.11)));          // the size of each star in pixels (small)
       skyName.style.setProperty('--ss', STAR + 'px');
       const secBox = sec.getBoundingClientRect();
       const circle = function (el) { const r = el.getBoundingClientRect(); return { x: r.left - secBox.left + r.width / 2, y: r.top - secBox.top + r.height / 2, r: Math.max(r.width, r.height) / 2 }; };
@@ -112,7 +112,7 @@
         node.dataset.x = spot[0]; node.dataset.y = spot[1];
         node.style.left = spot[0] + '%';
         node.style.top = spot[1] + '%';
-        node.style.setProperty('--gd', (-Math.random() * 3.2).toFixed(2) + 's');       // each letter's glow goes on and off at its own moment
+        node.style.setProperty('--k', index);                                          // which star it is: the sparks pass from one star to the next, in order
         node.innerHTML = '<i aria-hidden="true">✦</i><b>' + u.esc(letter) + '</b>';
         skyName.appendChild(node);
         return node;
