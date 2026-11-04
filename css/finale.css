@@ -516,3 +516,12 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 @media (max-width: 600px) and (orientation: portrait) { .moon-greeting { top: 47.5%; } .moon-ask { top: 57.5%; } .moon-begin { top: 67.5%; } }
 @media (max-width: 600px) and (orientation: portrait) and (max-height: 720px) { .moon-greeting { top: 46.5%; } .moon-ask { top: 57.5%; } .moon-begin { top: 68%; } }
 @media (max-height: 500px) and (orientation: landscape) { .moon-greeting { top: 54.5%; } .moon-ask { top: 69.5%; } .moon-begin { top: 82%; } }
+
+/* the button sits closer under the question, and its pointing hand sits close under the button */
+.moon-begin { top: 76.9%; }
+.moon-begin .tap-hint.side-below { margin-top: -.32em; --ay: 6px; }
+@media (max-width: 600px) and (orientation: portrait) { .moon-begin { top: 63.7%; } }
+@media (max-width: 600px) and (orientation: portrait) and (max-height: 720px) { .moon-begin { top: 65.2%; } }
+@media (max-height: 500px) and (orientation: landscape) { .moon-begin { top: 79.5%; } }
+.moon-begin .tap-hint.side-below { margin-top: -.04em; --ay: 6px; }
+@media (max-height: 500px) and (orientation: landscape) { .moon-begin { top: 78.5%; } }
