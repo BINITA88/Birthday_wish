@@ -69,6 +69,8 @@
     text: {
       // waitLine: 'Some people just feel like\na little bit of magic.\nAnd you are one of them,',
       waitGreeting: 'Hey beautiful,',
+      waitAsk1: 'Shall we begin?',
+      waitAsk2: '♡ A little surprise awaits',
       waitButton: 'Tap for music & begin ♡',
       introLine: 'Something special is waiting for you...',
       introButton: 'Click to begin ✨',

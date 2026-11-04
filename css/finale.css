@@ -382,3 +382,137 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 /* The letter slides slowly up out of the envelope and ends above it (butterflies and sparkles rise with it, see messageScene.js). */
 .env-sheet { transition: transform 2.6s cubic-bezier(.3, .08, .25, 1) .15s; }
 .rising .env-sheet { transform: translateY(-72%); }
+
+/* ===== Opening: a natural night sky, the name as blinking stars, a calmer moon corner, and the question before the button ===== */
+.sky-twinkle { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+/* the bright patches of the sky photo near the moon and along the top are toned down (the moon itself, above this layer, is untouched) */
+.sky-calm { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(180deg, rgba(3, 5, 9, .62) 0, rgba(3, 5, 9, .34) 24%, rgba(3, 5, 9, 0) 48%),
+    radial-gradient(circle at 19% 19%, rgba(3, 5, 9, .72) 0, rgba(3, 5, 9, .42) 9vmax, rgba(3, 5, 9, 0) 24vmax); }
+
+/* the letters: a star first (centred), which then settles into a small blinking sparkle at the corner of its letter */
+.sky-name-letter i { left: 50%; top: 50%; margin: -.5em 0 0 -.42em; font: normal clamp(1.6rem, 4.2vw, 3rem)/1 Georgia, serif; color: #fff; text-shadow: 0 0 6px #fff, 0 0 16px rgba(174, 214, 255, .95), 0 0 30px rgba(130, 180, 255, .6);
+  transition: left .9s var(--ease), top .9s var(--ease), font-size .9s var(--ease); }
+.sky-name-letter.appeared i { opacity: 1; animation: nameSpark 1.5s ease-in-out infinite alternate; }
+.sky-name-letter.letter-visible i { left: 88%; top: 16%; font-size: clamp(.9rem, 2.2vw, 1.6rem); opacity: 1; }
+.sky-name-letter.gathered i { opacity: 1; }
+@keyframes nameSpark { from { opacity: .18; transform: scale(.45) rotate(0); } to { opacity: 1; transform: scale(1.12) rotate(45deg); } }
+/* the letter itself stays crisp, with a soft glow that goes on and off */
+.sky-name-letter b { color: #fffaea; text-shadow: 0 0 3px rgba(255, 255, 255, .6), 0 0 8px rgba(255, 226, 158, .35); }
+.sky-name-letter.letter-visible b { animation: nameGlow 3.2s ease-in-out var(--gd, 0s) infinite alternate; }
+@keyframes nameGlow {
+  from { text-shadow: 0 0 2px rgba(255, 255, 255, .5), 0 0 6px rgba(255, 226, 158, .18); }
+  to   { text-shadow: 0 0 6px #fff, 0 0 20px rgba(255, 226, 158, .85), 0 0 38px rgba(131, 187, 255, .5); }
+}
+
+/* the question that is written out before the button */
+.moon-greeting { top: 60%; }
+.moon-ask { position: absolute; z-index: 4; left: 50%; top: 70.5%; transform: translate(-50%, -50%); width: min(92vw, 640px); margin: 0; display: grid; gap: .4em; text-align: center; pointer-events: none; }
+.moon-ask p { margin: 0; min-height: 1.2em; }
+.ask-1 { font: 600 clamp(1.5rem, 4.4vw, 2.4rem)/1.15 var(--sans); color: #fff; letter-spacing: .005em; }
+.ask-2 { font: 400 clamp(.95rem, 2.7vw, 1.35rem)/1.3 var(--sans); color: #b8b9c6; }
+.moon-begin { top: 81%; }
+@media (max-width: 600px) and (orientation: portrait) {
+  .moon-greeting { top: 55.5%; }
+  .moon-ask { top: 63.5%; }
+  .moon-begin { top: 73%; }
+  .sky-name-letter i { font-size: clamp(1.7rem, 7vw, 2.4rem); }
+  .sky-name-letter.letter-visible i { font-size: clamp(.95rem, 4vw, 1.3rem); }
+}
+@media (max-height: 560px) and (orientation: landscape) {
+  .moon-greeting { top: 58%; font-size: clamp(1.4rem, 5vh, 2rem); }
+  .moon-ask { top: 69%; }
+  .ask-1 { font-size: clamp(1.1rem, 4.4vh, 1.6rem); } .ask-2 { font-size: clamp(.8rem, 3.2vh, 1.05rem); }
+  .moon-begin { top: 82%; }
+}
+@media (prefers-reduced-motion: reduce) { .sky-name-letter i, .sky-name-letter.letter-visible b { animation: none; } }
+
+/* ===== The name: a slowly twinkling star first, then the letter slowly shows out of it ===== */
+.sky-name-letter { transition: opacity 1.4s ease, transform 1.6s var(--ease); }
+.sky-name-letter i { font-size: clamp(1.1rem, 3vw, 2rem); text-shadow: 0 0 5px #fff, 0 0 14px rgba(174, 214, 255, .9), 0 0 28px rgba(130, 180, 255, .5); }
+.sky-name-letter.appeared i { animation: starSlow 2.2s ease-in-out infinite alternate; }
+@keyframes starSlow { from { opacity: .08; transform: scale(.4); } to { opacity: 1; transform: scale(1.15); } }
+.sky-name-letter b { opacity: 0; transform: scale(.7); filter: blur(7px); transition: opacity 3s ease, transform 3s var(--ease), filter 3s ease; }
+.sky-name-letter.letter-visible b { opacity: 1; transform: scale(1); filter: blur(0); }
+@media (max-width: 600px) and (orientation: portrait) {
+  .sky-name-letter i { font-size: clamp(1.2rem, 5vw, 1.8rem); }
+}
+@media (prefers-reduced-motion: reduce) { .sky-name-letter b { transition-duration: .3s; } }
+
+/* Stars at different places turn into their letters there, and then glide into the name. */
+.sky-name-letter { transition: left 2.2s cubic-bezier(.45, .05, .25, 1), top 2.2s cubic-bezier(.45, .05, .25, 1), opacity 1.4s ease, transform 1.6s var(--ease); }
+/* the star does not stay above the letter: it turns into it (shrinks and fades as the letter shows) */
+.sky-name-letter.letter-visible i { left: 50%; top: 50%; animation: starOut 1.8s ease-out forwards; }
+@keyframes starOut { from { opacity: .9; transform: scale(1.1); } to { opacity: 0; transform: scale(.3); } }
+.sky-name-letter.gathered i { opacity: 0; }
+.sky-name-letter b { transition: opacity 2.4s ease, transform 2.4s var(--ease), filter 2.4s ease; }
+
+/* ===== The first star of each letter: big, with a bright core, long rays and a real twinkle ===== */
+.sky-name-letter { --sz: clamp(64px, 11vw, 124px); }
+.sky-name-letter i, .sky-name-letter.letter-visible i {
+  font-size: 0; color: transparent; text-shadow: none; width: var(--sz); height: var(--sz); left: 50%; top: 50%; margin: calc(var(--sz) / -2) 0 0 calc(var(--sz) / -2);
+  background:
+    radial-gradient(circle, #fff 0 5%, rgba(255, 255, 255, .95) 9%, rgba(205, 225, 255, .55) 19%, rgba(150, 190, 255, .2) 38%, transparent 62%),
+    linear-gradient(90deg, transparent 2%, rgba(255, 255, 255, .95) 50%, transparent 98%) center / 100% 2px no-repeat,
+    linear-gradient(0deg, transparent 2%, rgba(255, 255, 255, .95) 50%, transparent 98%) center / 2px 100% no-repeat;
+  filter: drop-shadow(0 0 7px rgba(190, 215, 255, .95)); transition: none; }
+.sky-name-letter i::before { content: ''; position: absolute; inset: 16%; transform: rotate(45deg);
+  background:
+    linear-gradient(90deg, transparent 5%, rgba(255, 244, 214, .8) 50%, transparent 95%) center / 100% 1.5px no-repeat,
+    linear-gradient(0deg, transparent 5%, rgba(255, 244, 214, .8) 50%, transparent 95%) center / 1.5px 100% no-repeat; }
+/* an uneven twinkle, like a real star: bright, dim, a quick flash, dim again */
+.sky-name-letter.appeared i { animation: starTwinkle 2.6s ease-in-out infinite; }
+@keyframes starTwinkle {
+  0%   { opacity: .25; transform: scale(.55) rotate(0); }
+  16%  { opacity: 1;   transform: scale(1.2) rotate(6deg); }
+  30%  { opacity: .5;  transform: scale(.8) rotate(2deg); }
+  46%  { opacity: 1;   transform: scale(1.05) rotate(-4deg); }
+  58%  { opacity: .35; transform: scale(.62) rotate(0); }
+  74%  { opacity: .95; transform: scale(1.15) rotate(5deg); }
+  100% { opacity: .25; transform: scale(.55) rotate(0); }
+}
+/* once its letter shows, the star shrinks and fades into it */
+.sky-name-letter.appeared.letter-visible i { animation: starOut 1.8s ease-out forwards; }
+@media (max-width: 600px) and (orientation: portrait) { .sky-name-letter { --sz: clamp(72px, 20vw, 96px); } }
+@media (prefers-reduced-motion: reduce) { .sky-name-letter.appeared i { animation: none; opacity: 1; } }
+
+/* The finished name: sharp and clear - pure white-cream letters, a faint dark edge for legibility, and only a small warm glow that goes on and off (no blue haze, no blur). */
+.sky-name-letter.crisp { will-change: auto; }
+.sky-name-letter.crisp b {
+  color: #fffdf4; filter: none; transform: none; will-change: auto; -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 0 5px rgba(255, 236, 190, .22);
+  animation: nameGlowCrisp 3.2s ease-in-out var(--gd, 0s) infinite alternate; }
+@keyframes nameGlowCrisp {
+  from { text-shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 0 3px rgba(255, 236, 190, .1); }
+  to   { text-shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 0 11px rgba(255, 232, 170, .55); }
+}
+
+/* "Hey beautiful," is bigger */
+.moon-greeting { font-size: clamp(2.5rem, 7.2vw, 4.8rem); }
+@media (max-width: 600px) and (orientation: portrait) { .moon-greeting { font-size: clamp(2.8rem, 13.2vw, 4.2rem); top: 55%; } .moon-ask { top: 64%; } .moon-begin { top: 73.5%; } }
+@media (max-height: 560px) and (orientation: landscape) { .moon-greeting { font-size: clamp(2rem, 8.5vh, 2.8rem); top: 58%; } .moon-ask { top: 70%; } .moon-begin { top: 83%; } }
+
+/* the greeting stays on one line; the name sits a little higher, so everything has room */
+.moon-greeting { white-space: nowrap; top: 58.5%; }
+.moon-ask { top: 71%; }
+.moon-begin { top: 82%; }
+@media (max-width: 600px) and (orientation: portrait) { .moon-greeting { top: 52.5%; } .moon-ask { top: 61%; } .moon-begin { top: 70.5%; } }
+@media (max-height: 560px) and (orientation: landscape) { .moon-greeting { top: 60%; } .moon-ask { top: 71.5%; } .moon-begin { top: 84%; } }
+
+/* "Hey beautiful," bigger still, with a clear gap before "Shall we begin?" */
+.moon-greeting { font-size: clamp(3rem, 8vw, 5.6rem); top: 59.5%; }
+.moon-ask { top: 73.5%; }
+.moon-begin { top: 85%; }
+@media (max-width: 600px) and (orientation: portrait) { .moon-greeting { font-size: clamp(3.2rem, 15.5vw, 5rem); top: 52%; } .moon-ask { top: 62%; } .moon-begin { top: 72%; } }
+@media (max-height: 560px) and (orientation: landscape) { .moon-greeting { font-size: clamp(2.2rem, 9.5vh, 3.1rem); top: 59.5%; } .moon-ask { top: 73.5%; } .moon-begin { top: 85.5%; } }
+
+@media (max-width: 600px) and (orientation: portrait) and (max-height: 720px) { .moon-greeting { font-size: clamp(2.8rem, 12.8vw, 4.2rem); top: 51.5%; } .moon-ask { top: 62%; } .moon-begin { top: 72.5%; } }
+@media (max-height: 500px) and (orientation: landscape) { .moon-greeting { top: 59.5%; } .moon-ask { top: 74.5%; } .moon-begin { top: 86%; } }
+
+/* the whole block (name, greeting, question, button) sits a little higher, with the same spacing, since there is more text below the name now */
+.moon-greeting { top: 54%; }
+.moon-ask { top: 68%; }
+.moon-begin { top: 79.5%; }
+@media (max-width: 600px) and (orientation: portrait) { .moon-greeting { top: 47.5%; } .moon-ask { top: 57.5%; } .moon-begin { top: 67.5%; } }
+@media (max-width: 600px) and (orientation: portrait) and (max-height: 720px) { .moon-greeting { top: 46.5%; } .moon-ask { top: 57.5%; } .moon-begin { top: 68%; } }
+@media (max-height: 500px) and (orientation: landscape) { .moon-greeting { top: 54.5%; } .moon-ask { top: 69.5%; } .moon-begin { top: 82%; } }
