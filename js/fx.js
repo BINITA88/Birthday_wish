@@ -306,53 +306,42 @@
     return wrap;
   };
 
-  /** FX.shower(parent, {count}) – a shower of red rose petals (and a few roses) falls steadily from the top of the screen, swaying gently, and is gone once the last one has left. */
-  const ROSE_PETALS = [['#7d0a1c', '#c4182f'], ['#9b0f24', '#e23a52'], ['#b3122b', '#f0566c'], ['#8c0c20', '#d12a43'], ['#c21a35', '#ff7088']];
+  /** FX.shower(parent, {count}) – a shower of petals in many colors, with a few sparkles, falls steadily from just above the top of the screen, swaying gently.
+      However often it is pressed, only a limited number are alive at once, so it never gets heavy. */
+  const SHOWER_COLORS = [['#7d0a1c', '#d12a43'], ['#b3122b', '#ff6b81'], ['#ff5d73', '#ffa3b3'], ['#ff8fb8', '#ffd0e4'], ['#e84393', '#ff9ccc'],
+    ['#f4c542', '#fff0a8'], ['#ff9a3c', '#ffd199'], ['#a46bdc', '#e2cbff'], ['#6fb6ff', '#cfe8ff'], ['#f7f1e8', '#ffffff'], ['#ff7a6b', '#ffc2b8']];
+  const SHOWER_SPARKS = ['#ffd978', '#fff3cf', '#ffc2d9', '#ffffff', '#ffe08a'];
+  let showerLive = 0;
   FX.shower = function (parent, o) {
     o = o || {};
-    const n = o.count || (App.isSmall() ? 26 : 40);
+    const MAX = App.isSmall() ? 70 : 110;
+    const room = MAX - showerLive;
+    if (room < 6) return null;                                       // enough are falling already
+    const nPetals = Math.min(room, o.count || (App.isSmall() ? 22 : 34));
+    const nSparks = Math.min(Math.max(0, room - nPetals), App.isSmall() ? 9 : 14);
     const wrap = document.createElement('div');
     wrap.className = 'shower';
     wrap.setAttribute('aria-hidden', 'true');
     let html = '', end = 0;
-    for (let i = 0; i < n; i++) {
-      const dur = u.rand(6, 10), delay = u.rand(0, 2.2), rose = Math.random() < 0.1;
+    for (let i = 0; i < nPetals; i++) {
+      const dur = u.rand(5, 8.2), delay = u.rand(0, 1.8), rose = Math.random() < 0.08;
       const size = rose ? u.rand(22, 30) : u.rand(12, 22);
       end = Math.max(end, dur + delay);
-      const col = ROSE_PETALS[Math.floor(Math.random() * ROSE_PETALS.length)];
-      const inner = rose ? '<i class="fp fp-rose">🌹</i>'
-        : '<i class="fp" style="width:' + size.toFixed(0) + 'px;height:' + (size * 1.3).toFixed(0) + 'px;background:radial-gradient(ellipse at 30% 25%,' + col[1] + ',' + col[0] + ')"></i>';
+      const col = SHOWER_COLORS[Math.floor(Math.random() * SHOWER_COLORS.length)];
+      const inner = rose ? '<i class="fp fp-rose">' + ['🌹', '🌸', '🌷', '🌺'][Math.floor(Math.random() * 4)] + '</i>'
+        : '<i class="fp" style="width:' + size.toFixed(0) + 'px;height:' + (size * 1.3).toFixed(0) + 'px;background:radial-gradient(ellipse at 30% 25%,' + col[1] + ',' + col[0] + ');box-shadow:inset -2px -3px 5px rgba(60,0,10,.28),0 0 7px ' + col[1] + '99"></i>';
       html += '<span class="fl" style="left:' + u.rand(1, 97).toFixed(1) + '%;font-size:' + size.toFixed(0) + 'px;--sx:' + u.rand(-50, 50).toFixed(0) + 'px;--sw:' + u.rand(16, 46).toFixed(0) + 'px;--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's;--sd:' + u.rand(1.7, 3.1).toFixed(2) + 's;--sr:' + u.rand(18, 55).toFixed(0) + 'deg">' + inner + '</span>';
     }
-    wrap.innerHTML = html;
-    parent.appendChild(wrap);
-    setTimeout(function () { wrap.remove(); }, end * 1000 + 400);
-    return wrap;
-  };
-
-  /** FX.glitter(parent, {rect, count}) – small golden and pink sparkles rise from the given rectangle (a letter, an envelope), twinkling, and drift up off the screen. */
-  const GLITTER = ['#ffd978', '#ffe9a8', '#ffb3cf', '#ffc9de', '#fff3cf', '#ffcf6b'];
-  FX.glitter = function (parent, o) {
-    o = o || {};
-    if (App.reduced) return null;
-    const pr = parent.getBoundingClientRect();
-    const r = o.rect ? { left: o.rect.left - pr.left, top: o.rect.top - pr.top, width: o.rect.width, height: o.rect.height }
-                     : { left: 0, top: pr.height * 0.4, width: pr.width, height: pr.height * 0.5 };
-    const n = o.count || (App.isSmall() ? 16 : 24);
-    const wrap = document.createElement('div');
-    wrap.className = 'glitter';
-    wrap.setAttribute('aria-hidden', 'true');
-    let html = '', end = 0;
-    for (let i = 0; i < n; i++) {
-      const x0 = r.left + r.width * u.rand(0.05, 0.95), y0 = r.top + r.height * u.rand(0.2, 0.95);
-      const size = u.rand(9, 20), dur = u.rand(2.6, 4.6), delay = i * 0.07 + u.rand(0, 0.5);
+    for (let i = 0; i < nSparks; i++) {
+      const dur = u.rand(4.2, 7), delay = u.rand(0, 2), size = u.rand(10, 20), c = SHOWER_SPARKS[Math.floor(Math.random() * SHOWER_SPARKS.length)];
       end = Math.max(end, dur + delay);
-      html += '<span class="gl" style="left:' + x0.toFixed(0) + 'px;top:' + y0.toFixed(0) + 'px;font-size:' + size.toFixed(0) + 'px;color:' + GLITTER[Math.floor(Math.random() * GLITTER.length)] + ';' +
-        '--dy:' + (-(y0 + size + 40)).toFixed(0) + 'px;--dx:' + u.rand(-40, 40).toFixed(0) + 'px;--sw:' + u.rand(6, 22).toFixed(0) + 'px;--tw:' + u.rand(0.5, 1.1).toFixed(2) + 's;--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's"><i>✦</i></span>';
+      html += '<span class="fl fl-spark" style="left:' + u.rand(1, 97).toFixed(1) + '%;font-size:' + size.toFixed(0) + 'px;color:' + c + ';--sx:' + u.rand(-40, 40).toFixed(0) + 'px;--sw:' + u.rand(8, 26).toFixed(0) + 'px;--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's;--sd:' + u.rand(.5, 1.1).toFixed(2) + 's;--sr:70deg"><i class="fp fp-spark">✦</i></span>';
     }
     wrap.innerHTML = html;
     parent.appendChild(wrap);
-    setTimeout(function () { wrap.remove(); }, end * 1000 + 400);
+    const total = nPetals + nSparks;
+    showerLive += total;
+    setTimeout(function () { wrap.remove(); showerLive = Math.max(0, showerLive - total); }, end * 1000 + 400);
     return wrap;
   };
 

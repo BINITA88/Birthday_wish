@@ -525,3 +525,40 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 @media (max-height: 500px) and (orientation: landscape) { .moon-begin { top: 79.5%; } }
 .moon-begin .tap-hint.side-below { margin-top: -.04em; --ay: 6px; }
 @media (max-height: 500px) and (orientation: landscape) { .moon-begin { top: 78.5%; } }
+
+/* the shower: lighter on the graphics (no per-petal drop-shadow), always starting just above the top edge */
+.fl { top: 0; margin-top: -14vh; }
+@keyframes flFall { 0% { opacity: 0; transform: translate3d(0, 0, 0); } 6% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; transform: translate3d(var(--sx), 122dvh, 0); } }
+.fp { filter: none; will-change: auto; }
+.fl-spark { text-shadow: 0 0 8px currentColor, 0 0 16px rgba(255, 220, 140, .55); }
+.fp-spark { border-radius: 0; box-shadow: none; animation: sparkTw var(--sd) ease-in-out infinite alternate; }
+@keyframes sparkTw { from { opacity: .25; transform: translateX(calc(var(--sw) * -1)) scale(.45) rotate(0); } to { opacity: 1; transform: translateX(var(--sw)) scale(1.15) rotate(var(--sr)); } }
+
+/* ===== Each letter of the name is a glowing star with the letter inside it, sparkling all the time ===== */
+.sky-name { --ss: 96px; }
+.sky-name-letter { --sz: calc(var(--ss) * 1.7); width: var(--ss); height: var(--ss); aspect-ratio: auto; }
+/* the star itself (a five-pointed shape) comes in as the star turns into its letter, then it breathes and shines all the time */
+.sky-name-letter::before { content: ''; position: absolute; inset: 0; z-index: 0; opacity: 0; transform: scale(0) rotate(-30deg);
+  background: radial-gradient(circle at 50% 46%, #ffffff 0, #fffbe0 26%, #ffe38a 56%, #ffc43c 100%);
+  clip-path: polygon(50.0% 0.0%, 65.3% 29.0%, 97.6% 34.5%, 74.7% 58.0%, 79.4% 90.5%, 50.0% 76.0%, 20.6% 90.5%, 25.3% 58.0%, 2.4% 34.5%, 34.7% 29.0%); }
+.sky-name-letter.letter-visible::before { opacity: 1; animation: starBodyIn 1.7s cubic-bezier(.2, .9, .25, 1) both, starBody 2.2s ease-in-out 1.7s infinite alternate; }
+@keyframes starBodyIn { from { opacity: 0; transform: scale(0) rotate(-30deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+@keyframes starBody { from { transform: scale(.93); filter: brightness(.95); } to { transform: scale(1.07); filter: brightness(1.28); } }
+/* the glow round the star, and tiny sparks that blink around it */
+.sky-name-letter.letter-visible { filter: drop-shadow(0 0 9px rgba(255, 220, 130, .95)) drop-shadow(0 0 22px rgba(255, 190, 70, .55)); }
+.sky-name-letter::after { content: ''; position: absolute; inset: -34%; z-index: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 10% 24%, #fff 0 1.6px, transparent 2.8px), radial-gradient(circle at 90% 20%, #ffe9a8 0 1.4px, transparent 2.6px), radial-gradient(circle at 18% 86%, #fff 0 1.4px, transparent 2.6px),
+    radial-gradient(circle at 84% 82%, #ffe9a8 0 1.8px, transparent 3px), radial-gradient(circle at 50% 2%, #fff 0 1.4px, transparent 2.6px), radial-gradient(circle at 98% 52%, #fff 0 1.2px, transparent 2.4px); }
+.sky-name-letter.letter-visible::after { animation: sparkSpecks 1.5s ease-in-out var(--gd) infinite alternate; }
+@keyframes sparkSpecks { 0% { opacity: .1; transform: scale(.9) rotate(0); } 55% { opacity: 1; } 100% { opacity: .3; transform: scale(1.08) rotate(14deg); } }
+/* the halo rays behind the star keep twinkling too (they no longer fade away) */
+.sky-name-letter.letter-visible i, .sky-name-letter.appeared.letter-visible i { opacity: 1; animation: starTwinkle 2.6s ease-in-out var(--gd, 0s) infinite; z-index: 0; }
+/* the letter sits in the middle of the star, dark on the bright star so it reads clearly */
+.sky-name-letter b, .sky-name-letter.crisp b { position: relative; z-index: 2; font-size: calc(var(--ss) * .42); font-weight: 700; line-height: 1; color: #5c3300; text-shadow: 0 1px 0 rgba(255, 255, 255, .55); animation: none; filter: none; margin-top: calc(var(--ss) * .03); }
+@media (prefers-reduced-motion: reduce) { .sky-name-letter::before, .sky-name-letter::after, .sky-name-letter.letter-visible i { animation: none !important; } .sky-name-letter.letter-visible::before { opacity: 1; transform: none; } }
+
+/* softer halo behind each star, and bigger letters inside the stars */
+.sky-name-letter { --sz: calc(var(--ss) * 1.35); }
+.sky-name-letter i { filter: drop-shadow(0 0 4px rgba(190, 215, 255, .8)); opacity: .55; }
+.sky-name-letter.letter-visible { filter: drop-shadow(0 0 7px rgba(255, 220, 130, .9)) drop-shadow(0 0 16px rgba(255, 190, 70, .4)); }
+.sky-name-letter b, .sky-name-letter.crisp b { font-size: calc(var(--ss) * .5); margin-top: calc(var(--ss) * .04); }

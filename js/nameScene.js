@@ -75,77 +75,78 @@
       }
 
       const skyName = sec.querySelector('.sky-name');
-      const nameY = function (h) { return h < 500 ? 0.31 : h < 720 ? 0.34 : 0.38; };       // the name sits a little higher on short screens, so the lines below have room
       const letters = Array.from(C.name);
-      // every letter is first a star in its own, different place in the sky (spread high and low, left and right); it becomes its letter right there
-      const SPOTS = [[14, 68], [76, 16], [36, 86], [62, 34], [88, 60], [46, 14], [22, 42], [70, 80]];
-      const spots = SPOTS.slice().sort(function () { return Math.random() - .5; });
+      // The name is written across the sky, one star at a time, left to right, with the stars up and down like a constellation (P, r, a, t, i, m, a).
+      // Every star becomes its letter right where it is, and stays there: nothing gathers in the middle.
+      // each letter is a glowing star with the letter inside it; the 7 stars are spread over the sky, up and down, left to right,
+      // sized from the screen and kept clear of the moon, the sound button, the greeting and each other
+      const SW0 = sec.clientWidth || window.innerWidth, SH0 = sec.clientHeight || window.innerHeight;
+      const STAR = Math.round(Math.max(64, Math.min(118, SW0 * 0.2, SH0 * 0.21)));          // the size of each star in pixels
+      skyName.style.setProperty('--ss', STAR + 'px');
+      const secBox = sec.getBoundingClientRect();
+      const circle = function (el) { const r = el.getBoundingClientRect(); return { x: r.left - secBox.left + r.width / 2, y: r.top - secBox.top + r.height / 2, r: Math.max(r.width, r.height) / 2 }; };
+      const obstacles = [circle(sec.querySelector('.photo-moon'))];
+      const soundBtn = document.getElementById('sound-btn'); if (soundBtn) obstacles.push(circle(soundBtn));
+      const pad = 8, margin = STAR / 2 + pad;
+      const yTop = margin, yBottom = Math.max(yTop + 30, SH0 * (SH0 < 500 ? 0.47 : 0.41) - STAR / 2 - 6);      // the stars stay above the greeting
+      const Y_PATTERN = [0, 1, 0.13, 0.87, 0.04, 0.96, 0.4];                                  // up, down, up, down ... like the stars drawn in the sky
+      const pts = letters.map(function (_, i) {
+        const f = letters.length > 1 ? i / (letters.length - 1) : 0.5;
+        return { x: margin + f * (SW0 - 2 * margin), y: yTop + Y_PATTERN[i % Y_PATTERN.length] * (yBottom - yTop) };
+      });
+      // a star that would touch the moon or the sound button is moved away from it (and kept on the screen)
+      for (let pass = 0; pass < 3; pass++) {
+        pts.forEach(function (p) {
+          obstacles.forEach(function (o) {
+            const need = o.r + STAR / 2 + 6, dx = p.x - o.x, dy = p.y - o.y, d = Math.hypot(dx, dy);
+            if (d < need) { const k = need / (d || 1); p.x = o.x + (d ? dx : need) * k; p.y = o.y + dy * k; }
+          });
+          p.x = Math.min(SW0 - margin, Math.max(margin, p.x)); p.y = Math.min(yBottom, Math.max(yTop, p.y));
+        });
+      }
+      const SPOTS = pts.map(function (p) { return [p.x / SW0 * 100, p.y / SH0 * 100]; });
       const nodes = letters.map(function (letter, index) {
         const node = document.createElement('span');
-        const step = sec.clientWidth < 600 ? 11.4 : 7;                                   // how far apart the letters of the name finally are
-        const finalLeft = 50 + (index - (letters.length - 1) / 2) * step;
-        const spot = spots[index % spots.length];
+        const spot = SPOTS[index % SPOTS.length];
         node.className = 'sky-name-letter';
+        node.dataset.x = spot[0]; node.dataset.y = spot[1];
         node.style.left = spot[0] + '%';
         node.style.top = spot[1] + '%';
-        node.dataset.finalLeft = finalLeft + '%';
         node.style.setProperty('--gd', (-Math.random() * 3.2).toFixed(2) + 's');       // each letter's glow goes on and off at its own moment
         node.innerHTML = '<i aria-hidden="true">✦</i><b>' + u.esc(letter) + '</b>';
         skyName.appendChild(node);
         return node;
       });
+      // once a letter has shown, it is set on whole pixels (no half-pixel blur), and kept there when the screen changes
+      const settled = [];
+      function place(n) {
+        const W = sec.clientWidth || window.innerWidth, H = sec.clientHeight || window.innerHeight;
+        const w = n.offsetWidth, h = n.offsetHeight;
+        n.style.transition = 'none';
+        n.style.transform = 'none';
+        n.style.left = Math.round(W * n.dataset.x / 100 - w / 2) + 'px';
+        n.style.top = Math.round(H * n.dataset.y / 100 - h / 2) + 'px';
+        n.classList.add('crisp');
+      }
+      ctx.on(window, 'resize', function () { settled.forEach(place); });
       const greeting = sec.querySelector('.moon-greeting');
       const btn = sec.querySelector('.moon-begin');
       u.hint(btn);
 
-      // P first, then r, a, t, i, m, a: each star twinkles slowly where it is, its letter slowly shows in the same place (the star turns into it),
-      // and then the letter glides into its place in the name
-      const STAR_GAP = 800, TWINKLE_MS = 1800, GLIDE_AFTER = 1500, GLIDE_MS = 2200;
+      // P first, then r, a, t, i, m, a: each star twinkles slowly where it is, then its letter slowly shows in the same place and stays
+      const STAR_GAP = 1100, TWINKLE_MS = 2000, SHOW_MS = 2600;
       nodes.forEach(function (node, i) {
         const t = 700 + i * STAR_GAP;
         ctx.later(function () { node.classList.add('appeared'); }, t);
         ctx.later(function () { node.classList.add('letter-visible'); }, t + TWINKLE_MS);
-        ctx.later(function () { node.style.left = node.dataset.finalLeft; node.style.top = (nameY(sec.clientHeight || window.innerHeight) * 100) + '%'; node.classList.add('gathered'); }, t + TWINKLE_MS + GLIDE_AFTER);
+        ctx.later(function () { place(node); settled.push(node); }, t + TWINKLE_MS + SHOW_MS);
       });
-      const gatherAt = 700 + (nodes.length - 1) * STAR_GAP + TWINKLE_MS + GLIDE_AFTER + GLIDE_MS;       // the last letter has reached its place
+      const gatherAt = 700 + (nodes.length - 1) * STAR_GAP + TWINKLE_MS + SHOW_MS;       // the last letter has shown
 
       // the greeting is written out, then the question below it, then the button appears
       const ask1 = sec.querySelector('.ask-1'), ask2 = sec.querySelector('.ask-2');
       const count = function (t) { return Array.from(t).filter(function (ch) { return ch !== ' '; }).length; };
-      // once every letter has gathered, the gaps between them close up slowly, so the name reads as one word;
-      // then every letter is set on a whole pixel, so the finished name is sharp and clear
-      const closeAt = gatherAt + 500, CLOSE_MS = 2000;
-      function tightCenters() {                                    // where each letter's middle goes: a small, even gap between letters, the whole word centred
-        const W = sec.clientWidth || window.innerWidth;
-        const widths = nodes.map(function (n) { return n.querySelector('b').offsetWidth; });
-        const gap = parseFloat(getComputedStyle(nodes[0].querySelector('b')).fontSize) * 0.1;
-        const total = widths.reduce(function (acc, w) { return acc + w; }, 0) + gap * (nodes.length - 1);
-        let x = W / 2 - total / 2;
-        const cx = widths.map(function (w) { const c = x + w / 2; x += w + gap; return c; });
-        return { cx: cx, W: W, H: sec.clientHeight || window.innerHeight };
-      }
-      let crisp = false;
-      function snapName() {
-        const t = tightCenters();
-        nodes.forEach(function (n, i) {
-          const w = n.offsetWidth, h = n.offsetHeight;
-          n.style.transition = 'none';
-          n.style.transform = 'none';                              // no scaling or half-pixel centring left on the letters
-          n.style.left = Math.round(t.cx[i] - w / 2) + 'px';
-          n.style.top = Math.round(t.H * nameY(t.H) - h / 2) + 'px';
-          n.classList.add('crisp');
-        });
-        crisp = true;
-      }
-      ctx.on(window, 'resize', function () { if (crisp) snapName(); });
-      ctx.later(function () {
-        const t = tightCenters();
-        nodes.forEach(function (n, i) {
-          n.style.transition = 'left ' + CLOSE_MS + 'ms cubic-bezier(.45,.05,.25,1)';
-          n.style.left = (t.cx[i] / t.W * 100) + '%';
-        });
-      }, closeAt);
-      ctx.later(snapName, closeAt + CLOSE_MS + 120);
+      const closeAt = gatherAt, CLOSE_MS = 400;
       const greetingAt = closeAt + CLOSE_MS - 400;
       const ask1At = greetingAt + count(C.text.waitGreeting) * 120 + 700;
       const ask2At = ask1At + count(C.text.waitAsk1) * 85 + 500;
