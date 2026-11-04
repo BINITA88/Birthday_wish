@@ -153,6 +153,21 @@
       const btnAt = ask2At + count(C.text.waitAsk2) * 85 + 600;
       ctx.later(function () {
         u.letters(greeting, C.text.waitGreeting, 120);
+        // a little tulip, drawn here (pink-red cup, green stem and leaves), right after the comma; it shows up with the last letter
+        const TULIP = '<svg viewBox="0 0 60 100" aria-hidden="true" focusable="false">' +
+          '<defs><linearGradient id="tlP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8fb4"/><stop offset=".55" stop-color="#f2457b"/><stop offset="1" stop-color="#c4164f"/></linearGradient>' +
+          '<linearGradient id="tlG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fd48a"/><stop offset="1" stop-color="#2f8a4a"/></linearGradient></defs>' +
+          '<path d="M30 97 C30 80 31 66 30 50" fill="none" stroke="#3d9a55" stroke-width="3.6" stroke-linecap="round"/>' +
+          '<path d="M30 94 C14 90 7 74 10 56 C21 64 28 78 30 94 Z" fill="url(#tlG)"/>' +
+          '<path d="M31 88 C45 84 53 70 51 55 C41 63 33 74 31 88 Z" fill="url(#tlG)"/>' +
+          '<path d="M11 19 C6 36 13 52 30 54 C47 52 54 36 49 19 L40 30 L30 11 L20 30 Z" fill="url(#tlP)"/>' +
+          '<path d="M30 11 C23 27 23 43 30 54 C37 43 37 27 30 11 Z" fill="#ffb6cf" opacity=".6"/>' +
+          '<path d="M11 19 C6 36 13 52 30 54 C19 45 17 33 20 30 Z" fill="#8a0b3b" opacity=".25"/>' +
+          '<path d="M49 19 C54 36 47 52 30 54 C41 45 43 33 40 30 Z" fill="#8a0b3b" opacity=".18"/></svg>';
+        const tw = document.createElement('span');
+        tw.className = 'word tulip-w';
+        tw.innerHTML = '<span class="ch tulip" style="--i:' + Array.from(C.text.waitGreeting).filter(function (ch) { return ch !== ' '; }).length + '">' + TULIP + '</span>';
+        greeting.appendChild(tw);
         greeting.classList.add('reveal', 'in');
       }, greetingAt);
       ctx.later(function () { u.letters(ask1, C.text.waitAsk1, 85); ask1.classList.add('reveal', 'in'); }, ask1At);

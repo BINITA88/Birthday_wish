@@ -631,3 +631,8 @@ html body .scene-photo .photo-text .btn.cta:hover, html body .scene-photo .photo
 @keyframes haloFlash { 0%, 76%, 100% { filter: brightness(1); } 83% { filter: brightness(1.45); } 90% { filter: brightness(1.1); } }
 .sky-name-letter.letter-visible b { animation: letterSpark 8s linear calc(-3.2s + var(--k, 0) * .05s) infinite; }
 @media (prefers-reduced-motion: reduce) { .sky-name-letter.appeared i { animation: none; opacity: 1; } .sky-name-letter.letter-visible::before { animation: none !important; opacity: .8; } .sky-name-letter.letter-visible::after { animation: none !important; } }
+
+/* the tulip after "Hey beautiful,": close to the word (small gap), sitting on the baseline */
+.moon-greeting .tulip-w { margin-left: .04em; }
+.moon-greeting .tulip { vertical-align: -.1em; }
+.moon-greeting .tulip svg { display: block; height: .92em; width: .55em; overflow: visible; filter: drop-shadow(0 0 6px rgba(255, 120, 170, .35)); }
